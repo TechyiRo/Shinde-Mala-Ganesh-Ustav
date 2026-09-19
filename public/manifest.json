@@ -1,0 +1,31 @@
+{
+  "name": "शिंदे मळा गणेश उत्सव मंडळ | Shinde Mala Ganesh Utsav",
+  "short_name": "गणेश उत्सव",
+  "description": "Ganesh Utsav Pavti Management & Live Public Financial Transparency System",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#7f1d1d",
+  "background_color": "#1a0b12",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/ganesh-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
