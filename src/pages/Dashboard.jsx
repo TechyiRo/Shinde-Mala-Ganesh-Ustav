@@ -66,7 +66,7 @@ export const Dashboard = ({ setActiveTab }) => {
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap' }}>
+        <div className="dashboard-header-actions" style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap' }}>
           <button className="btn btn-primary btn-sm" onClick={() => setActiveTab('createPavti')} style={{ minHeight: '40px', padding: '0.45rem 0.9rem', fontSize: 'var(--font-btn)' }}>
             <FilePlus size={16} />
             <span>{t('navCreatePavti')}</span>

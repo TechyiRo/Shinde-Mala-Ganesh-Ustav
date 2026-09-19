@@ -181,7 +181,18 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
         }}
       >
         {/* Mandal Brand with Halo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.45rem, 1.8vw, 0.75rem)', cursor: 'pointer', minWidth: 0 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'clamp(0.45rem, 1.8vw, 0.75rem)',
+            cursor: 'pointer',
+            minWidth: 0,
+            flex: '1 1 auto',
+            overflow: 'hidden'
+          }}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        >
           <img
             src="/logo.png"
             onError={(e) => {
@@ -189,8 +200,8 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
             }}
             alt="Mandal Logo"
             style={{
-              width: 'clamp(34px, 8vw, 42px)',
-              height: 'clamp(34px, 8vw, 42px)',
+              width: 'clamp(32px, 7vw, 42px)',
+              height: 'clamp(32px, 7vw, 42px)',
               borderRadius: '50%',
               filter: 'drop-shadow(0 2px 8px rgba(230, 81, 0, 0.45))',
               objectFit: 'cover',
@@ -211,7 +222,17 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
             >
               {mandalSettings.mandalName || t('appTitle')}
             </div>
-            <div style={{ fontSize: 'clamp(0.68rem, 1.8vw, 0.75rem)', color: 'var(--accent-gold-light)', fontWeight: 600 }}>
+            <div
+              className="mobile-hide-subtitle"
+              style={{
+                fontSize: 'clamp(0.68rem, 1.8vw, 0.75rem)',
+                color: 'var(--accent-gold-light)',
+                fontWeight: 600,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}
+            >
               {t('publicPortalTitle')}
             </div>
           </div>
@@ -252,25 +273,26 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
         </div>
 
         {/* Right Controls: Lang, Theme & Admin Portal */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.35rem, 1.2vw, 0.65rem)', flexShrink: 0 }}>
-          <button onClick={toggleLang} className="btn btn-secondary btn-sm" title="Switch Language" style={{ padding: '0.35rem 0.65rem', fontSize: '0.8rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.3rem, 1.2vw, 0.6rem)', flexShrink: 0 }}>
+          <button onClick={toggleLang} className="btn btn-secondary btn-sm" title="Switch Language" style={{ padding: '0.35rem 0.55rem', fontSize: '0.8rem' }}>
             <Languages size={14} color="#f59e0b" />
             <span>{lang === 'mr' ? 'EN' : 'मराठी'}</span>
           </button>
 
-          <button onClick={toggleTheme} className="btn btn-secondary btn-icon btn-sm" title="Toggle Theme" style={{ width: '34px', height: '34px' }}>
+          <button onClick={toggleTheme} className="btn btn-secondary btn-icon btn-sm" title="Toggle Theme" style={{ width: '34px', height: '34px', padding: 0 }}>
             {theme === 'dark' ? <Sun size={15} color="#fbbf24" /> : <Moon size={15} color="#6366f1" />}
           </button>
 
           {user ? (
-            <button className="btn btn-primary btn-sm" onClick={onOpenAdminPortal} style={{ padding: '0.35rem 0.65rem', fontSize: '0.8rem' }}>
-              <ShieldCheck size={15} />
+            <button className="btn btn-primary btn-sm" onClick={onOpenAdminPortal} style={{ padding: '0.35rem 0.6rem', fontSize: '0.8rem' }}>
+              <ShieldCheck size={14} />
               <span>Admin</span>
             </button>
           ) : (
-            <button className="btn btn-secondary btn-sm" onClick={onOpenLogin} style={{ padding: '0.35rem 0.65rem', fontSize: '0.8rem' }}>
+            <button className="btn btn-secondary btn-sm" onClick={onOpenLogin} style={{ padding: '0.35rem 0.6rem', fontSize: '0.8rem' }}>
               <Lock size={14} color="var(--primary-light)" />
-              <span>{t('adminLoginLink')}</span>
+              <span className="hide-on-mobile-xs">{t('adminLoginLink')}</span>
+              <span className="show-on-mobile-xs">लॉगिन</span>
             </button>
           )}
         </div>

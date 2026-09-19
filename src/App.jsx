@@ -92,19 +92,7 @@ export const App = () => {
 
           {/* Main App Content Area */}
           <main className="main-content">
-            {/* Header with Switch to Public View & Mandal Brand */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.75rem' }}>
-              <button
-                className="btn btn-secondary btn-sm"
-                onClick={handleBackToPublic}
-                title="View Public Transparency Portal"
-              >
-                <Globe size={15} color="#10b981" />
-                <span>{t('publicViewLink')}</span>
-              </button>
-            </div>
-
-            <Navbar />
+            <Navbar onBackToPublic={handleBackToPublic} />
 
             {activeTab === 'dashboard' && <Dashboard setActiveTab={setActiveTab} />}
             {activeTab === 'createPavti' && <CreatePavti />}
@@ -112,27 +100,6 @@ export const App = () => {
             {activeTab === 'expenses' && <Expenses />}
             {activeTab === 'events' && <ManageEvents />}
             {activeTab === 'settings' && <Settings />}
-
-            {/* Mobile Floating Action Button (FAB) for quick receipt creation */}
-            {isAdmin && activeTab !== 'createPavti' && (
-              <button
-                className="btn btn-primary btn-icon mobile-fab no-print"
-                onClick={() => setActiveTab('createPavti')}
-                title="नवीन पावती तयार करा"
-                style={{
-                  position: 'fixed',
-                  bottom: '5rem',
-                  right: '1.5rem',
-                  width: '54px',
-                  height: '54px',
-                  borderRadius: '50%',
-                  zIndex: 850,
-                  boxShadow: '0 8px 24px rgba(230, 81, 0, 0.5), 0 0 20px rgba(251, 191, 36, 0.4)'
-                }}
-              >
-                <FilePlus size={24} />
-              </button>
-            )}
           </main>
         </div>
       )}

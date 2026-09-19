@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { Sun, Moon, Languages, LogOut, ShieldCheck, UserCheck } from 'lucide-react';
 
-export const Navbar = () => {
+export const Navbar = ({ onBackToPublic }) => {
   const { lang, toggleLang, t } = useLanguage();
   const { user, logout, isAdmin } = useAuth();
   const { theme, toggleTheme, mandalSettings } = useData();
@@ -16,28 +16,30 @@ export const Navbar = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: 'clamp(0.6rem, 2.2vw, 1rem) clamp(0.75rem, 3vw, 1.5rem)',
-        marginBottom: '1.25rem',
+        padding: 'clamp(0.5rem, 2vw, 0.9rem) clamp(0.65rem, 2.5vw, 1.25rem)',
+        marginBottom: '1rem',
         borderRadius: 'var(--radius-lg)',
-        gap: '0.75rem'
+        gap: '0.5rem',
+        width: '100%',
+        boxSizing: 'border-box'
       }}
     >
       {/* Left: Mandal Title & Icon */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.5rem, 2vw, 0.85rem)', minWidth: 0, flex: '1 1 auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.45rem, 1.8vw, 0.75rem)', minWidth: 0, flex: '1 1 auto', overflow: 'hidden' }}>
         <img
           src="/ganesh-icon.svg"
           alt="Ganesh Logo"
           style={{
-            width: 'clamp(32px, 8vw, 42px)',
-            height: 'clamp(32px, 8vw, 42px)',
+            width: 'clamp(32px, 7vw, 40px)',
+            height: 'clamp(32px, 7vw, 40px)',
             filter: 'drop-shadow(0 2px 8px rgba(230, 81, 0, 0.4))',
             flexShrink: 0
           }}
         />
-        <div style={{ minWidth: 0 }}>
+        <div style={{ minWidth: 0, overflow: 'hidden' }}>
           <h1
             style={{
-              fontSize: 'clamp(0.95rem, 3.2vw, 1.2rem)',
+              fontSize: 'clamp(0.88rem, 2.8vw, 1.15rem)',
               fontWeight: 800,
               letterSpacing: '-0.01em',
               lineHeight: '1.2',
@@ -50,22 +52,52 @@ export const Navbar = () => {
           >
             {mandalSettings.mandalName || t('appTitle')}
           </h1>
-          <p style={{ fontSize: 'var(--font-subtext)', color: 'var(--text-subtle)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <p
+            className="mobile-hide-subtitle"
+            style={{
+              fontSize: 'var(--font-subtext)',
+              color: 'var(--text-subtle)',
+              margin: 0,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}
+          >
             {t('appSubtitle')}
           </p>
         </div>
       </div>
 
       {/* Right Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.35rem, 1.5vw, 0.75rem)', flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.3rem, 1.2vw, 0.6rem)', flexShrink: 0 }}>
+        {/* Back to Public Transparency View Button */}
+        {onBackToPublic && (
+          <button
+            onClick={onBackToPublic}
+            className="btn btn-secondary btn-sm"
+            title={t('publicViewLink')}
+            style={{
+              padding: '0.35rem 0.55rem',
+              fontSize: 'var(--font-subtext)',
+              borderColor: 'rgba(16, 185, 129, 0.4)',
+              color: '#34d399',
+              backgroundColor: 'rgba(16, 185, 129, 0.12)'
+            }}
+          >
+            <ShieldCheck size={14} color="#34d399" />
+            <span className="hide-on-mobile-xs">{t('publicViewLink')}</span>
+            <span className="show-on-mobile-xs">अहवाल</span>
+          </button>
+        )}
+
         {/* Language Toggle */}
         <button
           onClick={toggleLang}
           className="btn btn-secondary btn-sm"
-          title="Switch Language (मराठी / English)"
-          style={{ padding: '0.35rem 0.65rem', fontSize: 'var(--font-subtext)' }}
+          title="Switch Language"
+          style={{ padding: '0.35rem 0.55rem', fontSize: 'var(--font-subtext)' }}
         >
-          <Languages size={15} color="#f59e0b" />
+          <Languages size={14} color="#f59e0b" />
           <span>{lang === 'mr' ? 'EN' : 'मराठी'}</span>
         </button>
 
@@ -74,9 +106,9 @@ export const Navbar = () => {
           onClick={toggleTheme}
           className="btn btn-secondary btn-icon"
           title={theme === 'dark' ? t('themeLight') : t('themeDark')}
-          style={{ width: '36px', height: '36px', padding: 0 }}
+          style={{ width: '34px', height: '34px', padding: 0 }}
         >
-          {theme === 'dark' ? <Sun size={17} color="#fbbf24" /> : <Moon size={17} color="#6366f1" />}
+          {theme === 'dark' ? <Sun size={15} color="#fbbf24" /> : <Moon size={15} color="#6366f1" />}
         </button>
 
         {/* User Role Badge */}
@@ -85,8 +117,8 @@ export const Navbar = () => {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.35rem',
-              padding: '0.3rem 0.65rem',
+              gap: '0.3rem',
+              padding: '0.3rem 0.55rem',
               borderRadius: '999px',
               backgroundColor: isAdmin ? 'rgba(230, 81, 0, 0.15)' : 'rgba(59, 130, 246, 0.15)',
               border: `1px solid ${isAdmin ? 'rgba(230, 81, 0, 0.3)' : 'rgba(59, 130, 246, 0.3)'}`,
@@ -95,8 +127,8 @@ export const Navbar = () => {
               color: isAdmin ? '#ff7722' : '#60a5fa'
             }}
           >
-            {isAdmin ? <ShieldCheck size={15} /> : <UserCheck size={15} />}
-            <span>{isAdmin ? t('roleBadgeAdmin') : t('roleBadgeMember')}</span>
+            {isAdmin ? <ShieldCheck size={14} /> : <UserCheck size={14} />}
+            <span className="hide-on-mobile-xs">{isAdmin ? t('roleBadgeAdmin') : t('roleBadgeMember')}</span>
           </div>
         )}
 
@@ -106,9 +138,9 @@ export const Navbar = () => {
             onClick={logout}
             className="btn btn-secondary btn-icon"
             title={t('logout')}
-            style={{ color: '#ef4444', width: '36px', height: '36px', padding: 0 }}
+            style={{ color: '#ef4444', width: '34px', height: '34px', padding: 0 }}
           >
-            <LogOut size={17} />
+            <LogOut size={15} />
           </button>
         )}
       </div>

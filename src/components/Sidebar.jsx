@@ -8,12 +8,12 @@ export const Sidebar = ({ activeTab, setActiveTab, onBackToPublic }) => {
   const { isAdmin } = useAuth();
 
   const navItems = [
-    { id: 'dashboard', label: t('navDashboard'), icon: LayoutDashboard },
-    { id: 'createPavti', label: t('navCreatePavti'), icon: FilePlus, highlight: true },
-    { id: 'managePavti', label: t('navManagePavti'), icon: ListOrdered },
-    { id: 'expenses', label: t('navExpenses'), icon: Wallet },
-    { id: 'events', label: t('navEvents'), icon: Calendar },
-    { id: 'settings', label: t('navSettings'), icon: Settings }
+    { id: 'dashboard', label: t('navDashboard'), shortLabel: 'डॅशबोर्ड', icon: LayoutDashboard },
+    { id: 'createPavti', label: t('navCreatePavti'), shortLabel: 'पावती +', icon: FilePlus, highlight: true },
+    { id: 'managePavti', label: t('navManagePavti'), shortLabel: 'यादी', icon: ListOrdered },
+    { id: 'expenses', label: t('navExpenses'), shortLabel: 'खर्च', icon: Wallet },
+    { id: 'events', label: t('navEvents'), shortLabel: 'कार्यक्रम', icon: Calendar },
+    { id: 'settings', label: t('navSettings'), shortLabel: 'सेटिंग्ज', icon: Settings }
   ];
 
   return (
@@ -203,7 +203,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onBackToPublic }) => {
             >
               <Icon size={18} color={isActive ? 'var(--accent-gold-light)' : 'currentColor'} />
               <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%', lineHeight: 1.1 }}>
-                {item.label}
+                {item.shortLabel || item.label}
               </span>
             </button>
           );

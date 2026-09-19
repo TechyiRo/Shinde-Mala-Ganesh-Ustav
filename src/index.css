@@ -185,20 +185,30 @@ body {
 .app-layout {
   display: flex;
   min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .main-content {
   flex: 1;
+  min-width: 0;
   margin-left: var(--sidebar-w);
   padding: 1.5rem 2rem 4rem;
   transition: margin-left 0.3s ease;
   max-width: 1550px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 @media (max-width: 960px) {
   .main-content {
     margin-left: 0;
-    padding: 1rem 1rem 5.5rem;
+    padding: 0.75rem 0.75rem calc(env(safe-area-inset-bottom, 16px) + 85px) !important;
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
   }
 }
 
@@ -586,14 +596,22 @@ body {
   left: 0;
   right: 0;
   height: 64px;
-  background: var(--glass-bg);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-top: 1px solid var(--glass-border);
-  z-index: 900;
+  background: rgba(20, 11, 26, 0.98) !important;
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-top: 1px solid rgba(251, 191, 36, 0.25);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.75);
+  z-index: 999;
   justify-content: space-around;
   align-items: center;
-  padding: 0 0.5rem;
+  padding: 0 0.35rem env(safe-area-inset-bottom, 0);
+  box-sizing: border-box;
+}
+
+[data-theme="light"] .mobile-nav-bar {
+  background: rgba(255, 252, 248, 0.98) !important;
+  border-top: 1px solid rgba(230, 81, 0, 0.25);
+  box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.12);
 }
 
 @media (max-width: 960px) {
@@ -944,5 +962,56 @@ body {
   body {
     padding-bottom: 56px !important;
   }
+}
+
+/* Mobile Visibility Utilities & Sizing Safeguards */
+.show-on-mobile-xs {
+  display: none !important;
+}
+
+@media (max-width: 640px) {
+  .dashboard-header-actions {
+    width: 100% !important;
+    display: flex !important;
+    gap: 0.5rem !important;
+  }
+
+  .dashboard-header-actions .btn {
+    flex: 1 1 calc(50% - 0.25rem) !important;
+    min-width: 0 !important;
+    padding: 0.45rem 0.5rem !important;
+    font-size: 0.82rem !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .hide-on-mobile-xs {
+    display: none !important;
+  }
+
+  .show-on-mobile-xs {
+    display: inline !important;
+  }
+
+  .mobile-hide-subtitle {
+    display: none !important;
+  }
+
+  /* Prevent any modal dialog or card overflowing small screens */
+  .modal-dialog {
+    width: calc(100vw - 1.25rem) !important;
+    max-width: 100% !important;
+    margin: 0.5rem !important;
+  }
+}
+
+/* Global scroll guard */
+html, body, #root {
+  overflow-x: hidden !important;
+  width: 100% !important;
+  max-width: 100vw !important;
+  box-sizing: border-box !important;
 }
 
