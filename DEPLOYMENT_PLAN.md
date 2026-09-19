@@ -173,9 +173,9 @@ Once deployed with HTTPS, users and committee members can:
 ## 🔒 Admin Credentials & Security
 - **Admin Login**:
   - Username: `admin`
-  - Password: `admin123`
+  - Password: `ganpati2026`
 - **Treasurer / Committee Member (Read-Only)**:
-  - Username: `committee`
+  - Username: `member`
   - Password: `member123`
 
 ---
@@ -186,6 +186,6 @@ Once deployed with HTTPS, users and committee members can:
    - एकूण खर्च: ₹०
    - शिल्लक: ₹०
    - एकूण पावत्या: ०
-2. **Log into Admin portal** (`admin` / `admin123`).
+2. **Log into Admin portal** (`admin` / `ganpati2026`).
 3. **Issue first test receipt** (`GU-2026-0001`) to confirm live saving to MongoDB Atlas.
 4. **Share public link** via WhatsApp to mandal members and devotees!
