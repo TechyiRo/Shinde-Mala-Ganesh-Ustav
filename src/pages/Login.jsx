@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useData } from '../context/DataContext';
-import { ShieldCheck, UserCheck, Lock, User, Sparkles } from 'lucide-react';
+import { Lock, User, Sparkles } from 'lucide-react';
 
 export const Login = ({ onLoginSuccess }) => {
   const { login } = useAuth();
   const { t } = useLanguage();
   const { mandalSettings, addToast } = useData();
 
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('ganpati2026');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = (e) => {
@@ -29,17 +29,6 @@ export const Login = ({ onLoginSuccess }) => {
     }
   };
 
-  const setPreset = (role) => {
-    if (role === 'admin') {
-      setUsername('admin');
-      setPassword('ganpati2026');
-    } else {
-      setUsername('member');
-      setPassword('member123');
-    }
-    setError('');
-  };
-
   return (
     <div
       style={{
@@ -55,7 +44,7 @@ export const Login = ({ onLoginSuccess }) => {
         className="glass-panel"
         style={{
           width: '100%',
-          maxWidth: '460px',
+          maxWidth: '440px',
           padding: '2.5rem 2rem',
           borderRadius: 'var(--radius-xl)',
           position: 'relative',
@@ -63,7 +52,7 @@ export const Login = ({ onLoginSuccess }) => {
         }}
       >
         {/* Mandal Brand Icon */}
-        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <img
             src="/logo.png"
             onError={(e) => {
@@ -87,37 +76,9 @@ export const Login = ({ onLoginSuccess }) => {
           </p>
         </div>
 
-        {/* Quick Role Fillers */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem', marginBottom: '1.5rem' }}>
-          <button
-            type="button"
-            className="btn btn-secondary btn-sm"
-            onClick={() => setPreset('admin')}
-            style={{
-              borderColor: username === 'admin' ? 'var(--primary-light)' : 'var(--glass-border)',
-              backgroundColor: username === 'admin' ? 'rgba(230, 81, 0, 0.2)' : 'rgba(255, 255, 255, 0.05)'
-            }}
-          >
-            <ShieldCheck size={16} color="#ff7722" />
-            <span>{t('adminRole')}</span>
-          </button>
-          <button
-            type="button"
-            className="btn btn-secondary btn-sm"
-            onClick={() => setPreset('member')}
-            style={{
-              borderColor: username === 'member' ? '#60a5fa' : 'var(--glass-border)',
-              backgroundColor: username === 'member' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255, 255, 255, 0.05)'
-            }}
-          >
-            <UserCheck size={16} color="#60a5fa" />
-            <span>{t('memberRole')}</span>
-          </button>
-        </div>
-
         {/* Login Form */}
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
+          <div className="form-group" style={{ marginBottom: '1.25rem' }}>
             <label className="form-label">
               <User size={15} />
               <span>{t('username')}</span>
@@ -127,12 +88,13 @@ export const Login = ({ onLoginSuccess }) => {
               className="form-input"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="admin / member"
+              placeholder="Username"
+              autoComplete="username"
               required
             />
           </div>
 
-          <div className="form-group">
+          <div className="form-group" style={{ marginBottom: '1.25rem' }}>
             <label className="form-label">
               <Lock size={15} />
               <span>{t('password')}</span>
@@ -143,6 +105,7 @@ export const Login = ({ onLoginSuccess }) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
+              autoComplete="current-password"
               required
             />
           </div>
@@ -150,7 +113,7 @@ export const Login = ({ onLoginSuccess }) => {
           {error && (
             <div
               style={{
-                padding: '0.6rem 0.85rem',
+                padding: '0.65rem 0.85rem',
                 borderRadius: '8px',
                 backgroundColor: 'rgba(239, 68, 68, 0.15)',
                 border: '1px solid rgba(239, 68, 68, 0.3)',
@@ -164,27 +127,11 @@ export const Login = ({ onLoginSuccess }) => {
             </div>
           )}
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '0.5rem' }}>
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '0.5rem', padding: '0.8rem' }}>
             <Sparkles size={18} />
             <span>{t('loginBtn')}</span>
           </button>
         </form>
-
-        {/* Credentials hints */}
-        <div
-          style={{
-            marginTop: '1.5rem',
-            paddingTop: '1rem',
-            borderTop: '1px solid var(--glass-border)',
-            fontSize: '0.78rem',
-            color: 'var(--text-subtle)',
-            textAlign: 'center',
-            lineHeight: '1.6'
-          }}
-        >
-          <div><strong>Admin:</strong> admin / ganpati2026</div>
-          <div><strong>Committee:</strong> member / member123</div>
-        </div>
       </div>
     </div>
   );

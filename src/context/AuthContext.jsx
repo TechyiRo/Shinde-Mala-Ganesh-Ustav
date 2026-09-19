@@ -21,9 +21,9 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     try {
       const saved = localStorage.getItem('mandal_auth');
-      return saved ? JSON.parse(saved) : USERS.admin; // Default pre-logged in as admin for smooth initial experience
+      return saved ? JSON.parse(saved) : null;
     } catch {
-      return USERS.admin;
+      return null;
     }
   });
 
