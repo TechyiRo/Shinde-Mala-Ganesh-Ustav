@@ -8,6 +8,7 @@ import { DailyTrendChart } from '../components/Charts/DailyTrendChart';
 import { ExpenseDonutChart } from '../components/Charts/ExpenseDonutChart';
 import { EventStoriesViewer } from '../components/EventStoriesViewer';
 import { EventPostCard } from '../components/EventPostCard';
+import { DeveloperBadge } from '../components/DeveloperBadge';
 import {
   TrendingUp,
   TrendingDown,
@@ -1367,9 +1368,29 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
               {mandalSettings.regNo || 'नोंदणी क्र. महा/१२४५/२०१२'}<br />
               {mandalSettings.address || 'शिंदे मळा, हिंगणी Dumala, शिंदे मळा, ४१२२१०'}
             </p>
-            <p style={{ fontSize: '0.85rem', color: 'var(--accent-gold-light)', fontWeight: 600 }}>
-              संपर्क: {mandalSettings.contact || '9822012345'}
-            </p>
+            <div style={{ marginTop: '0.65rem' }}>
+              <p style={{ fontSize: '0.88rem', color: 'var(--accent-gold-light)', fontWeight: 700, margin: '0 0 0.35rem' }}>
+                📞 संपर्क: <a href="tel:9922466579" style={{ color: 'var(--accent-gold-light)', textDecoration: 'none' }}>9922466579</a>
+              </p>
+              <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
+                <a
+                  href="tel:9922466579"
+                  className="btn btn-secondary btn-sm"
+                  style={{ fontSize: '0.75rem', padding: '0.25rem 0.6rem', color: '#fbbf24', borderColor: 'rgba(251, 191, 36, 0.4)' }}
+                >
+                  कॉल करा
+                </a>
+                <a
+                  href="https://wa.me/919922466579?text=Namaskar%20Shinde%20Mala%20Ganesh%20Utsav%20Mandal"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary btn-sm"
+                  style={{ fontSize: '0.75rem', padding: '0.25rem 0.6rem', color: '#34d399', borderColor: 'rgba(52, 211, 153, 0.4)' }}
+                >
+                  WhatsApp
+                </a>
+              </div>
+            </div>
           </div>
 
           {/* Col 2: Committee Members */}
@@ -1394,6 +1415,9 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
             </p>
           </div>
         </div>
+
+        {/* Animated Developer Credit (Rohidas Shinde / रोहिदास शिंदे) */}
+        <DeveloperBadge />
 
         {/* Bottom bar */}
         <div

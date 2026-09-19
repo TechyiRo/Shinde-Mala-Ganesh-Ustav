@@ -66,6 +66,12 @@ async function seedInitialData(db) {
         createdAt: new Date().toISOString()
       });
       console.log('🌱 Seeded official Mandal Settings to MongoDB Atlas');
+    } else {
+      // Ensure official contact is up to date
+      await settingsCol.updateOne(
+        { _id: 'mandal_settings', contact: '9822012345' },
+        { $set: { contact: '9922466579' } }
+      );
     }
     // Note: Pavtis, expenses, and events are not automatically re-seeded
     // to preserve a clean slate for production deployment.

@@ -1015,3 +1015,309 @@ html, body, #root {
   box-sizing: border-box !important;
 }
 
+/* ==========================================================================
+   ANIMATED DEVELOPER BADGE STYLES (Rohidas Shinde / रोहिदास शिंदे)
+   ========================================================================== */
+
+.dev-badge-container {
+  margin: 1.5rem auto 1rem;
+  max-width: 580px;
+  width: 100%;
+}
+
+.dev-badge-animated-border {
+  position: relative;
+  padding: 2px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(
+    120deg,
+    rgba(230, 81, 0, 0.8),
+    rgba(251, 191, 36, 0.9),
+    rgba(168, 85, 247, 0.6),
+    rgba(230, 81, 0, 0.8)
+  );
+  background-size: 300% 300%;
+  animation: borderGradientFlow 6s ease infinite;
+  box-shadow: 0 8px 32px -4px rgba(230, 81, 0, 0.35);
+}
+
+@keyframes borderGradientFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.dev-badge-inner-card {
+  background: rgba(22, 12, 28, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: calc(var(--radius-lg) - 2px);
+  padding: 1.15rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  text-align: center;
+}
+
+[data-theme="light"] .dev-badge-inner-card {
+  background: rgba(255, 252, 246, 0.95);
+}
+
+.dev-badge-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 0.5rem;
+  font-size: 0.75rem;
+}
+
+[data-theme="light"] .dev-badge-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.dev-pulse-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent-gold-light);
+}
+
+.dev-spin-icon {
+  color: #ff7722;
+}
+
+.dev-badge-heart {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--text-subtle);
+  font-size: 0.72rem;
+}
+
+.dev-heart-beat {
+  animation: heartBeat 1.4s infinite ease-in-out;
+}
+
+@keyframes heartBeat {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.22); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.18); }
+}
+
+.dev-names-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.dev-name-card {
+  flex: 1 1 180px;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.dev-role-label {
+  font-size: 0.72rem;
+  color: var(--text-subtle);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.dev-developer-name {
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    #ffedd5 0%,
+    #fbbf24 30%,
+    #ff7722 60%,
+    #fef08a 85%,
+    #ffedd5 100%
+  );
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shimmerSweep 3.5s linear infinite;
+  display: inline-block;
+}
+
+[data-theme="light"] .shimmer-text {
+  background: linear-gradient(
+    90deg,
+    #9a3412 0%,
+    #c2410c 30%,
+    #d97706 60%,
+    #b45309 85%,
+    #9a3412 100%
+  );
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+@keyframes shimmerSweep {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+.dev-name-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dev-sparkle-anim {
+  animation: sparkleTwinkle 2s ease-in-out infinite alternate;
+}
+
+@keyframes sparkleTwinkle {
+  0% { transform: scale(0.8) rotate(0deg); opacity: 0.6; }
+  100% { transform: scale(1.25) rotate(45deg); opacity: 1; }
+}
+
+.dev-contact-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding-top: 0.35rem;
+}
+
+.dev-contact-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.45rem 1rem;
+  border-radius: 9999px;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  cursor: pointer;
+}
+
+.dev-call-btn {
+  background: rgba(230, 81, 0, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.45);
+}
+
+.dev-call-btn:hover {
+  background: linear-gradient(135deg, #ff7722, #e65100);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(230, 81, 0, 0.4);
+}
+
+.dev-wa-btn {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.dev-wa-btn:hover {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+}
+
+/* Compact version for Sidebar and Mobile headers */
+.dev-badge-compact-container {
+  width: 100%;
+  margin-top: 0.65rem;
+}
+
+.dev-badge-compact-content {
+  background: rgba(20, 11, 26, 0.94);
+  border-radius: calc(var(--radius-md) - 2px);
+  padding: 0.45rem 0.65rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+}
+
+[data-theme="light"] .dev-badge-compact-content {
+  background: rgba(255, 252, 245, 0.95);
+}
+
+.dev-compact-text-switcher {
+  position: relative;
+  height: 1.15rem;
+  flex: 1;
+  overflow: hidden;
+  text-align: left;
+}
+
+.dev-flip-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  font-size: 0.72rem;
+  color: var(--text-subtle);
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dev-flip-text.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dev-flip-text.hidden {
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+}
+
+.dev-highlight-name {
+  color: var(--accent-gold-light);
+  font-weight: 800;
+}
+
+.dev-phone-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.45rem;
+  background: rgba(230, 81, 0, 0.2);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  border-radius: 999px;
+  color: #fbbf24;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.dev-phone-pill:hover {
+  background: rgba(230, 81, 0, 0.4);
+  color: #fff;
+}
+
+

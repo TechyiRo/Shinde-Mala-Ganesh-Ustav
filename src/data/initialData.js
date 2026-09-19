@@ -9,7 +9,7 @@ export const initialMandalSettings = {
   president: 'श्री. तुषार शिंदे',
   treasurer: 'श्री. तुकाराम शिंदे व श्री. धनंजय शिंदे',
   secretary: 'श्री. मानस शिंदे',
-  contact: '9822012345',
+  contact: '9922466579',
   year: '2026',
   pavtiPrefix: 'GU-2026-'
 };

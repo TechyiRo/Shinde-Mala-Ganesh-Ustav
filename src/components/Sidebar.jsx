@@ -2,6 +2,7 @@ import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { LayoutDashboard, FilePlus, ListOrdered, Wallet, Settings, Globe, Calendar } from 'lucide-react';
+import { DeveloperBadge } from './DeveloperBadge';
 
 export const Sidebar = ({ activeTab, setActiveTab, onBackToPublic }) => {
   const { t } = useLanguage();
@@ -157,7 +158,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onBackToPublic }) => {
         {/* Quick Footer Mantra */}
         <div
           style={{
-            padding: '0.85rem',
+            padding: '0.75rem',
             borderRadius: 'var(--radius-md)',
             backgroundColor: 'rgba(230, 81, 0, 0.1)',
             border: '1px solid rgba(230, 81, 0, 0.2)',
@@ -171,6 +172,9 @@ export const Sidebar = ({ activeTab, setActiveTab, onBackToPublic }) => {
             मंगळमूर्ती मोरया
           </div>
         </div>
+
+        {/* Animated Compact Developer Credit */}
+        <DeveloperBadge compact={true} />
       </aside>
 
       {/* Mobile Bottom Navigation */}

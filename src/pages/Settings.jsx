@@ -17,6 +17,7 @@ import {
   Database,
   CheckCircle2
 } from 'lucide-react';
+import { DeveloperBadge } from '../components/DeveloperBadge';
 
 export const Settings = () => {
   const { lang, t } = useLanguage();
@@ -296,6 +297,7 @@ export const Settings = () => {
                 type="text"
                 className="form-input"
                 value={formData.contact || ''}
+                placeholder="9922466579"
                 onChange={(e) => handleInputChange('contact', e.target.value)}
               />
             </div>
@@ -393,6 +395,9 @@ export const Settings = () => {
           </div>
         </div>
       </div>
+
+      {/* Animated Developer Credit (Rohidas Shinde / रोहिदास शिंदे) */}
+      <DeveloperBadge />
     </div>
   );
 };
