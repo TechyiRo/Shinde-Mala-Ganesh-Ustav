@@ -187,18 +187,24 @@ export const Sidebar = ({ activeTab, setActiveTab, onBackToPublic }) => {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '0.2rem',
+                justifyContent: 'center',
+                gap: '2px',
                 background: 'none',
                 border: 'none',
                 color: isActive ? 'var(--accent-gold-light)' : 'var(--text-subtle)',
-                fontSize: '0.72rem',
+                fontSize: 'clamp(0.6rem, 2vw, 0.72rem)',
                 fontWeight: isActive ? 700 : 500,
                 cursor: 'pointer',
-                padding: '0.3rem 0.6rem'
+                padding: '0.2rem 0.2rem',
+                minWidth: 0,
+                flex: '1 1 0',
+                overflow: 'hidden'
               }}
             >
-              <Icon size={20} color={isActive ? 'var(--accent-gold-light)' : 'currentColor'} />
-              <span>{item.label}</span>
+              <Icon size={18} color={isActive ? 'var(--accent-gold-light)' : 'currentColor'} />
+              <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%', lineHeight: 1.1 }}>
+                {item.label}
+              </span>
             </button>
           );
         })}

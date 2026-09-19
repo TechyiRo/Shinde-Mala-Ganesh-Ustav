@@ -39,6 +39,22 @@
   --radius-md: 16px;
   --radius-lg: 22px;
   --radius-xl: 28px;
+
+  /* Responsive Typography Scaling System (Fluid CSS clamp) */
+  --font-page-title: clamp(1.375rem, 5.2vw, 1.75rem);       /* ~22px - 28px */
+  --font-hero-title: clamp(1.65rem, 6.5vw, 2.5rem);        /* ~26px - 40px */
+  --font-section-heading: clamp(1.125rem, 3.8vw, 1.375rem); /* ~18px - 22px */
+  --font-card-title: clamp(1rem, 2.8vw, 1.1875rem);         /* ~16px - 19px */
+  --font-body: clamp(0.875rem, 2.2vw, 1rem);                /* ~14px - 16px */
+  --font-subtext: clamp(0.75rem, 1.8vw, 0.875rem);          /* ~12px - 14px */
+  --font-btn: clamp(0.875rem, 2.2vw, 0.95rem);              /* ~14px - 15.2px */
+  --font-amount: clamp(1.125rem, 4.2vw, 1.5rem);            /* ~18px - 24px */
+  --font-amount-hero: clamp(1.35rem, 4.8vw, 1.75rem);       /* ~21.6px - 28px */
+
+  /* Fluid Spacing */
+  --pad-page-x: clamp(0.75rem, 3.5vw, 1.5rem);
+  --pad-card: clamp(0.85rem, 3vw, 1.5rem);
+  --gap-grid: clamp(0.65rem, 2.5vw, 1.25rem);
 }
 
 [data-theme="light"] {
@@ -429,6 +445,27 @@ body {
   border-radius: var(--radius-md);
 }
 
+.desktop-table-view {
+  display: block;
+  width: 100%;
+}
+
+.mobile-cards-view {
+  display: none;
+  width: 100%;
+}
+
+@media (max-width: 680px) {
+  .desktop-table-view {
+    display: none !important;
+  }
+  .mobile-cards-view {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
 .glass-table {
   width: 100%;
   border-collapse: collapse;
@@ -691,7 +728,7 @@ body {
 /* Mobile Safe Areas and Touch Target minimums */
 @media (max-width: 768px) {
   body {
-    padding-bottom: env(safe-area-inset-bottom, 20px);
+    padding-bottom: calc(env(safe-area-inset-bottom, 16px) + 64px);
   }
 
   .mobile-fab {
@@ -708,3 +745,204 @@ body {
     display: none !important;
   }
 }
+
+/* ==========================================================================
+   COMPREHENSIVE MOBILE RESPONSIVENESS SYSTEM (320px - 430px & Landscape)
+   ========================================================================== */
+
+/* Responsive Typography Utility Classes */
+.text-hero-title {
+  font-size: var(--font-hero-title);
+  font-weight: 800;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+}
+
+.text-page-title {
+  font-size: var(--font-page-title);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.text-section-heading {
+  font-size: var(--font-section-heading);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.text-card-title {
+  font-size: var(--font-card-title);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.text-body-responsive {
+  font-size: var(--font-body);
+  line-height: 1.5;
+}
+
+.text-subtext-responsive {
+  font-size: var(--font-subtext);
+  line-height: 1.4;
+}
+
+.text-amount-responsive {
+  font-size: var(--font-amount);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.text-btn-responsive {
+  font-size: var(--font-btn);
+  font-weight: 600;
+}
+
+/* Fluid Responsive Grid for Summary Cards & Stats */
+.responsive-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: var(--gap-grid);
+  width: 100%;
+}
+
+/* Fluid Countdown Grid */
+.responsive-countdown-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(0.35rem, 1.8vw, 0.9rem);
+  width: 100%;
+}
+
+.countdown-box {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: clamp(10px, 2.5vw, 16px);
+  padding: clamp(0.45rem, 1.8vw, 0.85rem) clamp(0.25rem, 1vw, 0.5rem);
+  text-align: center;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.countdown-number {
+  font-size: clamp(1.2rem, 4.5vw, 2.1rem);
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--accent-gold-light);
+  font-family: 'Outfit', sans-serif;
+}
+
+.countdown-label {
+  font-size: clamp(0.65rem, 1.8vw, 0.82rem);
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Mobile Filter Bar Flex Wrapping */
+.responsive-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.responsive-filter-bar > * {
+  flex: 1 1 clamp(140px, 30vw, 220px);
+  min-width: 0;
+}
+
+/* Small Phones: 320px – 360px Specific Optimizations */
+@media (max-width: 360px) {
+  :root {
+    --pad-page-x: 0.65rem;
+    --pad-card: 0.75rem;
+    --gap-grid: 0.6rem;
+  }
+
+  .main-content {
+    padding: 0.75rem 0.5rem 5.5rem !important;
+  }
+
+  .glass-panel {
+    padding: 0.75rem !important;
+    border-radius: var(--radius-md) !important;
+  }
+
+  .countdown-box {
+    padding: 0.35rem 0.15rem !important;
+  }
+
+  .countdown-number {
+    font-size: 1.1rem !important;
+  }
+
+  .countdown-label {
+    font-size: 0.62rem !important;
+  }
+
+  .responsive-summary-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .btn {
+    padding: 0.55rem 0.85rem !important;
+    font-size: 0.82rem !important;
+  }
+
+  .chip-btn {
+    padding: 0.3rem 0.65rem !important;
+    font-size: 0.78rem !important;
+  }
+
+  .stat-card-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.4rem !important;
+  }
+}
+
+/* Standard & Large Phones: 361px – 430px */
+@media (min-width: 361px) and (max-width: 480px) {
+  :root {
+    --pad-page-x: 0.85rem;
+    --pad-card: 0.95rem;
+    --gap-grid: 0.75rem;
+  }
+
+  .responsive-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .glass-panel {
+    border-radius: var(--radius-lg);
+  }
+}
+
+/* Tablet & Foldables (Landscape / Unfolded: 481px – 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .responsive-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile Landscape Orientation (short viewports) */
+@media (orientation: landscape) and (max-height: 500px) {
+  .hero-section-box {
+    min-height: auto !important;
+    padding: 1.5rem 1rem !important;
+  }
+
+  .mobile-nav-bar {
+    height: 52px !important;
+    padding: 0 1rem !important;
+  }
+
+  body {
+    padding-bottom: 56px !important;
+  }
+}
+

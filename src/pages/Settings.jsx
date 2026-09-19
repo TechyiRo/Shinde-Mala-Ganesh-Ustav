@@ -95,31 +95,32 @@ export const Settings = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '900px', margin: '0 auto' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
       {/* Settings Header */}
-      <div className="glass-panel" style={{ padding: '1.5rem 1.75rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+      <div className="glass-panel" style={{ padding: 'clamp(0.85rem, 3.5vw, 1.5rem)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.85rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div
               style={{
-                width: '46px',
-                height: '46px',
-                borderRadius: '16px',
+                width: '42px',
+                height: '42px',
+                borderRadius: '14px',
                 backgroundColor: 'rgba(230, 81, 0, 0.18)',
                 border: '1px solid rgba(230, 81, 0, 0.35)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#ff7722'
+                color: '#ff7722',
+                flexShrink: 0
               }}
             >
-              <SettingsIcon size={24} />
+              <SettingsIcon size={22} />
             </div>
             <div>
-              <h2 style={{ fontSize: '1.35rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
+              <h2 className="text-page-title" style={{ fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
                 {t('settingsTitle')}
               </h2>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-subtle)', margin: '2px 0 0' }}>
+              <p className="text-subtext-responsive" style={{ color: 'var(--text-subtle)', margin: '2px 0 0' }}>
                 मंडळ माहिती, पावती मजकूर आणि डेटाबेस क्लाउड जोडणी
               </p>
             </div>
@@ -131,12 +132,12 @@ export const Settings = () => {
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
-              padding: '0.45rem 0.9rem',
+              padding: '0.35rem 0.85rem',
               borderRadius: '999px',
               backgroundColor: isMongoConnected ? 'rgba(46, 125, 50, 0.15)' : 'rgba(230, 81, 0, 0.15)',
               border: `1px solid ${isMongoConnected ? 'rgba(46, 125, 50, 0.4)' : 'rgba(230, 81, 0, 0.4)'}`,
               color: isMongoConnected ? '#4caf50' : '#ff9800',
-              fontSize: '0.82rem',
+              fontSize: 'var(--font-subtext)',
               fontWeight: 700
             }}
           >
@@ -196,15 +197,15 @@ export const Settings = () => {
       </div>
 
       {/* Mandal Information Form */}
-      <div className="glass-panel" style={{ padding: '2rem' }}>
-        <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '1.25rem', color: 'var(--accent-gold-light)' }}>
+      <div className="glass-panel" style={{ padding: 'clamp(0.85rem, 3.5vw, 1.75rem)' }}>
+        <h3 className="text-card-title" style={{ fontWeight: 700, marginBottom: '1.25rem', color: 'var(--accent-gold-light)' }}>
           {t('generalSettings')}
         </h3>
 
         <form onSubmit={handleSaveSettings}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '1rem' }}>
             <div className="form-group">
-              <label className="form-label">
+              <label className="form-label" style={{ fontSize: 'var(--font-subtext)' }}>
                 <Building size={15} />
                 <span>{t('mandalNameLabel')} (मराठी)</span>
               </label>
@@ -218,7 +219,7 @@ export const Settings = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">
+              <label className="form-label" style={{ fontSize: 'var(--font-subtext)' }}>
                 <Building size={15} />
                 <span>{t('mandalNameLabel')} (English)</span>
               </label>
@@ -231,9 +232,9 @@ export const Settings = () => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: '1rem' }}>
             <div className="form-group">
-              <label className="form-label">
+              <label className="form-label" style={{ fontSize: 'var(--font-subtext)' }}>
                 <FileCheck size={15} />
                 <span>{t('regNoLabel')}</span>
               </label>
@@ -246,7 +247,7 @@ export const Settings = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">
+              <label className="form-label" style={{ fontSize: 'var(--font-subtext)' }}>
                 <Calendar size={15} />
                 <span>उत्सव वर्ष (Year)</span>
               </label>
@@ -259,9 +260,9 @@ export const Settings = () => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: '1rem' }}>
             <div className="form-group">
-              <label className="form-label">
+              <label className="form-label" style={{ fontSize: 'var(--font-subtext)' }}>
                 <User size={15} />
                 <span>{t('presidentLabel')}</span>
               </label>
@@ -274,7 +275,7 @@ export const Settings = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">
+              <label className="form-label" style={{ fontSize: 'var(--font-subtext)' }}>
                 <User size={15} />
                 <span>{t('treasurerLabel')}</span>
               </label>
@@ -287,7 +288,7 @@ export const Settings = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">
+              <label className="form-label" style={{ fontSize: 'var(--font-subtext)' }}>
                 <Phone size={15} />
                 <span>{t('contactLabel')}</span>
               </label>
@@ -301,7 +302,7 @@ export const Settings = () => {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.25rem' }}>
-            <button type="submit" className="btn btn-primary" disabled={!isAdmin} style={{ opacity: isAdmin ? 1 : 0.5 }}>
+            <button type="submit" className="btn btn-primary" disabled={!isAdmin} style={{ opacity: isAdmin ? 1 : 0.5, minHeight: '42px', padding: '0.45rem 1.25rem', fontSize: 'var(--font-btn)' }}>
               <Save size={16} />
               <span>{t('saveSettings')}</span>
             </button>
@@ -310,18 +311,18 @@ export const Settings = () => {
       </div>
 
       {/* Data Management & Backup */}
-      <div className="glass-panel" style={{ padding: '2rem' }}>
-        <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '1.25rem', color: 'var(--accent-gold-light)' }}>
+      <div className="glass-panel" style={{ padding: 'clamp(0.85rem, 3.5vw, 1.75rem)' }}>
+        <h3 className="text-card-title" style={{ fontWeight: 700, marginBottom: '1.25rem', color: 'var(--accent-gold-light)' }}>
           {t('dataManagement')}
         </h3>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '1rem',
+              padding: '0.85rem 1rem',
               borderRadius: 'var(--radius-md)',
               backgroundColor: 'rgba(255, 255, 255, 0.03)',
               border: '1px solid var(--glass-border)',
@@ -330,12 +331,12 @@ export const Settings = () => {
             }}
           >
             <div>
-              <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{t('downloadBackup')}</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-subtle)' }}>
+              <div style={{ fontWeight: 700, fontSize: 'var(--font-card-title)' }}>{t('downloadBackup')}</div>
+              <div style={{ fontSize: 'var(--font-subtext)', color: 'var(--text-subtle)' }}>
                 सर्व पावत्या, खर्च व सेटिंग्ज संगणकात JSON स्वरूपात सुरक्षित ठेवा
               </div>
             </div>
-            <button className="btn btn-secondary btn-sm" onClick={handleDownloadBackup}>
+            <button className="btn btn-secondary btn-sm" onClick={handleDownloadBackup} style={{ minHeight: '38px', padding: '0.4rem 0.85rem', fontSize: 'var(--font-btn)' }}>
               <Download size={16} color="#3b82f6" />
               <span>डाउनलोड बॅकअप</span>
             </button>
@@ -346,7 +347,7 @@ export const Settings = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '1rem',
+              padding: '0.85rem 1rem',
               borderRadius: 'var(--radius-md)',
               backgroundColor: 'rgba(255, 255, 255, 0.03)',
               border: '1px solid var(--glass-border)',
@@ -355,12 +356,12 @@ export const Settings = () => {
             }}
           >
             <div>
-              <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{t('resetSampleData')}</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-subtle)' }}>
+              <div style={{ fontWeight: 700, fontSize: 'var(--font-card-title)' }}>{t('resetSampleData')}</div>
+              <div style={{ fontSize: 'var(--font-subtext)', color: 'var(--text-subtle)' }}>
                 शिंदे मळा गणेश उत्सव २०२६ चे मूळ नमुना रेकॉर्ड्स पुन्हा लोड करा
               </div>
             </div>
-            <button className="btn btn-secondary btn-sm" onClick={handleResetSample} disabled={!isAdmin}>
+            <button className="btn btn-secondary btn-sm" onClick={handleResetSample} disabled={!isAdmin} style={{ minHeight: '38px', padding: '0.4rem 0.85rem', fontSize: 'var(--font-btn)' }}>
               <RotateCcw size={16} color="#f59e0b" />
               <span>{t('resetSampleData')}</span>
             </button>
@@ -371,7 +372,7 @@ export const Settings = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '1rem',
+              padding: '0.85rem 1rem',
               borderRadius: 'var(--radius-md)',
               backgroundColor: 'rgba(239, 68, 68, 0.08)',
               border: '1px solid rgba(239, 68, 68, 0.25)',
@@ -380,12 +381,12 @@ export const Settings = () => {
             }}
           >
             <div>
-              <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#f87171' }}>{t('clearAllData')}</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-subtle)' }}>
+              <div style={{ fontWeight: 700, fontSize: 'var(--font-card-title)', color: '#f87171' }}>{t('clearAllData')}</div>
+              <div style={{ fontSize: 'var(--font-subtext)', color: 'var(--text-subtle)' }}>
                 सर्व पावत्या आणि खर्चाचा डेटा त्वरित साफ करा
               </div>
             </div>
-            <button className="btn btn-danger btn-sm" onClick={handleClearAll} disabled={!isAdmin}>
+            <button className="btn btn-danger btn-sm" onClick={handleClearAll} disabled={!isAdmin} style={{ minHeight: '38px', padding: '0.4rem 0.85rem', fontSize: 'var(--font-btn)' }}>
               <Trash2 size={16} />
               <span>{t('clearAllData')}</span>
             </button>

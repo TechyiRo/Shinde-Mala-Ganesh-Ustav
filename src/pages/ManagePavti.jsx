@@ -217,26 +217,26 @@ export const ManagePavti = () => {
           flexWrap: 'wrap',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '1.25rem 1.75rem',
-          gap: '1rem'
+          padding: 'clamp(0.85rem, 3vw, 1.35rem)',
+          gap: '0.85rem'
         }}
       >
-        <div>
-          <h2 style={{ fontSize: '1.35rem', fontWeight: 800, margin: '0 0 0.25rem', color: 'var(--text-main)' }}>
+        <div style={{ minWidth: '220px' }}>
+          <h2 className="text-page-title" style={{ fontWeight: 800, margin: '0 0 0.25rem', color: 'var(--text-main)' }}>
             {t('managePavtiTitle')}
           </h2>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-subtle)', margin: 0 }}>
+          <p className="text-subtext-responsive" style={{ color: 'var(--text-subtle)', margin: 0 }}>
             {t('totalRecords')}: <strong style={{ color: 'var(--accent-gold-light)' }}>{filteredList.length}</strong> |{' '}
             {t('filteredSum')}: <strong style={{ color: '#34d399' }}>{formatCurrency(filteredTotalAmount)}</strong>
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <button className="btn btn-secondary btn-sm" onClick={handleExportCSV}>
+        <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap' }}>
+          <button className="btn btn-secondary btn-sm" onClick={handleExportCSV} style={{ padding: '0.45rem 0.85rem', fontSize: 'var(--font-btn)' }}>
             <FileSpreadsheet size={16} color="#10b981" />
             <span>{t('exportExcel')}</span>
           </button>
-          <button className="btn btn-secondary btn-sm" onClick={handlePrintLedger}>
+          <button className="btn btn-secondary btn-sm" onClick={handlePrintLedger} style={{ padding: '0.45rem 0.85rem', fontSize: 'var(--font-btn)' }}>
             <Printer size={16} color="#3b82f6" />
             <span>{t('exportPdf')}</span>
           </button>
@@ -244,11 +244,11 @@ export const ManagePavti = () => {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="glass-panel no-print" style={{ padding: '1.25rem 1.5rem' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
-          {/* Search Input */}
-          <div style={{ gridColumn: 'span 2', minWidth: '220px' }}>
-            <label className="form-label" style={{ fontSize: '0.82rem' }}>
+      <div className="glass-panel no-print" style={{ padding: 'clamp(0.85rem, 3vw, 1.35rem)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '0.75rem' }}>
+          {/* Search Input (spans full width on narrow screens) */}
+          <div style={{ gridColumn: '1 / -1' }}>
+            <label className="form-label" style={{ fontSize: 'var(--font-subtext)', marginBottom: '0.35rem' }}>
               <Search size={14} />
               <span>{t('searchPlaceholder')}</span>
             </label>
@@ -266,7 +266,7 @@ export const ManagePavti = () => {
 
           {/* Payment Mode Filter */}
           <div>
-            <label className="form-label" style={{ fontSize: '0.82rem' }}>
+            <label className="form-label" style={{ fontSize: 'var(--font-subtext)', marginBottom: '0.35rem' }}>
               <span>{t('paymentMode')}</span>
             </label>
             <select
@@ -287,7 +287,7 @@ export const ManagePavti = () => {
 
           {/* Donation Type Filter */}
           <div>
-            <label className="form-label" style={{ fontSize: '0.82rem' }}>
+            <label className="form-label" style={{ fontSize: 'var(--font-subtext)', marginBottom: '0.35rem' }}>
               <span>{t('donationType')}</span>
             </label>
             <select
@@ -308,7 +308,7 @@ export const ManagePavti = () => {
 
           {/* Date Range From */}
           <div>
-            <label className="form-label" style={{ fontSize: '0.82rem' }}>
+            <label className="form-label" style={{ fontSize: 'var(--font-subtext)', marginBottom: '0.35rem' }}>
               <span>{t('filterDateFrom')}</span>
             </label>
             <input
@@ -324,7 +324,7 @@ export const ManagePavti = () => {
 
           {/* Date Range To */}
           <div>
-            <label className="form-label" style={{ fontSize: '0.82rem' }}>
+            <label className="form-label" style={{ fontSize: 'var(--font-subtext)', marginBottom: '0.35rem' }}>
               <span>{t('filterDateTo')}</span>
             </label>
             <input
@@ -340,7 +340,7 @@ export const ManagePavti = () => {
 
           {/* Min Amount */}
           <div>
-            <label className="form-label" style={{ fontSize: '0.82rem' }}>
+            <label className="form-label" style={{ fontSize: 'var(--font-subtext)', marginBottom: '0.35rem' }}>
               <span>{t('filterMinAmount')}</span>
             </label>
             <input
@@ -357,7 +357,7 @@ export const ManagePavti = () => {
 
           {/* Max Amount */}
           <div>
-            <label className="form-label" style={{ fontSize: '0.82rem' }}>
+            <label className="form-label" style={{ fontSize: 'var(--font-subtext)', marginBottom: '0.35rem' }}>
               <span>{t('filterMaxAmount')}</span>
             </label>
             <input
@@ -378,7 +378,7 @@ export const ManagePavti = () => {
               type="button"
               className="btn btn-secondary"
               onClick={handleClearFilters}
-              style={{ width: '100%' }}
+              style={{ width: '100%', minHeight: '40px' }}
             >
               <RotateCcw size={15} />
               <span>{t('clearFilters')}</span>
@@ -387,112 +387,208 @@ export const ManagePavti = () => {
         </div>
       </div>
 
-      {/* Receipts Table Panel */}
-      <div className="glass-panel" style={{ padding: '1.25rem 1.5rem' }}>
-        <div className="table-container">
-          <table className="glass-table">
-            <thead>
-              <tr>
-                <th onClick={() => handleSort('pavtiNo')} style={{ cursor: 'pointer' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <span>{t('pavtiNo')}</span>
-                    <ArrowUpDown size={13} />
-                  </div>
-                </th>
-                <th onClick={() => handleSort('date')} style={{ cursor: 'pointer' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <span>{t('date')}</span>
-                    <ArrowUpDown size={13} />
-                  </div>
-                </th>
-                <th onClick={() => handleSort('donorName')} style={{ cursor: 'pointer' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <span>{t('donorName')}</span>
-                    <ArrowUpDown size={13} />
-                  </div>
-                </th>
-                <th>{t('mobileNumber')}</th>
-                <th>{t('paymentMode')}</th>
-                <th>{t('donationType')}</th>
-                <th onClick={() => handleSort('amount')} style={{ cursor: 'pointer', textAlign: 'right' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.35rem' }}>
-                    <span>{t('amount')}</span>
-                    <ArrowUpDown size={13} />
-                  </div>
-                </th>
-                <th className="no-print" style={{ textAlign: 'center' }}>
-                  {t('actions')}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedList.length === 0 ? (
+      {/* Receipts Table & Mobile Cards Panel */}
+      <div className="glass-panel" style={{ padding: 'clamp(0.85rem, 3vw, 1.35rem)' }}>
+        {/* Desktop Table View */}
+        <div className="desktop-table-view">
+          <div className="table-container">
+            <table className="glass-table">
+              <thead>
                 <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-subtle)' }}>
-                    {t('noRecordsFound')}
-                  </td>
+                  <th onClick={() => handleSort('pavtiNo')} style={{ cursor: 'pointer' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <span>{t('pavtiNo')}</span>
+                      <ArrowUpDown size={13} />
+                    </div>
+                  </th>
+                  <th onClick={() => handleSort('date')} style={{ cursor: 'pointer' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <span>{t('date')}</span>
+                      <ArrowUpDown size={13} />
+                    </div>
+                  </th>
+                  <th onClick={() => handleSort('donorName')} style={{ cursor: 'pointer' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <span>{t('donorName')}</span>
+                      <ArrowUpDown size={13} />
+                    </div>
+                  </th>
+                  <th>{t('mobileNumber')}</th>
+                  <th>{t('paymentMode')}</th>
+                  <th>{t('donationType')}</th>
+                  <th onClick={() => handleSort('amount')} style={{ cursor: 'pointer', textAlign: 'right' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.35rem' }}>
+                      <span>{t('amount')}</span>
+                      <ArrowUpDown size={13} />
+                    </div>
+                  </th>
+                  <th className="no-print" style={{ textAlign: 'center' }}>
+                    {t('actions')}
+                  </th>
                 </tr>
-              ) : (
-                paginatedList.map((item) => (
-                  <tr key={item.id}>
-                    <td>
-                      <strong style={{ color: 'var(--accent-gold-light)' }}>{item.pavtiNo}</strong>
-                    </td>
-                    <td style={{ whiteSpace: 'nowrap' }}>{item.date}</td>
-                    <td>
-                      <div style={{ fontWeight: 700 }}>{item.donorName}</div>
-                      {item.address && (
-                        <div style={{ fontSize: '0.76rem', color: 'var(--text-subtle)' }}>{item.address}</div>
-                      )}
-                    </td>
-                    <td style={{ fontSize: '0.85rem' }}>{item.mobile || '—'}</td>
-                    <td>
-                      <span className={`badge badge-${(item.paymentMode || '').toLowerCase().replace(/\s+/g, '')}`}>
-                        {t(`mode${item.paymentMode}`) || item.paymentMode}
-                      </span>
-                    </td>
-                    <td>
-                      <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                        {t(`type${item.donationType}`) || item.donationType}
-                      </span>
-                    </td>
-                    <td style={{ textAlign: 'right', fontWeight: 800, color: '#34d399', fontSize: '1rem' }}>
-                      {formatCurrency(item.amount)}
-                    </td>
-                    <td className="no-print" style={{ textAlign: 'center' }}>
-                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-                        <button
-                          className="btn btn-secondary btn-icon btn-sm"
-                          onClick={() => handleView(item)}
-                          title={t('view')}
-                        >
-                          <Eye size={15} color="#fbbf24" />
-                        </button>
-                        <button
-                          className="btn btn-secondary btn-icon btn-sm"
-                          onClick={() => handleEditClick(item)}
-                          title={t('edit')}
-                          disabled={!isAdmin}
-                          style={{ opacity: isAdmin ? 1 : 0.4 }}
-                        >
-                          <Edit2 size={15} color="#60a5fa" />
-                        </button>
-                        <button
-                          className="btn btn-secondary btn-icon btn-sm"
-                          onClick={() => handleDeleteClick(item.id)}
-                          title={t('delete')}
-                          disabled={!isAdmin}
-                          style={{ opacity: isAdmin ? 1 : 0.4 }}
-                        >
-                          <Trash2 size={15} color="#f87171" />
-                        </button>
-                      </div>
+              </thead>
+              <tbody>
+                {paginatedList.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-subtle)' }}>
+                      {t('noRecordsFound')}
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  paginatedList.map((item) => (
+                    <tr key={item.id}>
+                      <td>
+                        <strong style={{ color: 'var(--accent-gold-light)' }}>{item.pavtiNo}</strong>
+                      </td>
+                      <td style={{ whiteSpace: 'nowrap' }}>{item.date}</td>
+                      <td>
+                        <div style={{ fontWeight: 700 }}>{item.donorName}</div>
+                        {item.address && (
+                          <div style={{ fontSize: '0.76rem', color: 'var(--text-subtle)' }}>{item.address}</div>
+                        )}
+                      </td>
+                      <td style={{ fontSize: '0.85rem' }}>{item.mobile || '—'}</td>
+                      <td>
+                        <span className={`badge badge-${(item.paymentMode || '').toLowerCase().replace(/\s+/g, '')}`}>
+                          {t(`mode${item.paymentMode}`) || item.paymentMode}
+                        </span>
+                      </td>
+                      <td>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                          {t(`type${item.donationType}`) || item.donationType}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'right', fontWeight: 800, color: '#34d399', fontSize: '1rem' }}>
+                        {formatCurrency(item.amount)}
+                      </td>
+                      <td className="no-print" style={{ textAlign: 'center' }}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                          <button
+                            className="btn btn-secondary btn-icon btn-sm"
+                            onClick={() => handleView(item)}
+                            title={t('view')}
+                          >
+                            <Eye size={15} color="#fbbf24" />
+                          </button>
+                          <button
+                            className="btn btn-secondary btn-icon btn-sm"
+                            onClick={() => handleEditClick(item)}
+                            title={t('edit')}
+                            disabled={!isAdmin}
+                            style={{ opacity: isAdmin ? 1 : 0.4 }}
+                          >
+                            <Edit2 size={15} color="#60a5fa" />
+                          </button>
+                          <button
+                            className="btn btn-secondary btn-icon btn-sm"
+                            onClick={() => handleDeleteClick(item.id)}
+                            title={t('delete')}
+                            disabled={!isAdmin}
+                            style={{ opacity: isAdmin ? 1 : 0.4 }}
+                          >
+                            <Trash2 size={15} color="#f87171" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Mobile Cards View (< 680px) */}
+        <div className="mobile-cards-view no-print">
+          {paginatedList.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--text-subtle)', fontSize: 'var(--font-body)' }}>
+              {t('noRecordsFound')}
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {paginatedList.map((item) => (
+                <div
+                  key={item.id}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    border: '1px solid var(--glass-border)',
+                    borderRadius: '12px',
+                    padding: '0.85rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.6rem'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--accent-gold-light)', letterSpacing: '0.5px' }}>
+                        #{item.pavtiNo}
+                      </span>
+                      <h4 style={{ margin: '0.2rem 0 0', fontSize: 'var(--font-card-title)', fontWeight: 700, color: 'var(--text-main)' }}>
+                        {item.donorName}
+                      </h4>
+                      {item.address && (
+                        <p style={{ margin: '0.15rem 0 0', fontSize: 'var(--font-subtext)', color: 'var(--text-subtle)' }}>
+                          {item.address}
+                        </p>
+                      )}
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <span className="text-amount-responsive" style={{ fontWeight: 800, color: '#34d399', display: 'block' }}>
+                        {formatCurrency(item.amount)}
+                      </span>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>{item.date}</span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.4rem', borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', alignItems: 'center' }}>
+                      <span className={`badge badge-${(item.paymentMode || '').toLowerCase().replace(/\s+/g, '')}`} style={{ fontSize: '0.72rem', padding: '0.2rem 0.5rem' }}>
+                        {t(`mode${item.paymentMode}`) || item.paymentMode}
+                      </span>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                        {t(`type${item.donationType}`) || item.donationType}
+                      </span>
+                      {item.mobile && (
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>
+                          📞 {item.mobile}
+                        </span>
+                      )}
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.35rem', marginLeft: 'auto' }}>
+                      <button
+                        className="btn btn-secondary btn-icon btn-sm"
+                        onClick={() => handleView(item)}
+                        title={t('view')}
+                        style={{ padding: '0.35rem', minWidth: '32px', minHeight: '32px' }}
+                      >
+                        <Eye size={14} color="#fbbf24" />
+                      </button>
+                      <button
+                        className="btn btn-secondary btn-icon btn-sm"
+                        onClick={() => handleEditClick(item)}
+                        title={t('edit')}
+                        disabled={!isAdmin}
+                        style={{ opacity: isAdmin ? 1 : 0.4, padding: '0.35rem', minWidth: '32px', minHeight: '32px' }}
+                      >
+                        <Edit2 size={14} color="#60a5fa" />
+                      </button>
+                      <button
+                        className="btn btn-secondary btn-icon btn-sm"
+                        onClick={() => handleDeleteClick(item.id)}
+                        title={t('delete')}
+                        disabled={!isAdmin}
+                        style={{ opacity: isAdmin ? 1 : 0.4, padding: '0.35rem', minWidth: '32px', minHeight: '32px' }}
+                      >
+                        <Trash2 size={14} color="#f87171" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Pagination Bar */}

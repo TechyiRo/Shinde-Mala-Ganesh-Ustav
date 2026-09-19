@@ -82,7 +82,7 @@ export const TiltGlassCard = ({ title, value, prefix = '', suffix = '', icon: Ic
         border: '1px solid var(--glass-border)',
         borderRadius: 'var(--radius-xl)',
         boxShadow: 'var(--glass-shadow), var(--glass-inner-glow)',
-        padding: '1.75rem',
+        padding: 'clamp(1rem, 3.5vw, 1.75rem)',
         overflow: 'hidden',
         cursor: 'default'
       }}
@@ -119,16 +119,17 @@ export const TiltGlassCard = ({ title, value, prefix = '', suffix = '', icon: Ic
         }}
       />
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', position: 'relative', zIndex: 1 }}>
-        <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-subtle)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.85rem', position: 'relative', zIndex: 1 }}>
+        <span style={{ fontSize: 'clamp(0.85rem, 2.4vw, 0.98rem)', fontWeight: 700, color: 'var(--text-subtle)', lineHeight: 1.3 }}>
           {title}
         </span>
         {Icon && (
           <div
             style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '16px',
+              width: 'clamp(36px, 8vw, 46px)',
+              height: 'clamp(36px, 8vw, 46px)',
+              flexShrink: 0,
+              borderRadius: 'clamp(10px, 2.5vw, 16px)',
               backgroundColor: `${color || 'var(--primary)'}22`,
               border: `1px solid ${color || 'var(--primary)'}44`,
               display: 'flex',
@@ -138,37 +139,37 @@ export const TiltGlassCard = ({ title, value, prefix = '', suffix = '', icon: Ic
               boxShadow: `0 4px 14px ${color || 'var(--primary)'}25`
             }}
           >
-            <Icon size={24} />
+            <Icon size={20} />
           </div>
         )}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.35rem', marginBottom: '0.4rem', position: 'relative', zIndex: 1 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem', marginBottom: '0.35rem', position: 'relative', zIndex: 1, flexWrap: 'wrap' }}>
         {prefix && (
-          <span style={{ fontSize: '1.5rem', fontWeight: 800, color: color || 'var(--text-main)' }}>
+          <span style={{ fontSize: 'clamp(1.1rem, 3.8vw, 1.45rem)', fontWeight: 800, color: color || 'var(--text-main)' }}>
             {prefix}
           </span>
         )}
         <span
           style={{
-            fontSize: '2.3rem',
+            fontSize: 'clamp(1.25rem, 4.5vw, 2.1rem)',
             fontWeight: 800,
             letterSpacing: '-0.02em',
             color: color || 'var(--text-main)',
-            lineHeight: 1.1
+            lineHeight: 1.15
           }}
         >
           {formattedNumber}
         </span>
         {suffix && (
-          <span style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+          <span style={{ fontSize: 'clamp(0.85rem, 2.4vw, 1.05rem)', fontWeight: 600, color: 'var(--text-muted)' }}>
             {suffix}
           </span>
         )}
       </div>
 
       {subtitle && (
-        <div style={{ fontSize: '0.85rem', color: 'var(--text-subtle)', fontWeight: 600, position: 'relative', zIndex: 1 }}>
+        <div style={{ fontSize: 'clamp(0.75rem, 1.9vw, 0.85rem)', color: 'var(--text-subtle)', fontWeight: 600, position: 'relative', zIndex: 1 }}>
           {subtitle}
         </div>
       )}

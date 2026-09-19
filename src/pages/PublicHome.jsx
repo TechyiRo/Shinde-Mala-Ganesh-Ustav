@@ -165,22 +165,23 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
         className="glass-panel no-print"
         style={{
           position: 'sticky',
-          top: '1rem',
-          margin: '1rem auto',
+          top: '0.5rem',
+          margin: '0.5rem auto 1rem',
           maxWidth: '1280px',
-          width: 'calc(100% - 2rem)',
+          width: 'calc(100% - clamp(0.75rem, 3vw, 2rem))',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0.75rem 1.5rem',
+          padding: 'clamp(0.5rem, 2vw, 0.75rem) clamp(0.65rem, 2.5vw, 1.25rem)',
           borderRadius: 'var(--radius-xl)',
           zIndex: 100,
           backdropFilter: 'blur(28px)',
-          WebkitBackdropFilter: 'blur(28px)'
+          WebkitBackdropFilter: 'blur(28px)',
+          gap: '0.5rem'
         }}
       >
         {/* Mandal Brand with Halo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', cursor: 'pointer' }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.45rem, 1.8vw, 0.75rem)', cursor: 'pointer', minWidth: 0 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
           <img
             src="/logo.png"
             onError={(e) => {
@@ -188,18 +189,29 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
             }}
             alt="Mandal Logo"
             style={{
-              width: '44px',
-              height: '44px',
+              width: 'clamp(34px, 8vw, 42px)',
+              height: 'clamp(34px, 8vw, 42px)',
               borderRadius: '50%',
-              filter: 'drop-shadow(0 2px 10px rgba(230, 81, 0, 0.45))',
-              objectFit: 'cover'
+              filter: 'drop-shadow(0 2px 8px rgba(230, 81, 0, 0.45))',
+              objectFit: 'cover',
+              flexShrink: 0
             }}
           />
-          <div>
-            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1.2 }}>
+          <div style={{ minWidth: 0, overflow: 'hidden' }}>
+            <div
+              style={{
+                fontSize: 'clamp(0.85rem, 3vw, 1.05rem)',
+                fontWeight: 800,
+                color: 'var(--text-main)',
+                lineHeight: 1.2,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}
+            >
               {mandalSettings.mandalName || t('appTitle')}
             </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--accent-gold-light)', fontWeight: 600 }}>
+            <div style={{ fontSize: 'clamp(0.68rem, 1.8vw, 0.75rem)', color: 'var(--accent-gold-light)', fontWeight: 600 }}>
               {t('publicPortalTitle')}
             </div>
           </div>
@@ -240,24 +252,24 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
         </div>
 
         {/* Right Controls: Lang, Theme & Admin Portal */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-          <button onClick={toggleLang} className="btn btn-secondary btn-sm" title="Switch Language">
-            <Languages size={15} color="#f59e0b" />
-            <span>{lang === 'mr' ? 'English' : 'मराठी'}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.35rem, 1.2vw, 0.65rem)', flexShrink: 0 }}>
+          <button onClick={toggleLang} className="btn btn-secondary btn-sm" title="Switch Language" style={{ padding: '0.35rem 0.65rem', fontSize: '0.8rem' }}>
+            <Languages size={14} color="#f59e0b" />
+            <span>{lang === 'mr' ? 'EN' : 'मराठी'}</span>
           </button>
 
-          <button onClick={toggleTheme} className="btn btn-secondary btn-icon btn-sm" title="Toggle Theme">
-            {theme === 'dark' ? <Sun size={16} color="#fbbf24" /> : <Moon size={16} color="#6366f1" />}
+          <button onClick={toggleTheme} className="btn btn-secondary btn-icon btn-sm" title="Toggle Theme" style={{ width: '34px', height: '34px' }}>
+            {theme === 'dark' ? <Sun size={15} color="#fbbf24" /> : <Moon size={15} color="#6366f1" />}
           </button>
 
           {user ? (
-            <button className="btn btn-primary btn-sm" onClick={onOpenAdminPortal}>
-              <ShieldCheck size={16} />
-              <span>{t('navDashboard')} (Admin)</span>
+            <button className="btn btn-primary btn-sm" onClick={onOpenAdminPortal} style={{ padding: '0.35rem 0.65rem', fontSize: '0.8rem' }}>
+              <ShieldCheck size={15} />
+              <span>Admin</span>
             </button>
           ) : (
-            <button className="btn btn-secondary btn-sm" onClick={onOpenLogin}>
-              <Lock size={15} color="var(--primary-light)" />
+            <button className="btn btn-secondary btn-sm" onClick={onOpenLogin} style={{ padding: '0.35rem 0.65rem', fontSize: '0.8rem' }}>
+              <Lock size={14} color="var(--primary-light)" />
               <span>{t('adminLoginLink')}</span>
             </button>
           )}
@@ -265,19 +277,20 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
       </nav>
 
       {/* Main Container */}
-      <main style={{ maxWidth: '1280px', margin: '0 auto', padding: '1rem 1.5rem 4rem', position: 'relative', zIndex: 1 }}>
+      <main style={{ maxWidth: '1280px', margin: '0 auto', padding: 'clamp(0.5rem, 2.5vw, 1rem) clamp(0.65rem, 3vw, 1.5rem) 4rem', position: 'relative', zIndex: 1 }}>
         {/* ================================================================= */}
         {/* 1. HERO SECTION */}
         {/* ================================================================= */}
         <section
+          className="hero-section-box"
           style={{
-            minHeight: '75vh',
+            minHeight: '70vh',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             textAlign: 'center',
-            padding: '3rem 1rem 2rem',
+            padding: 'clamp(1.5rem, 5vw, 3rem) clamp(0.25rem, 2vw, 1rem) 2rem',
             position: 'relative'
           }}
         >
@@ -285,9 +298,9 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
           <div
             style={{
               position: 'relative',
-              width: '150px',
-              height: '150px',
-              margin: '0 auto 1.75rem',
+              width: 'clamp(100px, 24vw, 140px)',
+              height: 'clamp(100px, 24vw, 140px)',
+              margin: '0 auto 1.25rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
@@ -297,10 +310,10 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
             <div
               style={{
                 position: 'absolute',
-                inset: '-15px',
+                inset: '-12px',
                 borderRadius: '50%',
                 background: 'radial-gradient(circle, rgba(245, 158, 11, 0.45) 0%, rgba(230, 81, 0, 0.2) 50%, transparent 75%)',
-                filter: 'blur(16px)',
+                filter: 'blur(14px)',
                 animation: 'floatOrb 6s ease-in-out infinite alternate'
               }}
             />
@@ -311,11 +324,11 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
               }}
               alt="Ganesh Logo"
               style={{
-                width: '135px',
-                height: '135px',
+                width: '100%',
+                height: '100%',
                 borderRadius: '50%',
                 border: '3px solid rgba(251, 191, 36, 0.75)',
-                boxShadow: '0 0 35px rgba(230, 81, 0, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.3)',
+                boxShadow: '0 0 30px rgba(230, 81, 0, 0.55), inset 0 0 15px rgba(255, 255, 255, 0.3)',
                 objectFit: 'cover',
                 position: 'relative',
                 zIndex: 2
@@ -328,39 +341,39 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.4rem 1.1rem',
+              gap: '0.4rem',
+              padding: '0.35rem 0.85rem',
               borderRadius: '999px',
               backgroundColor: 'rgba(245, 158, 11, 0.15)',
               border: '1px solid rgba(245, 158, 11, 0.35)',
               color: 'var(--accent-gold-light)',
-              fontSize: '0.9rem',
+              fontSize: 'var(--font-subtext)',
               fontWeight: 700,
-              marginBottom: '1rem',
-              letterSpacing: '0.04em'
+              marginBottom: '0.85rem',
+              letterSpacing: '0.03em'
             }}
           >
-            <Sparkles size={16} />
+            <Sparkles size={14} />
             <span>{mandalSettings.tagline || '॥ श्री गणेशाय नमः ॥ गणपती बाप्पा मोरया'}</span>
           </div>
 
           {/* Mandal Name in Prominent Devanagari Typography */}
           <h1
+            className="text-hero-title"
             style={{
-              fontSize: 'clamp(2.1rem, 5vw, 3.6rem)',
-              fontWeight: 800,
-              letterSpacing: '-0.02em',
-              lineHeight: '1.2',
               color: 'var(--text-main)',
               maxWidth: '960px',
-              margin: '0 auto 0.75rem',
+              margin: '0 auto 0.65rem',
               textShadow: '0 4px 20px rgba(230, 81, 0, 0.25)'
             }}
           >
             {mandalSettings.mandalName || t('mandalDefaultName')}
           </h1>
 
-          <p style={{ fontSize: '1.15rem', color: 'var(--text-muted)', maxWidth: '750px', margin: '0 auto 2rem' }}>
+          <p
+            className="text-body-responsive"
+            style={{ color: 'var(--text-muted)', maxWidth: '750px', margin: '0 auto 1.75rem' }}
+          >
             {t('publicPortalSubtitle')}
           </p>
 
@@ -368,45 +381,36 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
           <div
             className="glass-panel"
             style={{
-              padding: '1.25rem 2rem',
-              borderRadius: 'var(--radius-xl)',
+              padding: 'clamp(0.85rem, 2.5vw, 1.35rem)',
+              borderRadius: 'var(--radius-lg)',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '0.85rem',
-              maxWidth: '620px',
+              gap: '0.75rem',
+              maxWidth: '580px',
               width: '100%',
-              margin: '0 auto 2.5rem',
-              border: '1px solid rgba(251, 191, 36, 0.4)',
-              boxShadow: '0 16px 40px -10px rgba(230, 81, 0, 0.3)'
+              margin: '0 auto 2rem',
+              border: '1px solid rgba(251, 191, 36, 0.35)',
+              boxShadow: '0 12px 35px -8px rgba(230, 81, 0, 0.25)'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-gold-light)', fontWeight: 700, fontSize: '0.95rem' }}>
-              <Clock size={18} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', color: 'var(--accent-gold-light)', fontWeight: 700, fontSize: 'var(--font-subtext)' }}>
+              <Clock size={16} />
               <span>{t('visarjanCountdownTitle')} (अनंत चतुर्दशी २०२६)</span>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', width: '100%' }}>
+            <div className="responsive-countdown-grid">
               {[
                 { val: timeLeft.days, label: t('days') },
                 { val: timeLeft.hours, label: t('hours') },
                 { val: timeLeft.minutes, label: t('minutes') },
                 { val: timeLeft.seconds, label: t('seconds') }
               ].map((item, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid var(--glass-border)',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '0.65rem 0.25rem',
-                    textAlign: 'center'
-                  }}
-                >
-                  <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--accent-gold-light)', lineHeight: 1.1 }}>
+                <div key={idx} className="countdown-box">
+                  <div className="countdown-number">
                     {String(item.val).padStart(2, '0')}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-subtle)', fontWeight: 600, marginTop: '2px' }}>
+                  <div className="countdown-label">
                     {item.label}
                   </div>
                 </div>
@@ -422,37 +426,30 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '0.25rem',
+              gap: '0.2rem',
               color: 'var(--accent-gold-light)',
               animation: 'bounce 2s infinite'
             }}
           >
-            <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>तपशील पहा (Explore Transparency)</span>
-            <ChevronDown size={22} />
+            <span style={{ fontSize: 'var(--font-subtext)', fontWeight: 600 }}>तपशील पहा (Explore)</span>
+            <ChevronDown size={20} />
           </div>
         </section>
 
         {/* ================================================================= */}
         {/* 2. LIVE SUMMARY 3D TILT CARDS (HEADLINE NUMBERS) */}
         {/* ================================================================= */}
-        <section id="summary-section" style={{ scrollMarginTop: '6rem', marginBottom: '3.5rem' }}>
-          <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
-            <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)', margin: '0 0 0.35rem' }}>
+        <section id="summary-section" style={{ scrollMarginTop: '5rem', marginBottom: '3rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+            <h2 className="text-section-heading" style={{ color: 'var(--text-main)', margin: '0 0 0.25rem' }}>
               थोडक्यात जमाखर्च स्थिती (Live Financial Snapshot)
             </h2>
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-subtle)', margin: 0 }}>
+            <p className="text-subtext-responsive" style={{ color: 'var(--text-subtle)', margin: 0 }}>
               प्रत्येक पावती व खर्च नोंदीनुसार स्वयंचलित अपडेट होणारा लाइव्ह हिशोब
             </p>
           </div>
 
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-              gap: '1.5rem',
-              marginBottom: '2rem'
-            }}
-          >
+          <div className="responsive-summary-grid" style={{ marginBottom: '1.75rem' }}>
             <TiltGlassCard
               title={t('dashTotalCollection')}
               value={totalCollection}
@@ -675,8 +672,9 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
           </div>
 
           {/* Public Pavti Table (Desktop) & Cards (Mobile) */}
-          <div className="glass-panel" style={{ padding: '1.25rem 1.5rem' }}>
-            <div className="table-container">
+          <div className="glass-panel" style={{ padding: 'clamp(0.85rem, 2.5vw, 1.5rem)' }}>
+            {/* Desktop Table View */}
+            <div className="table-container desktop-table-view">
               <table className="glass-table">
                 <thead>
                   <tr>
@@ -728,6 +726,61 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
                   )}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile Stacked Cards View (No horizontal scrolling on phones) */}
+            <div className="mobile-cards-view">
+              {paginatedPublicPavti.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--text-subtle)' }}>
+                  {t('noRecordsFound')}
+                </div>
+              ) : (
+                paginatedPublicPavti.map((p) => (
+                  <div
+                    key={p.id}
+                    style={{
+                      padding: '0.85rem 1rem',
+                      marginBottom: '0.75rem',
+                      borderRadius: 'var(--radius-md)',
+                      backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                      border: '1px solid var(--glass-border)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.4rem'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--accent-gold-light)' }}>
+                        {p.pavtiNo}
+                      </span>
+                      <strong style={{ fontSize: '1.15rem', color: '#34d399' }}>
+                        {formatCurrency(p.amount)}
+                      </strong>
+                    </div>
+                    <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-main)' }}>
+                      {p.donorName}
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: 'var(--text-subtle)' }}>
+                      <span>📍 {getMaskedAddress(p.address)}</span>
+                      <span>📅 {p.date}</span>
+                    </div>
+                    <div style={{ marginTop: '0.2rem' }}>
+                      <span
+                        style={{
+                          padding: '0.15rem 0.5rem',
+                          borderRadius: '6px',
+                          backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                          color: 'var(--accent-gold-light)',
+                          fontSize: '0.75rem',
+                          fontWeight: 600
+                        }}
+                      >
+                        {t(`type${p.donationType}`) || p.donationType}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
 
             {/* Pagination Controls */}
@@ -1007,9 +1060,10 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
             </div>
           </div>
 
-          {/* Expense Table */}
-          <div className="glass-panel" style={{ padding: '1.25rem 1.5rem' }}>
-            <div className="table-container">
+          {/* Expense Table & Mobile Cards */}
+          <div className="glass-panel" style={{ padding: 'clamp(0.85rem, 2.5vw, 1.5rem)' }}>
+            {/* Desktop Table View */}
+            <div className="table-container desktop-table-view">
               <table className="glass-table">
                 <thead>
                   <tr>
@@ -1069,6 +1123,68 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
                   )}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile Stacked Cards View */}
+            <div className="mobile-cards-view">
+              {filteredPublicExpenses.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--text-subtle)' }}>
+                  {t('noRecordsFound')}
+                </div>
+              ) : (
+                filteredPublicExpenses.map((e) => (
+                  <div
+                    key={e.id}
+                    style={{
+                      padding: '0.85rem 1rem',
+                      marginBottom: '0.75rem',
+                      borderRadius: 'var(--radius-md)',
+                      backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                      border: '1px solid var(--glass-border)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.4rem'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span
+                        style={{
+                          padding: '0.15rem 0.5rem',
+                          borderRadius: '6px',
+                          backgroundColor: 'rgba(230, 81, 0, 0.15)',
+                          color: '#ff7722',
+                          fontSize: '0.75rem',
+                          fontWeight: 700
+                        }}
+                      >
+                        {t(`cat${e.category}`) || e.category}
+                      </span>
+                      <strong style={{ fontSize: '1.15rem', color: '#f87171' }}>
+                        {formatCurrency(e.amount)}
+                      </strong>
+                    </div>
+                    <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-main)' }}>
+                      {e.description}
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: 'var(--text-subtle)' }}>
+                      <span>👤 {e.paidTo || 'दुकानदार / व्यक्ती'}</span>
+                      <span>📅 {e.date}</span>
+                    </div>
+                    {e.billPhoto && (
+                      <div style={{ marginTop: '0.35rem' }}>
+                        <button
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => setViewingBillPhoto(e.billPhoto)}
+                          style={{ padding: '0.3rem 0.65rem', fontSize: '0.78rem' }}
+                        >
+                          <ImageIcon size={14} color="#10b981" />
+                          <span>बिल फोटो पहा</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </section>

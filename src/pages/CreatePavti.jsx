@@ -151,8 +151,8 @@ export const CreatePavti = () => {
     : '';
 
   return (
-    <div style={{ maxWidth: '920px', margin: '0 auto' }}>
-      <div className="glass-panel" style={{ padding: '2rem 2.25rem' }}>
+    <div style={{ maxWidth: '920px', margin: '0 auto', width: '100%' }}>
+      <div className="glass-panel" style={{ padding: 'clamp(0.85rem, 3.5vw, 1.75rem)' }}>
         {/* Form Header */}
         <div
           style={{
@@ -160,33 +160,34 @@ export const CreatePavti = () => {
             alignItems: 'center',
             justifyContent: 'space-between',
             borderBottom: '1px solid var(--glass-border)',
-            paddingBottom: '1.25rem',
-            marginBottom: '1.75rem',
+            paddingBottom: '1rem',
+            marginBottom: '1.25rem',
             flexWrap: 'wrap',
-            gap: '1rem'
+            gap: '0.85rem'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div
               style={{
-                width: '46px',
-                height: '46px',
-                borderRadius: '16px',
+                width: '42px',
+                height: '42px',
+                borderRadius: '14px',
                 backgroundColor: 'rgba(230, 81, 0, 0.18)',
                 border: '1px solid rgba(230, 81, 0, 0.35)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#ff7722'
+                color: '#ff7722',
+                flexShrink: 0
               }}
             >
-              <FilePlus size={24} />
+              <FilePlus size={22} />
             </div>
             <div>
-              <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
+              <h2 className="text-page-title" style={{ fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
                 {t('createPavtiTitle')}
               </h2>
-              <p style={{ fontSize: '0.82rem', color: 'var(--text-subtle)', margin: '2px 0 0' }}>
+              <p className="text-subtext-responsive" style={{ color: 'var(--text-subtle)', margin: '2px 0 0' }}>
                 {mandalSettings.mandalName || t('mandalDefaultName')}
               </p>
             </div>
@@ -200,14 +201,14 @@ export const CreatePavti = () => {
               alignItems: 'flex-end',
               background: 'rgba(251, 191, 36, 0.12)',
               border: '1px solid rgba(251, 191, 36, 0.35)',
-              padding: '0.5rem 1rem',
+              padding: '0.4rem 0.85rem',
               borderRadius: 'var(--radius-md)'
             }}
           >
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-subtle)' }}>
+            <span style={{ fontSize: 'var(--font-subtext)', fontWeight: 600, color: 'var(--text-subtle)' }}>
               {t('pavtiNo')} (Auto)
             </span>
-            <strong style={{ fontSize: '1.15rem', color: 'var(--accent-gold-light)', letterSpacing: '0.04em' }}>
+            <strong style={{ fontSize: 'clamp(1rem, 3.5vw, 1.25rem)', color: 'var(--accent-gold-light)', letterSpacing: '0.04em' }}>
               {nextPavtiNo}
             </strong>
           </div>
@@ -455,18 +456,28 @@ export const CreatePavti = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'flex-end',
-              gap: '1rem',
+              gap: '0.75rem',
               marginTop: '1.5rem',
               paddingTop: '1.25rem',
-              borderTop: '1px solid var(--glass-border)'
+              borderTop: '1px solid var(--glass-border)',
+              flexWrap: 'wrap'
             }}
           >
-            <button type="button" className="btn btn-secondary" onClick={handleReset}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={handleReset}
+              style={{ flex: '1 1 120px', minHeight: '44px', fontSize: 'var(--font-btn)' }}
+            >
               <RotateCcw size={16} />
               <span>{t('resetForm')}</span>
             </button>
 
-            <button type="submit" className="btn btn-primary" style={{ minWidth: '180px' }}>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              style={{ flex: '2 1 180px', minHeight: '44px', fontSize: 'var(--font-btn)' }}
+            >
               <Printer size={18} />
               <span>{t('saveAndPrint')}</span>
             </button>

@@ -191,28 +191,28 @@ export const ManageEvents = () => {
           flexWrap: 'wrap',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '1.25rem 1.75rem',
-          gap: '1rem'
+          padding: 'clamp(0.85rem, 3vw, 1.35rem)',
+          gap: '0.85rem'
         }}
       >
-        <div>
-          <h2 style={{ fontSize: '1.35rem', fontWeight: 800, margin: '0 0 0.25rem', color: 'var(--text-main)' }}>
+        <div style={{ minWidth: '220px' }}>
+          <h2 className="text-page-title" style={{ fontWeight: 800, margin: '0 0 0.25rem', color: 'var(--text-main)' }}>
             {t('manageEventsTitle')}
           </h2>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-subtle)', margin: 0 }}>
+          <p className="text-subtext-responsive" style={{ color: 'var(--text-subtle)', margin: 0 }}>
             येथे जोडलेला प्रत्येक कार्यक्रम थेट सार्वजनिक पोर्टलवरील इन्स्टाग्राम फीड व स्टोरीजमध्ये दिसेल
           </p>
         </div>
 
-        <button className="btn btn-primary" onClick={handleOpenCreate}>
+        <button className="btn btn-primary btn-sm" onClick={handleOpenCreate} style={{ minHeight: '42px', padding: '0.45rem 1rem', fontSize: 'var(--font-btn)' }}>
           <PlusCircle size={18} />
           <span>{t('addEventBtn')}</span>
         </button>
       </div>
 
       {/* Status Filter Chips */}
-      <div className="glass-panel no-print" style={{ padding: '1rem 1.5rem' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.65rem' }}>
+      <div className="glass-panel no-print" style={{ padding: 'clamp(0.75rem, 2.5vw, 1.15rem)' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
           {[
             { id: 'All', label: 'सर्व कार्यक्रम (All)' },
             { id: 'Live', label: '🔴 थेट सुरू (Live Now)' },
@@ -238,12 +238,12 @@ export const ManageEvents = () => {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-          gap: '1.5rem'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
+          gap: 'var(--gap-grid)'
         }}
       >
         {filteredEvents.length === 0 ? (
-          <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-subtle)', gridColumn: '1 / -1' }}>
+          <div className="glass-panel" style={{ padding: '2.5rem 1rem', textAlign: 'center', color: 'var(--text-subtle)', gridColumn: '1 / -1' }}>
             {t('noRecordsFound')}
           </div>
         ) : (
@@ -417,16 +417,16 @@ export const ManageEvents = () => {
         <div className="modal-overlay" onClick={() => setIsCreateModalOpen(false)}>
           <div
             className="modal-content"
-            style={{ maxWidth: '680px', padding: '1.75rem' }}
+            style={{ maxWidth: 'min(94vw, 680px)', padding: 'clamp(1rem, 3.5vw, 1.75rem)' }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
+              <h3 className="text-section-heading" style={{ fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
                 {editingEvent ? 'कार्यक्रम संपादित करा (Edit Event)' : 'नवीन उत्सव कार्यक्रम जोडा (Create Event)'}
               </h3>
               <button
                 onClick={() => setIsCreateModalOpen(false)}
-                style={{ background: 'none', border: 'none', color: 'var(--text-subtle)', cursor: 'pointer' }}
+                style={{ background: 'none', border: 'none', color: 'var(--text-subtle)', cursor: 'pointer', padding: '0.25rem' }}
               >
                 <X size={20} />
               </button>
@@ -435,7 +435,7 @@ export const ManageEvents = () => {
             <form onSubmit={handleSubmit}>
               {/* Row 1: Title */}
               <div className="form-group">
-                <label className="form-label">
+                <label className="form-label" style={{ fontSize: 'var(--font-subtext)' }}>
                   <FileText size={15} />
                   <span>{t('eventTitleLabel')} (मराठी)</span>
                   <span className="required-star">*</span>
@@ -451,7 +451,7 @@ export const ManageEvents = () => {
               </div>
 
               {/* Row 2: Day Number, Category, Status */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '0.85rem' }}>
                 <div className="form-group">
                   <label className="form-label">{t('dayNumberLabel')}</label>
                   <select
@@ -504,9 +504,9 @@ export const ManageEvents = () => {
               </div>
 
               {/* Row 3: Date & Start/End Time */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '0.85rem' }}>
                 <div className="form-group">
-                  <label className="form-label">{t('date')}</label>
+                  <label className="form-label" style={{ fontSize: 'var(--font-subtext)' }}>{t('date')}</label>
                   <input
                     type="date"
                     className="form-input"
@@ -516,7 +516,7 @@ export const ManageEvents = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">सुरुवात वेळ (Start)</label>
+                  <label className="form-label" style={{ fontSize: 'var(--font-subtext)' }}>सुरुवात वेळ (Start)</label>
                   <input
                     type="text"
                     className="form-input"
@@ -526,7 +526,7 @@ export const ManageEvents = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">समाप्ती वेळ (End)</label>
+                  <label className="form-label" style={{ fontSize: 'var(--font-subtext)' }}>समाप्ती वेळ (End)</label>
                   <input
                     type="text"
                     className="form-input"
@@ -539,7 +539,7 @@ export const ManageEvents = () => {
 
               {/* Row 4: Location */}
               <div className="form-group">
-                <label className="form-label">
+                <label className="form-label" style={{ fontSize: 'var(--font-subtext)' }}>
                   <MapPin size={15} />
                   <span>{t('eventLocationLabel')}</span>
                 </label>
@@ -554,7 +554,7 @@ export const ManageEvents = () => {
 
               {/* Row 5: Caption / Description */}
               <div className="form-group">
-                <label className="form-label">कार्यक्रमाचा सविस्तर तपशील (Caption)</label>
+                <label className="form-label" style={{ fontSize: 'var(--font-subtext)' }}>कार्यक्रमाचा सविस्तर तपशील (Caption)</label>
                 <textarea
                   className="form-textarea"
                   rows={3}
@@ -566,7 +566,7 @@ export const ManageEvents = () => {
 
               {/* Media Upload with Client-Side Compression */}
               <div className="form-group">
-                <label className="form-label">{t('uploadMediaLabel')}</label>
+                <label className="form-label" style={{ fontSize: 'var(--font-subtext)' }}>{t('uploadMediaLabel')}</label>
                 <div
                   style={{
                     border: '1.5px dashed var(--glass-border)',
@@ -640,11 +640,11 @@ export const ManageEvents = () => {
               </div>
 
               {/* Buttons */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem', borderTop: '1px solid var(--glass-border)', paddingTop: '1rem' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setIsCreateModalOpen(false)}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.65rem', marginTop: '1.25rem', borderTop: '1px solid var(--glass-border)', paddingTop: '1rem', flexWrap: 'wrap' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsCreateModalOpen(false)} style={{ flex: '1 1 110px', minHeight: '44px' }}>
                   {t('confirmCancel')}
                 </button>
-                <button type="submit" className="btn btn-primary" disabled={isCompressing}>
+                <button type="submit" className="btn btn-primary" disabled={isCompressing} style={{ flex: '2 1 150px', minHeight: '44px' }}>
                   <Sparkles size={16} />
                   <span>{t('saveEventBtn')}</span>
                 </button>

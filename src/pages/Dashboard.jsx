@@ -44,7 +44,7 @@ export const Dashboard = ({ setActiveTab }) => {
   const recentExpenses = expenseList.slice(0, 5);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       {/* Quick Actions Header Bar */}
       <div
         className="glass-panel"
@@ -53,39 +53,33 @@ export const Dashboard = ({ setActiveTab }) => {
           flexWrap: 'wrap',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '1.25rem 1.75rem',
-          gap: '1rem'
+          padding: 'clamp(0.85rem, 3vw, 1.35rem)',
+          gap: '0.85rem'
         }}
       >
         <div>
-          <h2 style={{ fontSize: '1.35rem', fontWeight: 800, margin: '0 0 0.25rem', color: 'var(--text-main)' }}>
+          <h2 className="text-page-title" style={{ fontWeight: 800, margin: '0 0 0.25rem', color: 'var(--text-main)' }}>
             {t('navDashboard')}
           </h2>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-subtle)', margin: 0 }}>
+          <p className="text-subtext-responsive" style={{ color: 'var(--text-subtle)', margin: 0 }}>
             {t('appSubtitle')}
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <button className="btn btn-primary" onClick={() => setActiveTab('createPavti')}>
-            <FilePlus size={18} />
+        <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap' }}>
+          <button className="btn btn-primary btn-sm" onClick={() => setActiveTab('createPavti')} style={{ minHeight: '40px', padding: '0.45rem 0.9rem', fontSize: 'var(--font-btn)' }}>
+            <FilePlus size={16} />
             <span>{t('navCreatePavti')}</span>
           </button>
-          <button className="btn btn-secondary" onClick={() => setActiveTab('expenses')}>
-            <PlusCircle size={18} />
+          <button className="btn btn-secondary btn-sm" onClick={() => setActiveTab('expenses')} style={{ minHeight: '40px', padding: '0.45rem 0.9rem', fontSize: 'var(--font-btn)' }}>
+            <PlusCircle size={16} />
             <span>{t('addExpenseBtn')}</span>
           </button>
         </div>
       </div>
 
       {/* Top Row: 4 3D Glass Stat Cards */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-          gap: '1.25rem'
-        }}
-      >
+      <div className="responsive-summary-grid">
         <StatCard
           title={t('dashTotalCollection')}
           value={totalCollection}
@@ -126,14 +120,14 @@ export const Dashboard = ({ setActiveTab }) => {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
-          gap: '1.5rem'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
+          gap: 'var(--gap-grid)'
         }}
       >
         {/* Daily Collection Trend */}
-        <div className="glass-panel" style={{ padding: '1.5rem' }}>
+        <div className="glass-panel" style={{ padding: 'clamp(0.85rem, 3vw, 1.35rem)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-main)', margin: 0 }}>
+            <h3 className="text-card-title" style={{ fontWeight: 700, color: 'var(--text-main)', margin: 0 }}>
               {t('chartDailyTrend')}
             </h3>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-subtle)' }}>२०२६</span>
@@ -142,9 +136,9 @@ export const Dashboard = ({ setActiveTab }) => {
         </div>
 
         {/* Expense Breakdown Donut */}
-        <div className="glass-panel" style={{ padding: '1.5rem' }}>
+        <div className="glass-panel" style={{ padding: 'clamp(0.85rem, 3vw, 1.35rem)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-main)', margin: 0 }}>
+            <h3 className="text-card-title" style={{ fontWeight: 700, color: 'var(--text-main)', margin: 0 }}>
               {t('chartExpenseBreakdown')}
             </h3>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-subtle)' }}>
@@ -159,14 +153,14 @@ export const Dashboard = ({ setActiveTab }) => {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
-          gap: '1.5rem'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
+          gap: 'var(--gap-grid)'
         }}
       >
         {/* Payment Modes Bar Chart */}
-        <div className="glass-panel" style={{ padding: '1.5rem' }}>
+        <div className="glass-panel" style={{ padding: 'clamp(0.85rem, 3vw, 1.35rem)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-main)', margin: 0 }}>
+            <h3 className="text-card-title" style={{ fontWeight: 700, color: 'var(--text-main)', margin: 0 }}>
               {t('chartPaymentModes')}
             </h3>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-subtle)' }}>पेमेंट प्रकार</span>
@@ -175,11 +169,11 @@ export const Dashboard = ({ setActiveTab }) => {
         </div>
 
         {/* Top 10 Donors Leaderboard */}
-        <div className="glass-panel" style={{ padding: '1.5rem', maxHeight: '420px', overflowY: 'auto' }}>
+        <div className="glass-panel" style={{ padding: 'clamp(0.85rem, 3vw, 1.35rem)', maxHeight: '420px', overflowY: 'auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Trophy size={20} color="#fbbf24" />
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-main)', margin: 0 }}>
+              <h3 className="text-card-title" style={{ fontWeight: 700, color: 'var(--text-main)', margin: 0 }}>
                 {t('topDonors')}
               </h3>
             </div>
@@ -260,14 +254,14 @@ export const Dashboard = ({ setActiveTab }) => {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
-          gap: '1.5rem'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
+          gap: 'var(--gap-grid)'
         }}
       >
         {/* Recent 5 Pavti */}
-        <div className="glass-panel" style={{ padding: '1.5rem' }}>
+        <div className="glass-panel" style={{ padding: 'clamp(0.85rem, 3vw, 1.35rem)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-main)', margin: 0 }}>
+            <h3 className="text-card-title" style={{ fontWeight: 700, color: 'var(--text-main)', margin: 0 }}>
               {t('recentPavti')}
             </h3>
             <button
@@ -328,9 +322,9 @@ export const Dashboard = ({ setActiveTab }) => {
         </div>
 
         {/* Recent 5 Expenses */}
-        <div className="glass-panel" style={{ padding: '1.5rem' }}>
+        <div className="glass-panel" style={{ padding: 'clamp(0.85rem, 3vw, 1.35rem)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-main)', margin: 0 }}>
+            <h3 className="text-card-title" style={{ fontWeight: 700, color: 'var(--text-main)', margin: 0 }}>
               {t('recentExpenses')}
             </h3>
             <button
