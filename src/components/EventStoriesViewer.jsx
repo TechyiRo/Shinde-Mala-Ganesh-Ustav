@@ -179,17 +179,18 @@ export const EventStoriesViewer = ({
       }}
       onClick={onClose}
     >
-      {/* Story Container Phone Mockup / Card */}
+      {/* Story Container Responsive Modal Card */}
       <div
         style={{
           position: 'relative',
           width: '100%',
-          maxWidth: '440px',
-          height: 'min(92vh, 780px)',
+          maxWidth: 'min(94vw, 760px)',
+          height: 'min(94vh, 840px)',
+          maxHeight: '94vh',
           borderRadius: '24px',
           overflow: 'hidden',
           backgroundColor: '#0c0307',
-          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(245, 158, 11, 0.25)',
+          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.95), 0 0 35px rgba(245, 158, 11, 0.25)',
           border: '1.5px solid rgba(251, 191, 36, 0.4)',
           display: 'flex',
           flexDirection: 'column'
@@ -378,32 +379,47 @@ export const EventStoriesViewer = ({
           </div>
         </div>
 
-        {/* Media Content Body (Photo or Video) */}
-        <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
-          {mediaItem.type === 'video' ? (
-            <video
-              src={mediaItem.url}
-              autoPlay
-              playsInline
-              muted
-              loop
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-          ) : (
-            <img
-              src={mediaItem.url}
-              alt={currentStory.title}
-              onError={(e) => {
-                e.target.src = '/logo.png';
-              }}
+        {/* Media Content Body (Photo or Video in Original Uncropped Aspect Ratio) */}
+        <div
+          style={{
+            position: 'relative',
+            width: '100%',
+            height: '100%',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#080205'
+          }}
+        >
+          {/* Ambient Blurred Background Aura to cleanly fill Letterbox/Pillarbox space */}
+          {mediaItem.url && (
+            <div
               style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                filter: 'brightness(0.95)'
+                position: 'absolute',
+                inset: -25,
+                backgroundImage: `url(${mediaItem.url})`,
+                backgroundPosition: 'center',
+                backgroundSize: 'cover',
+                filter: 'blur(42px) brightness(0.32) saturate(1.25)',
+                transform: 'scale(1.15)',
+                opacity: 0.75,
+                zIndex: 1,
+                pointerEvents: 'none'
               }}
             />
           )}
+
+          {/* Clean Dark Vignette Overlay */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'radial-gradient(circle at center, rgba(0,0,0,0) 40%, rgba(6, 2, 4, 0.78) 100%)',
+              zIndex: 2,
+              pointerEvents: 'none'
+            }}
+          />
 
           {/* Tap Zones for Next / Prev */}
           <div
@@ -412,7 +428,7 @@ export const EventStoriesViewer = ({
               top: '4.5rem',
               left: 0,
               width: '35%',
-              bottom: '5rem',
+              bottom: '5.5rem',
               cursor: 'pointer',
               zIndex: 20
             }}
@@ -425,13 +441,53 @@ export const EventStoriesViewer = ({
               top: '4.5rem',
               right: 0,
               width: '65%',
-              bottom: '5rem',
+              bottom: '5.5rem',
               cursor: 'pointer',
               zIndex: 20
             }}
             onClick={handleNext}
             title="पुढील (Next)"
           />
+
+          {/* Exact Original Image / Video - Complete, Uncropped, Undistorted */}
+          {mediaItem.type === 'video' ? (
+            <video
+              src={mediaItem.url}
+              autoPlay
+              playsInline
+              muted
+              loop
+              style={{
+                maxWidth: '100%',
+                maxHeight: '100%',
+                width: 'auto',
+                height: 'auto',
+                objectFit: 'contain',
+                zIndex: 4,
+                borderRadius: '8px',
+                boxShadow: '0 10px 35px rgba(0, 0, 0, 0.75)'
+              }}
+            />
+          ) : (
+            <img
+              src={mediaItem.url}
+              alt={currentStory.title}
+              onError={(e) => {
+                e.target.src = '/logo.png';
+              }}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '100%',
+                width: 'auto',
+                height: 'auto',
+                objectFit: 'contain',
+                zIndex: 4,
+                borderRadius: '8px',
+                boxShadow: '0 10px 35px rgba(0, 0, 0, 0.75)',
+                userSelect: 'none'
+              }}
+            />
+          )}
 
           {/* Left / Right Chevron Nav Buttons for Desktop Ease */}
           {currentIndex > 0 && (
@@ -443,21 +499,22 @@ export const EventStoriesViewer = ({
                 top: '50%',
                 left: '0.75rem',
                 transform: 'translateY(-50%)',
-                background: 'rgba(0, 0, 0, 0.45)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
+                background: 'rgba(0, 0, 0, 0.55)',
+                border: '1px solid rgba(255, 255, 255, 0.25)',
                 borderRadius: '50%',
-                width: '36px',
-                height: '36px',
+                width: '38px',
+                height: '38px',
                 color: '#fff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
                 zIndex: 25,
-                backdropFilter: 'blur(6px)'
+                backdropFilter: 'blur(8px)',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.5)'
               }}
             >
-              <ChevronLeft size={20} />
+              <ChevronLeft size={22} />
             </button>
           )}
 
@@ -470,21 +527,22 @@ export const EventStoriesViewer = ({
                 top: '50%',
                 right: '0.75rem',
                 transform: 'translateY(-50%)',
-                background: 'rgba(0, 0, 0, 0.45)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
+                background: 'rgba(0, 0, 0, 0.55)',
+                border: '1px solid rgba(255, 255, 255, 0.25)',
                 borderRadius: '50%',
-                width: '36px',
-                height: '36px',
+                width: '38px',
+                height: '38px',
                 color: '#fff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
                 zIndex: 25,
-                backdropFilter: 'blur(6px)'
+                backdropFilter: 'blur(8px)',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.5)'
               }}
             >
-              <ChevronRight size={20} />
+              <ChevronRight size={22} />
             </button>
           )}
         </div>

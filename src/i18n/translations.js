@@ -34,7 +34,7 @@ export const translations = {
     
     // Events & Stories
     navEvents: 'दैनिक कार्यक्रम',
-    eventsFeedTitle: 'उत्सव कार्यक्रम व क्षणचित्रे (Instagram Feed)',
+    eventsFeedTitle: 'उत्सव कार्यक्रम व क्षणचित्रे',
     eventsFeedSubtitle: 'मंडळाचे थेट कार्यक्रम, महाप्रसाद, आरती व उत्सव क्षणचित्रे',
     storiesTitle: 'उत्सव दिवस (Day 1 ते 11)',
     dayStory: 'दिवस',
@@ -298,7 +298,7 @@ export const translations = {
     
     // Events & Stories
     navEvents: 'Daily Events',
-    eventsFeedTitle: 'Festival Events & Moments (Feed)',
+    eventsFeedTitle: 'Festival Events & Moments',
     eventsFeedSubtitle: 'Live festival celebrations, aarti, mahaprasad, and memories',
     storiesTitle: 'Festival Days (Day 1 - 11)',
     dayStory: 'Day',

@@ -3,8 +3,8 @@ import { initialMandalSettings, initialPavtiList, initialExpenseList, initialEve
 
 const DataContext = createContext();
 
-// Client-side image compression utility
-export const compressImage = (file, maxWidth = 1000, quality = 0.75) => {
+// Client-side image compression utility - maintains high quality and original aspect ratio
+export const compressImage = (file, maxWidth = 1920, quality = 0.90) => {
   return new Promise((resolve, reject) => {
     if (!file.type.startsWith('image/')) {
       // For videos or other media, read as data URL directly

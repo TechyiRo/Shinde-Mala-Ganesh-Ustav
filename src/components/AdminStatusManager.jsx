@@ -86,7 +86,7 @@ export const AdminStatusManager = () => {
       const newMedia = [];
       for (const file of files) {
         if (file.type.startsWith('image/')) {
-          const compressed = await compressImage(file, 1080, 0.82);
+          const compressed = await compressImage(file, 1920, 0.90);
           newMedia.push({
             type: 'image',
             url: compressed,
