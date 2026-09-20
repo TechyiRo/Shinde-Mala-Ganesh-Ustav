@@ -12,6 +12,7 @@ import { Settings } from './pages/Settings';
 import { Login } from './pages/Login';
 import { PublicHome } from './pages/PublicHome';
 import { InstallPromptModal } from './components/InstallPromptModal';
+import { GaneshWelcomeIntro } from './components/GaneshWelcomeIntro';
 import { Globe, Plus, FilePlus } from 'lucide-react';
 import { useLanguage } from './context/LanguageContext';
 
@@ -19,9 +20,27 @@ export const App = () => {
   const { user, isAdmin } = useAuth();
   const { t } = useLanguage();
 
+  // Ganesh Welcome Intro state (Shown once per browser session on initial open)
+  const [showWelcomeIntro, setShowWelcomeIntro] = useState(() => {
+    try {
+      return !sessionStorage.getItem('shinde_welcome_shown');
+    } catch {
+      return false;
+    }
+  });
+
   // Mode: 'public' | 'admin' | 'login'
+  // Default landing view is the public portal
   const [viewMode, setViewMode] = useState('public');
   const [activeTab, setActiveTab] = useState('dashboard');
+
+  const handleIntroComplete = () => {
+    try {
+      sessionStorage.setItem('shinde_welcome_shown', 'true');
+    } catch {}
+    setShowWelcomeIntro(false);
+    setViewMode('public');
+  };
 
   const handleOpenAdminPortal = () => {
     if (user) {
@@ -43,6 +62,11 @@ export const App = () => {
     <>
       {/* Animated Festive Mesh Background with Floating Glow Orbs */}
       <div className="mesh-background" />
+
+      {/* Lord Ganesha Divine Welcome Intro Animation Screen */}
+      {showWelcomeIntro && (
+        <GaneshWelcomeIntro onComplete={handleIntroComplete} />
+      )}
       <div className="floating-orb orb-1" />
       <div className="floating-orb orb-2" />
       <div className="floating-orb orb-3" />
@@ -77,7 +101,7 @@ export const App = () => {
               <span>← {t('publicViewLink')}</span>
             </button>
           </div>
-          <Login onLoginSuccess={() => setViewMode('admin')} />
+          <Login onLoginSuccess={() => setViewMode('public')} />
         </div>
       )}
 

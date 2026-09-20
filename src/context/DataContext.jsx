@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { initialMandalSettings, initialPavtiList, initialExpenseList, initialEventList } from '../data/initialData';
 
 const DataContext = createContext();
@@ -97,6 +97,41 @@ export const DataProvider = ({ children }) => {
     }
   });
 
+  // 5. 24-Hour Stories & Statuses List
+  const [statusList, setStatusList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('mandal_status_data');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Real-time client-side ticker every 10 seconds for instant 24-hour expiry check
+  const [currentTimestamp, setCurrentTimestamp] = useState(Date.now());
+  useEffect(() => {
+    const ticker = setInterval(() => {
+      setCurrentTimestamp(Date.now());
+    }, 10000);
+    return () => clearInterval(ticker);
+  }, []);
+
+  // Active unexpired statuses selector (sorted: pinned first, then newest createdAt)
+  const activeStatuses = useMemo(() => {
+    const now = currentTimestamp;
+    return statusList
+      .filter((s) => {
+        if (s.isActive === false || s.status === 'Expired') return false;
+        if (!s.expiresAt) return true;
+        return new Date(s.expiresAt).getTime() > now;
+      })
+      .sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+      });
+  }, [statusList, currentTimestamp]);
+
   // 5. Active Theme (dark or light)
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('mandal_theme') || 'dark';
@@ -133,6 +168,9 @@ export const DataProvider = ({ children }) => {
             if (Array.isArray(data.eventList)) {
               setEventList(data.eventList);
             }
+            if (Array.isArray(data.statusList)) {
+              setStatusList(data.statusList);
+            }
             setIsMongoConnected(true);
             console.log('✅ MongoDB Atlas data successfully synchronized!');
           }
@@ -149,6 +187,138 @@ export const DataProvider = ({ children }) => {
 
     return () => {
       isMounted = false;
+    };
+  }, []);
+
+  // Real-Time Server-Sent Events (SSE) Listener
+  // Automatically syncs Statuses, Pavtis, Expenses, and Events in real time without refreshing the page!
+  useEffect(() => {
+    let eventSource = null;
+    let reconnectTimer = null;
+
+    const connectSSE = () => {
+      try {
+        eventSource = new EventSource('/api/realtime/stream');
+
+        eventSource.onmessage = (event) => {
+          try {
+            const parsed = JSON.parse(event.data);
+            if (!parsed || !parsed.type) return;
+
+            switch (parsed.type) {
+              case 'STATUS_CREATED':
+                setStatusList((prev) => {
+                  const filtered = prev.filter((s) => s.id !== parsed.data.id);
+                  return [parsed.data, ...filtered];
+                });
+                break;
+              case 'STATUS_UPDATED':
+                setStatusList((prev) =>
+                  prev.map((s) => (s.id === parsed.data.id ? { ...s, ...parsed.data } : s))
+                );
+                break;
+              case 'STATUS_DELETED':
+                setStatusList((prev) => prev.filter((s) => s.id !== parsed.data.id));
+                break;
+              case 'STATUS_EXPIRED':
+                if (Array.isArray(parsed.data?.expiredIds)) {
+                  setStatusList((prev) =>
+                    prev.map((s) =>
+                      parsed.data.expiredIds.includes(s.id)
+                        ? { ...s, isActive: false, status: 'Expired' }
+                        : s
+                    )
+                  );
+                }
+                break;
+              case 'STATUS_LIKED':
+                setStatusList((prev) =>
+                  prev.map((s) => (s.id === parsed.data.id ? { ...s, likes: parsed.data.likes } : s))
+                );
+                break;
+              case 'PAVTI_CREATED':
+                setPavtiList((prev) => {
+                  const exists = prev.some((p) => p.id === parsed.data.id || p.pavtiNo === parsed.data.pavtiNo);
+                  if (exists) return prev.map((p) => (p.id === parsed.data.id ? parsed.data : p));
+                  return [parsed.data, ...prev];
+                });
+                setRecentlyAddedPavtiId(parsed.data.id);
+                break;
+              case 'PAVTI_UPDATED':
+                setPavtiList((prev) =>
+                  prev.map((p) => (p.id === parsed.data.id ? { ...p, ...parsed.data } : p))
+                );
+                break;
+              case 'PAVTI_DELETED':
+                setPavtiList((prev) => prev.filter((p) => p.id !== parsed.data.id));
+                break;
+              case 'EXPENSE_CREATED':
+                setExpenseList((prev) => {
+                  const filtered = prev.filter((e) => e.id !== parsed.data.id);
+                  return [parsed.data, ...filtered];
+                });
+                break;
+              case 'EXPENSE_UPDATED':
+                setExpenseList((prev) =>
+                  prev.map((e) => (e.id === parsed.data.id ? { ...e, ...parsed.data } : e))
+                );
+                break;
+              case 'EXPENSE_DELETED':
+                setExpenseList((prev) => prev.filter((e) => e.id !== parsed.data.id));
+                break;
+              case 'EVENT_CREATED':
+                setEventList((prev) => {
+                  const filtered = prev.filter((e) => e.id !== parsed.data.id);
+                  return [parsed.data, ...filtered];
+                });
+                break;
+              case 'EVENT_UPDATED':
+                setEventList((prev) =>
+                  prev.map((e) => (e.id === parsed.data.id ? { ...e, ...parsed.data } : e))
+                );
+                break;
+              case 'EVENT_DELETED':
+                setEventList((prev) => prev.filter((e) => e.id !== parsed.data.id));
+                break;
+              case 'EVENT_LIKED':
+                setEventList((prev) =>
+                  prev.map((e) => (e.id === parsed.data.id ? { ...e, likes: parsed.data.likes } : e))
+                );
+                break;
+              case 'SETTINGS_UPDATED':
+                setMandalSettings((prev) => ({ ...prev, ...parsed.data }));
+                break;
+              case 'DATA_WIPED':
+                setPavtiList([]);
+                setExpenseList([]);
+                setEventList([]);
+                setStatusList([]);
+                break;
+              default:
+                break;
+            }
+          } catch {
+            // Heartbeat / ping
+          }
+        };
+
+        eventSource.onerror = () => {
+          if (eventSource) {
+            eventSource.close();
+          }
+          // Exponential backoff reconnect
+          reconnectTimer = setTimeout(connectSSE, 3000);
+        };
+      } catch (err) {
+        reconnectTimer = setTimeout(connectSSE, 5000);
+      }
+    };
+
+    connectSSE();
+
+    return () => {
+      if (eventSource) eventSource.close();
+      if (reconnectTimer) clearTimeout(reconnectTimer);
     };
   }, []);
 
@@ -207,6 +377,10 @@ export const DataProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('mandal_events_data', JSON.stringify(eventList));
   }, [eventList]);
+
+  useEffect(() => {
+    localStorage.setItem('mandal_status_data', JSON.stringify(statusList));
+  }, [statusList]);
 
   useEffect(() => {
     localStorage.setItem('mandal_theme', theme);
@@ -432,6 +606,137 @@ export const DataProvider = ({ children }) => {
     }).catch((err) => console.warn('Could not register like in MongoDB:', err.message));
   };
 
+  // ================= 24-HOUR STATUS MANAGEMENT =================
+  const createStatus = async (statusData) => {
+    const now = new Date();
+    const createdAt = now.toISOString();
+    const pinnedAt = createdAt;
+    const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
+    const uniqueId = `ST-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+
+    const newStatus = {
+      ...statusData,
+      _id: uniqueId,
+      id: uniqueId,
+      createdAt,
+      pinnedAt,
+      expiresAt,
+      isActive: true,
+      isPinned: statusData.isPinned ?? false,
+      likes: 0,
+      viewsCount: 0,
+      status: 'Active'
+    };
+
+    // Immediate optimistic update
+    setStatusList((prev) => [newStatus, ...prev.filter((s) => s.id !== uniqueId)]);
+
+    try {
+      const res = await fetch('/api/statuses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newStatus)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.item) {
+          setStatusList((prev) => [data.item, ...prev.filter((s) => s.id !== data.item.id && s.id !== uniqueId)]);
+        }
+      }
+      addToast('स्टेटस यशस्वीरित्या प्रसिद्ध झाला! २४ तास सक्रिय राहील.', 'success');
+    } catch (err) {
+      console.warn('Could not save status to MongoDB:', err.message);
+    }
+  };
+
+  const updateStatus = async (id, updateData) => {
+    setStatusList((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, ...updateData } : s))
+    );
+
+    try {
+      await fetch(`/api/statuses/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData)
+      });
+    } catch (err) {
+      console.warn('Could not update status in MongoDB:', err.message);
+    }
+  };
+
+  const deleteStatus = async (id) => {
+    setStatusList((prev) => prev.filter((s) => s.id !== id));
+
+    try {
+      await fetch(`/api/statuses/${id}`, {
+        method: 'DELETE'
+      });
+      addToast('स्टेटस हटवण्यात आला आहे.', 'info');
+    } catch (err) {
+      console.warn('Could not delete status from MongoDB:', err.message);
+    }
+  };
+
+  const togglePinStatus = async (id) => {
+    let targetPin = false;
+    setStatusList((prev) =>
+      prev.map((s) => {
+        if (s.id === id) {
+          targetPin = !s.isPinned;
+          return { ...s, isPinned: targetPin };
+        }
+        return s;
+      })
+    );
+
+    try {
+      await fetch(`/api/statuses/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isPinned: targetPin })
+      });
+    } catch (err) {
+      console.warn('Could not toggle pin in MongoDB:', err.message);
+    }
+  };
+
+  const reActivateStatus = async (id) => {
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
+
+    setStatusList((prev) =>
+      prev.map((s) =>
+        s.id === id
+          ? { ...s, isActive: true, status: 'Active', createdAt: now.toISOString(), pinnedAt: now.toISOString(), expiresAt }
+          : s
+      )
+    );
+
+    try {
+      await fetch(`/api/statuses/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reActivate: true })
+      });
+      addToast('स्टेटस पुन्हा २४ तासांसाठी सक्रिय करण्यात आला आहे!', 'success');
+    } catch (err) {
+      console.warn('Could not re-activate status:', err.message);
+    }
+  };
+
+  const likeStatus = async (id) => {
+    setStatusList((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, likes: (s.likes || 0) + 1, isLikedByUser: true } : s))
+    );
+
+    try {
+      await fetch(`/api/statuses/${id}/like`, { method: 'POST' });
+    } catch (err) {
+      console.warn('Could not like status:', err.message);
+    }
+  };
+
   // Settings & Reset
   const updateSettings = (newSettings) => {
     setMandalSettings((prev) => ({ ...prev, ...newSettings }));
@@ -454,9 +759,11 @@ export const DataProvider = ({ children }) => {
     setPavtiList([]);
     setExpenseList([]);
     setEventList([]);
+    setStatusList([]);
     localStorage.removeItem('mandal_pavti_data');
     localStorage.removeItem('mandal_expense_data');
     localStorage.removeItem('mandal_events_data');
+    localStorage.removeItem('mandal_status_data');
 
     fetch('/api/wipe-all', {
       method: 'POST'
@@ -499,6 +806,14 @@ export const DataProvider = ({ children }) => {
         togglePinEvent,
         likeEvent,
         getNextEventId,
+        statusList,
+        activeStatuses,
+        createStatus,
+        updateStatus,
+        deleteStatus,
+        togglePinStatus,
+        reActivateStatus,
+        likeStatus,
         resetToSampleData,
         clearAllData,
         totalCollection,

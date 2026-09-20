@@ -43,9 +43,11 @@ import { formatCurrency } from '../i18n/numberToWords';
 
 export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
   const { lang, toggleLang, t } = useLanguage();
-  const { mandalSettings, pavtiList, expenseList, eventList = [], totalCollection, totalExpense, balance, pavtiCount, theme, toggleTheme, recentlyAddedPavtiId } = useData();
+  const { mandalSettings, pavtiList, expenseList, eventList = [], activeStatuses = [], totalCollection, totalExpense, balance, pavtiCount, theme, toggleTheme, recentlyAddedPavtiId } = useData();
   const [isStoriesViewerOpen, setIsStoriesViewerOpen] = useState(false);
   const [selectedDayStory, setSelectedDayStory] = useState(1);
+  const [selectedStatusId, setSelectedStatusId] = useState(null);
+  const [selectedCategoryStatuses, setSelectedCategoryStatuses] = useState([]);
   const [selectedPublicEventCat, setSelectedPublicEventCat] = useState('');
   const [selectedViewingPavti, setSelectedViewingPavti] = useState(null);
   const { user } = useAuth();
@@ -173,6 +175,84 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
   const marqueeDonors = useMemo(() => {
     return pavtiList.slice(0, 15);
   }, [pavtiList]);
+
+  const formatStoryTimeAgo = (isoString) => {
+    if (!isoString) return '';
+    try {
+      const diffMs = Date.now() - new Date(isoString).getTime();
+      const mins = Math.floor(diffMs / 60000);
+      if (mins < 1) return 'आत्ताच';
+      if (mins < 60) return `${mins} मि. आधी`;
+      const hours = Math.floor(mins / 60);
+      if (hours < 24) return `${hours} तास आधी`;
+      return `${Math.floor(hours / 24)} दिवस आधी`;
+    } catch {
+      return '';
+    }
+  };
+
+  // Group active statuses by Category (Requirements 1, 3, 4, 5)
+  // - Public Dashboard displays only ONE card per Category (e.g. Ganesh Utsav 2026, Ganesh Chaturthi, Aarti, Visarjan)
+  // - User clicking the category card views all statuses in that category one-by-one in sequence!
+  // - 24-Hour Expiry: Each status expires individually. When all statuses in a category expire, the category card disappears automatically.
+  // - Real-Time sync: Updates instantly when Admin adds new status without page refresh.
+  const statusCategories = useMemo(() => {
+    if (activeStatuses.length > 0) {
+      const map = new Map();
+      activeStatuses.forEach((st) => {
+        const cat = (st.category || 'Ganesh Utsav 2026').trim();
+        if (!map.has(cat)) {
+          map.set(cat, []);
+        }
+        map.get(cat).push(st);
+      });
+
+      return Array.from(map.entries()).map(([name, statuses]) => {
+        // Chronological order: Status 1 -> Status 2 -> Status 3...
+        const sorted = [...statuses].sort((a, b) => {
+          return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+        });
+        const latestStatus = sorted[sorted.length - 1];
+        const isLive = sorted.some((s) => s.isPinned);
+        return {
+          name,
+          statuses: sorted,
+          count: sorted.length,
+          coverUrl: (latestStatus?.media && latestStatus.media[0]?.url) || '/logo.png',
+          latestTime: latestStatus?.createdAt,
+          isLive
+        };
+      });
+    }
+
+    // Default single Status card if no active statuses have been uploaded yet
+    return [
+      {
+        name: 'Ganesh Utsav 2026',
+        statuses: [
+          {
+            id: 'default-status',
+            title: 'श्री गणेश उत्सव २०२६',
+            caption: 'शिंदे मळा सार्वजनिक गणेश उत्सव मंडळ — २४-तास थेट स्टोरीज',
+            category: 'Ganesh Utsav 2026',
+            media: [{ url: '/logo.png', type: 'image' }],
+            createdAt: new Date().toISOString()
+          }
+        ],
+        count: 1,
+        coverUrl: '/logo.png',
+        latestTime: new Date().toISOString(),
+        isLive: false,
+        isDefault: true
+      }
+    ];
+  }, [activeStatuses]);
+
+  const handleOpenCategoryStories = (category) => {
+    setSelectedCategoryStatuses(category.statuses);
+    setSelectedStatusId(category.statuses[0]?.id || null);
+    setIsStoriesViewerOpen(true);
+  };
 
   const scrollToSection = (id) => {
     const el = document.getElementById(id);
@@ -965,7 +1045,8 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
             </div>
           </div>
 
-          {/* Stories Circular Row (Day 1 ... Day 11) with Glowing Saffron-Gold Rings */}
+          {/* Stories Category Cards Container (Requirements 1, 2, 4) */}
+          {/* Displays only ONE card per Category. Clicking opens that category's statuses sequentially one-by-one. */}
           <div
             className="glass-panel"
             style={{
@@ -975,45 +1056,110 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
               scrollbarWidth: 'none'
             }}
           >
-            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--accent-gold-light)', marginBottom: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <Sparkles size={15} />
-              <span>{t('storiesTitle')} — स्टोरी पाहण्यासाठी टॅप करा</span>
+            <div
+              style={{
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                color: 'var(--accent-gold-light)',
+                marginBottom: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '0.5rem'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                <Sparkles size={16} />
+                <span>📸 {t('storiesTitle') || 'गणेश उत्सव २४-तास थेट स्टेटस'}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                {activeStatuses.length > 0 && (
+                  <span
+                    style={{
+                      fontSize: '0.74rem',
+                      color: '#34d399',
+                      fontWeight: 700,
+                      background: 'rgba(52, 211, 153, 0.12)',
+                      padding: '0.2rem 0.6rem',
+                      borderRadius: '999px',
+                      border: '1px solid rgba(52, 211, 153, 0.3)'
+                    }}
+                  >
+                    ● {activeStatuses.length} थेट सक्रिय (Live Stories)
+                  </span>
+                )}
+                <span style={{ fontSize: '0.74rem', color: 'var(--text-subtle)' }}>
+                  टॅप करून पहा (Tap to view)
+                </span>
+              </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '1.1rem', alignItems: 'center' }}>
-              {Array.from({ length: 11 }, (_, i) => i + 1).map((dayNum) => {
-                const dayEvent = eventList.find((e) => Number(e.dayNumber) === dayNum);
-                const isDayLive = dayEvent && (dayEvent.status === 'Live' || dayEvent.status === 'Live Now');
+            {/* Horizontal Flex Row of Category Story Cards */}
+            <div
+              style={{
+                display: 'flex',
+                gap: '1.1rem',
+                alignItems: 'stretch',
+                overflowX: 'auto',
+                paddingBottom: '0.35rem',
+                scrollbarWidth: 'none'
+              }}
+            >
+              {statusCategories.map((cat) => {
+                const isLive = cat.isLive;
 
                 return (
                   <div
-                    key={dayNum}
-                    onClick={() => {
-                      setSelectedDayStory(dayNum);
-                      setIsStoriesViewerOpen(true);
-                    }}
+                    key={cat.name}
+                    onClick={() => handleOpenCategoryStories(cat)}
                     style={{
                       display: 'flex',
-                      flexDirection: 'column',
                       alignItems: 'center',
-                      gap: '0.4rem',
+                      gap: '0.85rem',
+                      padding: '0.75rem 1.15rem',
+                      borderRadius: '18px',
+                      background: isLive
+                        ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.18), rgba(251, 191, 36, 0.12))'
+                        : 'linear-gradient(135deg, rgba(255, 119, 34, 0.12), rgba(251, 191, 36, 0.08))',
+                      border: isLive
+                        ? '1.5px solid rgba(239, 68, 68, 0.55)'
+                        : '1.5px solid rgba(251, 191, 36, 0.4)',
+                      boxShadow: isLive
+                        ? '0 4px 20px rgba(239, 68, 68, 0.25)'
+                        : '0 4px 18px rgba(245, 158, 11, 0.15)',
                       cursor: 'pointer',
-                      flexShrink: 0
+                      flexShrink: 0,
+                      minWidth: '220px',
+                      transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                      position: 'relative'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
+                      e.currentTarget.style.borderColor = 'rgba(251, 191, 36, 0.9)';
+                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(251, 191, 36, 0.35)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'none';
+                      e.currentTarget.style.borderColor = isLive ? 'rgba(239, 68, 68, 0.55)' : 'rgba(251, 191, 36, 0.4)';
+                      e.currentTarget.style.boxShadow = isLive ? '0 4px 20px rgba(239, 68, 68, 0.25)' : '0 4px 18px rgba(245, 158, 11, 0.15)';
                     }}
                   >
+                    {/* Glowing Circular Story Ring Thumbnail */}
                     <div
                       style={{
-                        width: '64px',
-                        height: '64px',
+                        width: '56px',
+                        height: '56px',
                         borderRadius: '50%',
                         padding: '2.5px',
-                        background: isDayLive
-                          ? 'linear-gradient(135deg, #ef4444, #f59e0b)'
+                        background: isLive
+                          ? 'linear-gradient(135deg, #ef4444, #fbbf24, #f59e0b)'
                           : 'linear-gradient(135deg, #ff7722, #fbbf24, #d97706)',
-                        boxShadow: isDayLive
-                          ? '0 0 16px rgba(239, 68, 68, 0.7)'
-                          : '0 0 14px rgba(251, 191, 36, 0.45)',
-                        transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+                        boxShadow: isLive
+                          ? '0 0 16px rgba(239, 68, 68, 0.65)'
+                          : '0 0 14px rgba(251, 191, 36, 0.4)',
+                        flexShrink: 0,
+                        position: 'relative'
                       }}
                     >
                       <div
@@ -1023,24 +1169,94 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
                           borderRadius: '50%',
                           backgroundColor: '#1a0b12',
                           padding: '2px',
+                          overflow: 'hidden',
                           display: 'flex',
                           alignItems: 'center',
-                          justifyContent: 'center',
-                          overflow: 'hidden'
+                          justifyContent: 'center'
                         }}
                       >
                         <img
-                          src={dayEvent && dayEvent.media && dayEvent.media.length > 0 ? dayEvent.media[0].url : '/logo.png'}
-                          onError={(e) => { e.target.src = '/ganesh-icon.svg'; }}
-                          alt={'Day ' + dayNum}
-                          style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+                          src={cat.coverUrl}
+                          onError={(e) => {
+                            e.target.src = '/ganesh-icon.svg';
+                          }}
+                          alt={cat.name}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            borderRadius: '50%',
+                            objectFit: 'cover'
+                          }}
                         />
                       </div>
+
+                      {/* Small Live indicator dot if pinned */}
+                      {isLive && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            bottom: '-2px',
+                            right: '-2px',
+                            width: '14px',
+                            height: '14px',
+                            borderRadius: '50%',
+                            backgroundColor: '#ef4444',
+                            border: '2px solid #1a0b12',
+                            boxShadow: '0 0 8px #ef4444'
+                          }}
+                        />
+                      )}
                     </div>
 
-                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: isDayLive ? '#f87171' : 'var(--text-main)' }}>
-                      दिवस {dayNum} {isDayLive ? '🔴' : ''}
-                    </span>
+                    {/* Category Details */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', minWidth: 0, flex: 1 }}>
+                      <div
+                        style={{
+                          fontSize: '0.92rem',
+                          fontWeight: 800,
+                          color: 'var(--text-main)',
+                          lineHeight: 1.25,
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }}
+                      >
+                        {cat.name}
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                        <span
+                          style={{
+                            fontSize: '0.72rem',
+                            color: '#fbbf24',
+                            fontWeight: 700,
+                            background: 'rgba(251, 191, 36, 0.15)',
+                            padding: '0.12rem 0.45rem',
+                            borderRadius: '6px'
+                          }}
+                        >
+                          {cat.count} {cat.count === 1 ? 'स्टोरी' : 'स्टोरीज'}
+                        </span>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>
+                          • {formatStoryTimeAgo(cat.latestTime)}
+                        </span>
+                      </div>
+
+                      <div
+                        style={{
+                          fontSize: '0.72rem',
+                          color: '#ffaa44',
+                          fontWeight: 600,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
+                          marginTop: '0.1rem'
+                        }}
+                      >
+                        <span>पाहण्यासाठी टॅप करा (Tap to view)</span>
+                        <span>👆</span>
+                      </div>
+                    </div>
                   </div>
                 );
               })}
@@ -1095,12 +1311,17 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
           </div>
         </section>
 
-        {/* Stories Viewer Modal */}
+        {/* Stories Viewer Modal (Sequential One-by-One Stories for Selected Category) */}
         <EventStoriesViewer
           isOpen={isStoriesViewerOpen}
-          initialDay={selectedDayStory}
-          stories={eventList}
-          onClose={() => setIsStoriesViewerOpen(false)}
+          initialStatusId={selectedStatusId}
+          statuses={selectedCategoryStatuses.length > 0 ? selectedCategoryStatuses : (activeStatuses.length > 0 ? activeStatuses : [])}
+          fallbackEvents={eventList}
+          onClose={() => {
+            setIsStoriesViewerOpen(false);
+            setSelectedStatusId(null);
+            setSelectedCategoryStatuses([]);
+          }}
         />
 
         <section id="public-expenses-section" style={{ scrollMarginTop: '6rem', marginBottom: '3.5rem' }}>

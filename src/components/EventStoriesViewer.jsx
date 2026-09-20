@@ -1,59 +1,70 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { X, ChevronLeft, ChevronRight, Volume2, VolumeX, Sparkles, MapPin } from 'lucide-react';
+import { useData } from '../context/DataContext';
+import {
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Heart,
+  Sparkles,
+  MapPin,
+  Pin,
+  Share2
+} from 'lucide-react';
 
-export const EventStoriesViewer = ({ isOpen, initialDay = 1, stories = [], onClose }) => {
+export const EventStoriesViewer = ({
+  isOpen,
+  initialStatusId,
+  statuses = [],
+  fallbackEvents = [],
+  onClose
+}) => {
   const { lang, t } = useLanguage();
-  const [currentDayIndex, setCurrentDayIndex] = useState(0);
-  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+  const { likeStatus, addToast } = useData();
+
+  // Combine items to display: prefer activeStatuses, fallback to events
+  const storiesList = statuses.length > 0 ? statuses : fallbackEvents;
+
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
-  // Group events by dayNumber
-  const daysList = Array.from({ length: 11 }, (_, i) => i + 1);
-
-  // Find day index based on initialDay
+  // Set initial index when modal opens
   useEffect(() => {
-    const idx = daysList.indexOf(Number(initialDay));
-    if (idx !== -1) {
-      setCurrentDayIndex(idx);
-      setCurrentMediaIndex(0);
-      setProgress(0);
-    }
-  }, [initialDay, isOpen]);
+    if (!isOpen || storiesList.length === 0) return;
 
-  const currentDay = daysList[currentDayIndex];
-  // Find event corresponding to this day
-  const dayEvent = stories.find((s) => Number(s.dayNumber) === currentDay) || {
-    title: `उत्सव दिवस ${currentDay}`,
-    titleEn: `Festival Day ${currentDay}`,
-    caption: 'श्री गणेश उत्सव २०२६ — शिंदे मळा, हिंगणी दुमाला',
-    captionEn: 'Shri Ganesh Utsav 2026 - Shinde Mala, Hingani Dumala',
-    media: [
-      {
-        type: 'image',
-        url: 'https://images.unsplash.com/photo-1567591974584-f1832dfa6291?auto=format&fit=crop&w=1000&q=80',
-        caption: `दिवस ${currentDay} दर्शन`
+    if (initialStatusId) {
+      const idx = storiesList.findIndex((s) => s.id === initialStatusId);
+      if (idx !== -1) {
+        setCurrentIndex(idx);
+        setProgress(0);
+        return;
       }
-    ]
+    }
+    setCurrentIndex(0);
+    setProgress(0);
+  }, [isOpen, initialStatusId, storiesList]);
+
+  // Current active story item
+  const currentStory = storiesList[currentIndex] || {
+    title: 'श्री गणेश उत्सव २०२६',
+    caption: 'शिंदे मळा सार्वजनिक गणेश उत्सव मंडळ',
+    media: [{ url: '/logo.png', type: 'image' }],
+    createdAt: new Date().toISOString()
   };
 
-  const mediaList = dayEvent.media && dayEvent.media.length > 0 ? dayEvent.media : [
-    {
-      type: 'image',
-      url: 'https://images.unsplash.com/photo-1567591974584-f1832dfa6291?auto=format&fit=crop&w=1000&q=80',
-      caption: `दिवस ${currentDay}`
-    }
-  ];
+  const mediaItem =
+    currentStory.media && currentStory.media.length > 0
+      ? currentStory.media[0]
+      : { url: '/logo.png', type: 'image' };
 
-  const currentMedia = mediaList[currentMediaIndex] || mediaList[0];
-
-  // Auto-progress timer (5 seconds per slide)
+  // Auto-progress timer (5.0 seconds per story)
   useEffect(() => {
-    if (!isOpen || isPaused) return;
+    if (!isOpen || isPaused || storiesList.length === 0) return;
 
-    const interval = 50; // ms
-    const step = 100 / (5000 / interval);
+    const intervalMs = 50;
+    const step = 100 / (5000 / intervalMs);
 
     const timer = setInterval(() => {
       setProgress((prev) => {
@@ -63,62 +74,125 @@ export const EventStoriesViewer = ({ isOpen, initialDay = 1, stories = [], onClo
         }
         return prev + step;
       });
-    }, interval);
+    }, intervalMs);
 
     return () => clearInterval(timer);
-  }, [isOpen, isPaused, currentDayIndex, currentMediaIndex]);
+  }, [isOpen, isPaused, currentIndex, storiesList.length]);
 
   const handleNext = () => {
-    if (currentMediaIndex < mediaList.length - 1) {
-      setCurrentMediaIndex((prev) => prev + 1);
-      setProgress(0);
-    } else if (currentDayIndex < daysList.length - 1) {
-      setCurrentDayIndex((prev) => prev + 1);
-      setCurrentMediaIndex(0);
+    if (currentIndex < storiesList.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
       setProgress(0);
     } else {
+      // Completed all stories
       onClose();
     }
   };
 
   const handlePrev = () => {
-    if (currentMediaIndex > 0) {
-      setCurrentMediaIndex((prev) => prev - 1);
-      setProgress(0);
-    } else if (currentDayIndex > 0) {
-      setCurrentDayIndex((prev) => prev - 1);
-      setCurrentMediaIndex(0);
+    if (currentIndex > 0) {
+      setCurrentIndex((prev) => prev - 1);
       setProgress(0);
     }
   };
 
-  if (!isOpen) return null;
+  // Keyboard navigation
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'ArrowRight') handleNext();
+      if (e.key === 'ArrowLeft') handlePrev();
+      if (e.key === ' ') setIsPaused((p) => !p);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, currentIndex, storiesList.length]);
+
+  // Format time ago (e.g., "२ तास आधी")
+  const formatTimeAgo = (isoString) => {
+    if (!isoString) return '';
+    try {
+      const diffMs = Date.now() - new Date(isoString).getTime();
+      const mins = Math.floor(diffMs / 60000);
+      if (mins < 1) return 'आत्ताच (Just now)';
+      if (mins < 60) return `${mins} मिनिटांपूर्वी`;
+      const hours = Math.floor(mins / 60);
+      if (hours < 24) return `${hours} तासांपूर्वी`;
+      const days = Math.floor(hours / 24);
+      return `${days} दिवसांपूर्वी`;
+    } catch {
+      return '';
+    }
+  };
+
+  // Format remaining 24-hour time
+  const formatRemaining = (expiresAt) => {
+    if (!expiresAt) return null;
+    try {
+      const diffMs = new Date(expiresAt).getTime() - Date.now();
+      if (diffMs <= 0) return 'कालबाह्य';
+      const totalMinutes = Math.floor(diffMs / (1000 * 60));
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      if (hours > 0) return `${hours} तास ${minutes} मि. शिल्लक`;
+      return `${minutes} मि. शिल्लक`;
+    } catch {
+      return null;
+    }
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: currentStory.title || 'गणेश उत्सव स्टोरी',
+          text: currentStory.caption || 'शिंदे मळा गणेश उत्सव मंडळ २४-तास स्टोरी',
+          url: window.location.href
+        });
+      } catch {
+        // Share cancelled or unavailable
+      }
+    } else {
+      navigator.clipboard?.writeText(window.location.href);
+      addToast('स्टोरी लिंक कॉपी झाली!', 'success');
+    }
+  };
+
+  if (!isOpen || storiesList.length === 0) return null;
 
   return (
     <div
       className="modal-overlay"
       style={{
-        zIndex: 2500,
+        position: 'fixed',
+        inset: 0,
+        zIndex: 99999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.92)',
-        backdropFilter: 'blur(30px)',
-        padding: 0
+        backdropFilter: 'blur(16px)',
+        userSelect: 'none'
       }}
       onClick={onClose}
     >
+      {/* Story Container Phone Mockup / Card */}
       <div
         style={{
           position: 'relative',
           width: '100%',
-          maxWidth: '480px',
-          height: '100vh',
-          maxHeight: '920px',
-          display: 'flex',
-          flexDirection: 'column',
-          backgroundColor: '#120810',
+          maxWidth: '440px',
+          height: 'min(92vh, 780px)',
+          borderRadius: '24px',
           overflow: 'hidden',
-          borderRadius: 'var(--radius-xl)',
-          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(230, 81, 0, 0.35)',
-          border: '1px solid var(--glass-border)'
+          backgroundColor: '#0c0307',
+          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(245, 158, 11, 0.25)',
+          border: '1.5px solid rgba(251, 191, 36, 0.4)',
+          display: 'flex',
+          flexDirection: 'column'
         }}
         onClick={(e) => e.stopPropagation()}
         onMouseDown={() => setIsPaused(true)}
@@ -126,251 +200,356 @@ export const EventStoriesViewer = ({ isOpen, initialDay = 1, stories = [], onClo
         onTouchStart={() => setIsPaused(true)}
         onTouchEnd={() => setIsPaused(false)}
       >
-        {/* Top Story Header & Segmented Progress Bars */}
+        {/* Top Segmented Story Progress Bars */}
         <div
           style={{
             position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 10,
-            padding: '1rem 1rem 2rem',
-            background: 'linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, transparent 100%)'
+            top: '0.85rem',
+            left: '0.75rem',
+            right: '0.75rem',
+            display: 'flex',
+            gap: '4px',
+            zIndex: 30
           }}
         >
-          {/* Segmented Progress Bars */}
-          <div style={{ display: 'flex', gap: '4px', marginBottom: '0.75rem' }}>
-            {mediaList.map((_, i) => (
+          {storiesList.map((s, idx) => {
+            let segProgress = 0;
+            if (idx < currentIndex) segProgress = 100;
+            else if (idx === currentIndex) segProgress = progress;
+
+            return (
               <div
-                key={i}
+                key={s.id || idx}
                 style={{
                   flex: 1,
-                  height: '3px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                  borderRadius: '2px',
+                  height: '3.5px',
+                  borderRadius: '3px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.28)',
                   overflow: 'hidden'
                 }}
               >
                 <div
                   style={{
                     height: '100%',
+                    width: `${segProgress}%`,
                     backgroundColor: '#fbbf24',
-                    width:
-                      i < currentMediaIndex
-                        ? '100%'
-                        : i === currentMediaIndex
-                        ? `${progress}%`
-                        : '0%',
-                    transition: i === currentMediaIndex ? 'width 0.05s linear' : 'none'
+                    boxShadow: '0 0 8px rgba(251, 191, 36, 0.8)',
+                    transition: idx === currentIndex ? 'none' : 'width 0.2s ease'
                   }}
                 />
               </div>
-            ))}
-          </div>
+            );
+          })}
+        </div>
 
-          {/* User / Mandal Info */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-              <div
-                style={{
-                  width: '42px',
-                  height: '42px',
-                  borderRadius: '50%',
-                  padding: '2px',
-                  background: 'linear-gradient(135deg, #ff7722, #fbbf24)',
-                  boxShadow: '0 0 12px rgba(251, 191, 36, 0.5)'
+        {/* Top Header Bar: Mandal Logo, Title, Time, Remaining, Close */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '1.65rem',
+            left: '0.85rem',
+            right: '0.85rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            zIndex: 30,
+            background: 'linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)',
+            paddingBottom: '0.5rem'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0 }}>
+            {/* Animated Profile Ring */}
+            <div
+              style={{
+                width: '42px',
+                height: '42px',
+                borderRadius: '50%',
+                padding: '2px',
+                background: 'linear-gradient(135deg, #ff7722, #fbbf24, #ef4444)',
+                flexShrink: 0
+              }}
+            >
+              <img
+                src="/logo.png"
+                alt="Mandal Logo"
+                onError={(e) => {
+                  e.target.src = '/ganesh-icon.svg';
                 }}
-              >
-                <img
-                  src="/logo.png"
-                  onError={(e) => {
-                    e.target.src = '/ganesh-icon.svg';
-                  }}
-                  alt="Logo"
-                  style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
-                />
-              </div>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <strong style={{ fontSize: '0.95rem', color: '#fff' }}>शिंदे मळा गणेश उत्सव</strong>
-                  <span
-                    style={{
-                      fontSize: '0.75rem',
-                      padding: '0.1rem 0.5rem',
-                      borderRadius: '999px',
-                      backgroundColor: 'rgba(245, 158, 11, 0.25)',
-                      color: '#fbbf24',
-                      fontWeight: 700
-                    }}
-                  >
-                    दिवस {currentDay} (Day {currentDay})
-                  </span>
-                </div>
-                <div style={{ fontSize: '0.78rem', color: 'rgba(255, 255, 255, 0.7)' }}>
-                  {dayEvent.startTime ? `${dayEvent.date} • ${dayEvent.startTime}` : '२०२६ उत्सव सोहळा'}
-                </div>
-              </div>
+                style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+              />
             </div>
 
-            {/* Close Button */}
+            <div style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: '0.88rem',
+                  fontWeight: 800,
+                  color: '#ffffff',
+                  lineHeight: 1.2,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem'
+                }}
+              >
+                <span>{currentStory.category || 'Ganesh Utsav 2026'}</span>
+                {storiesList.length > 1 && (
+                  <span style={{ fontSize: '0.72rem', color: '#fbbf24', fontWeight: 700 }}>
+                    ({currentIndex + 1}/{storiesList.length})
+                  </span>
+                )}
+              </div>
+              <div
+                style={{
+                  fontSize: '0.76rem',
+                  color: '#fff',
+                  fontWeight: 600,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}
+              >
+                {currentStory.title}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.7rem', color: '#fde68a' }}>
+                <span>{formatTimeAgo(currentStory.createdAt)}</span>
+                {formatRemaining(currentStory.expiresAt) && (
+                  <>
+                    <span>•</span>
+                    <span style={{ color: '#34d399', fontWeight: 700 }}>
+                      ⏳ {formatRemaining(currentStory.expiresAt)}
+                    </span>
+                  </>
+                )}
+                {currentStory.isPinned && (
+                  <>
+                    <span>•</span>
+                    <span style={{ color: '#fbbf24', fontWeight: 800 }}>📌 पिन</span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
             <button
-              onClick={onClose}
+              type="button"
+              onClick={handleShare}
               style={{
                 background: 'rgba(255, 255, 255, 0.15)',
                 border: 'none',
+                color: '#fff',
                 borderRadius: '50%',
                 width: '32px',
                 height: '32px',
-                color: '#fff',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                backdropFilter: 'blur(8px)'
               }}
+              title="शेअर करा"
             >
-              <X size={18} />
+              <Share2 size={14} />
+            </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                background: 'rgba(255, 255, 255, 0.2)',
+                border: 'none',
+                color: '#ffffff',
+                borderRadius: '50%',
+                width: '32px',
+                height: '32px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backdropFilter: 'blur(8px)'
+              }}
+              title="बंद करा"
+            >
+              <X size={16} />
             </button>
           </div>
         </div>
 
-        {/* Media Display Area with Ambient Blurred Backdrop */}
-        <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', backgroundColor: '#07030a' }}>
-          {/* Ambient Blurred Backdrop */}
-          <img
-            src={currentMedia.url}
-            alt=""
-            aria-hidden="true"
-            style={{
-              position: 'absolute',
-              inset: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              filter: 'blur(30px) brightness(0.4)',
-              transform: 'scale(1.15)',
-              pointerEvents: 'none',
-              zIndex: 1
-            }}
-          />
-
-          {/* Foreground Uncropped Media */}
-          {currentMedia.type === 'video' || currentMedia.url?.match(/\.(mp4|webm|mov)(\?.*)?$/i) ? (
+        {/* Media Content Body (Photo or Video) */}
+        <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+          {mediaItem.type === 'video' ? (
             <video
-              src={currentMedia.url}
+              src={mediaItem.url}
               autoPlay
               playsInline
-              controls
-              style={{
-                position: 'relative',
-                maxWidth: '100%',
-                maxHeight: '100%',
-                objectFit: 'contain',
-                zIndex: 2
-              }}
+              muted
+              loop
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
           ) : (
             <img
-              src={currentMedia.url}
-              alt="Story"
+              src={mediaItem.url}
+              alt={currentStory.title}
+              onError={(e) => {
+                e.target.src = '/logo.png';
+              }}
               style={{
-                position: 'relative',
-                maxWidth: '100%',
-                maxHeight: '100%',
-                objectFit: 'contain',
-                zIndex: 2
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                filter: 'brightness(0.95)'
               }}
             />
           )}
 
-          {/* Left & Right Touch Areas for Navigation */}
+          {/* Tap Zones for Next / Prev */}
           <div
-            onClick={handlePrev}
             style={{
               position: 'absolute',
-              top: '80px',
-              bottom: '120px',
+              top: '4.5rem',
               left: 0,
               width: '35%',
+              bottom: '5rem',
               cursor: 'pointer',
-              zIndex: 5
+              zIndex: 20
             }}
+            onClick={handlePrev}
+            title="मागील (Previous)"
           />
           <div
-            onClick={handleNext}
             style={{
               position: 'absolute',
-              top: '80px',
-              bottom: '120px',
+              top: '4.5rem',
               right: 0,
-              width: '35%',
+              width: '65%',
+              bottom: '5rem',
               cursor: 'pointer',
-              zIndex: 5
+              zIndex: 20
             }}
+            onClick={handleNext}
+            title="पुढील (Next)"
           />
+
+          {/* Left / Right Chevron Nav Buttons for Desktop Ease */}
+          {currentIndex > 0 && (
+            <button
+              type="button"
+              onClick={handlePrev}
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '0.75rem',
+                transform: 'translateY(-50%)',
+                background: 'rgba(0, 0, 0, 0.45)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '50%',
+                width: '36px',
+                height: '36px',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                zIndex: 25,
+                backdropFilter: 'blur(6px)'
+              }}
+            >
+              <ChevronLeft size={20} />
+            </button>
+          )}
+
+          {currentIndex < storiesList.length - 1 && (
+            <button
+              type="button"
+              onClick={handleNext}
+              style={{
+                position: 'absolute',
+                top: '50%',
+                right: '0.75rem',
+                transform: 'translateY(-50%)',
+                background: 'rgba(0, 0, 0, 0.45)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '50%',
+                width: '36px',
+                height: '36px',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                zIndex: 25,
+                backdropFilter: 'blur(6px)'
+              }}
+            >
+              <ChevronRight size={20} />
+            </button>
+          )}
         </div>
 
-        {/* Bottom Caption & Day Details */}
+        {/* Bottom Caption, Location & Like Bar */}
         <div
           style={{
             position: 'absolute',
             bottom: 0,
             left: 0,
             right: 0,
-            zIndex: 10,
-            padding: '2rem 1.25rem 1.25rem',
-            background: 'linear-gradient(0deg, rgba(0, 0, 0, 0.9) 0%, transparent 100%)',
-            color: '#fff'
+            padding: '1.5rem 1rem 1rem',
+            background: 'linear-gradient(0deg, rgba(12, 3, 7, 0.95) 0%, rgba(12, 3, 7, 0.75) 70%, transparent 100%)',
+            zIndex: 30,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.45rem'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#fbbf24', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.35rem' }}>
-            <Sparkles size={16} />
-            <span>{lang === 'mr' ? dayEvent.title : dayEvent.titleEn || dayEvent.title}</span>
-          </div>
-
-          {dayEvent.location && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.78rem', color: 'rgba(255, 255, 255, 0.75)', marginBottom: '0.5rem' }}>
-              <MapPin size={13} color="#f59e0b" />
-              <span>{dayEvent.location}</span>
-            </div>
+          {currentStory.caption && (
+            <p
+              style={{
+                margin: 0,
+                fontSize: '0.88rem',
+                color: '#ffedd5',
+                lineHeight: 1.35,
+                fontWeight: 600,
+                textShadow: '0 1px 4px rgba(0,0,0,0.8)'
+              }}
+            >
+              {currentStory.caption}
+            </p>
           )}
 
-          <p style={{ fontSize: '0.85rem', lineHeight: 1.5, color: 'rgba(255, 255, 255, 0.9)', margin: 0, maxHeight: '85px', overflowY: 'auto' }}>
-            {lang === 'mr' ? dayEvent.caption : dayEvent.captionEn || dayEvent.caption}
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.2rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--accent-gold-light)', fontSize: '0.78rem', fontWeight: 600 }}>
+              <MapPin size={13} />
+              <span>शिंदे मळा, हिंगणी दुमाला</span>
+            </div>
 
-          {/* Days Switcher Chips at the very bottom */}
-          <div
-            style={{
-              display: 'flex',
-              gap: '0.4rem',
-              overflowX: 'auto',
-              paddingTop: '0.85rem',
-              scrollbarWidth: 'none'
-            }}
-          >
-            {daysList.map((d) => (
-              <button
-                key={d}
-                onClick={() => {
-                  setCurrentDayIndex(d - 1);
-                  setCurrentMediaIndex(0);
-                  setProgress(0);
-                }}
-                style={{
-                  padding: '0.25rem 0.65rem',
-                  borderRadius: '999px',
-                  border: d === currentDay ? '1px solid #fbbf24' : '1px solid rgba(255, 255, 255, 0.2)',
-                  backgroundColor: d === currentDay ? 'rgba(245, 158, 11, 0.35)' : 'rgba(0, 0, 0, 0.4)',
-                  color: d === currentDay ? '#fff' : 'rgba(255, 255, 255, 0.7)',
-                  fontSize: '0.75rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                दिवस {d}
-              </button>
-            ))}
+            {/* Like Button */}
+            <button
+              type="button"
+              onClick={() => {
+                if (currentStory.id) likeStatus(currentStory.id);
+              }}
+              style={{
+                background: currentStory.isLikedByUser ? 'rgba(239, 68, 68, 0.25)' : 'rgba(255, 255, 255, 0.1)',
+                border: currentStory.isLikedByUser ? '1px solid #ef4444' : '1px solid rgba(255, 255, 255, 0.2)',
+                color: currentStory.isLikedByUser ? '#ef4444' : '#ffffff',
+                padding: '0.3rem 0.75rem',
+                borderRadius: '999px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                fontSize: '0.8rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                backdropFilter: 'blur(8px)'
+              }}
+            >
+              <Heart size={14} fill={currentStory.isLikedByUser ? '#ef4444' : 'none'} />
+              <span>{currentStory.likes || 0}</span>
+            </button>
           </div>
         </div>
       </div>

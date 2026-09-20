@@ -3,6 +3,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import { ConfirmModal } from '../components/ConfirmModal';
+import { AdminStatusManager } from '../components/AdminStatusManager';
 import {
   Calendar,
   PlusCircle,
@@ -34,6 +35,9 @@ export const ManageEvents = () => {
   const { lang, t } = useLanguage();
   const { eventList, createEvent, updateEvent, deleteEvent, togglePinEvent, addToast, compressImage } = useData();
   const { isAdmin } = useAuth();
+
+  // Top Section Mode: 'statuses' (24-Hour Stories) | 'events' (Festival Schedule & Feed)
+  const [activeSection, setActiveSection] = useState('statuses');
 
   // Filters & State
   const [statusFilter, setStatusFilter] = useState('All');
@@ -183,32 +187,99 @@ export const ManageEvents = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Header Bar */}
+      {/* Top Section Navigation Tabs */}
       <div
         className="glass-panel no-print"
         style={{
           display: 'flex',
-          flexWrap: 'wrap',
+          gap: '0.75rem',
+          padding: '0.65rem 1rem',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: 'clamp(0.85rem, 3vw, 1.35rem)',
-          gap: '0.85rem'
+          background: 'rgba(20, 11, 26, 0.85)',
+          flexWrap: 'wrap'
         }}
       >
-        <div style={{ minWidth: '220px' }}>
-          <h2 className="text-page-title" style={{ fontWeight: 800, margin: '0 0 0.25rem', color: 'var(--text-main)' }}>
-            {t('manageEventsTitle')}
-          </h2>
-          <p className="text-subtext-responsive" style={{ color: 'var(--text-subtle)', margin: 0 }}>
-            येथे जोडलेला प्रत्येक कार्यक्रम थेट सार्वजनिक पोर्टलवरील इन्स्टाग्राम फीड व स्टोरीजमध्ये दिसेल
-          </p>
-        </div>
+        <button
+          type="button"
+          onClick={() => setActiveSection('statuses')}
+          className="btn"
+          style={{
+            flex: '1 1 200px',
+            padding: '0.6rem 1rem',
+            borderRadius: 'var(--radius-md)',
+            fontWeight: 800,
+            fontSize: '0.92rem',
+            background: activeSection === 'statuses' ? 'var(--primary)' : 'rgba(255, 255, 255, 0.05)',
+            color: activeSection === 'statuses' ? '#fff' : 'var(--text-muted)',
+            border: activeSection === 'statuses' ? '1.5px solid var(--accent-gold-light)' : '1px solid rgba(255, 255, 255, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            boxShadow: activeSection === 'statuses' ? '0 4px 15px rgba(230, 81, 0, 0.35)' : 'none'
+          }}
+        >
+          <Sparkles size={17} color={activeSection === 'statuses' ? '#fff' : 'var(--accent-gold-light)'} />
+          <span>२४-तास स्टेटस व स्टोरीज (24-Hour Stories)</span>
+        </button>
 
-        <button className="btn btn-primary btn-sm" onClick={handleOpenCreate} style={{ minHeight: '42px', padding: '0.45rem 1rem', fontSize: 'var(--font-btn)' }}>
-          <PlusCircle size={18} />
-          <span>{t('addEventBtn')}</span>
+        <button
+          type="button"
+          onClick={() => setActiveSection('events')}
+          className="btn"
+          style={{
+            flex: '1 1 200px',
+            padding: '0.6rem 1rem',
+            borderRadius: 'var(--radius-md)',
+            fontWeight: 800,
+            fontSize: '0.92rem',
+            background: activeSection === 'events' ? 'var(--primary)' : 'rgba(255, 255, 255, 0.05)',
+            color: activeSection === 'events' ? '#fff' : 'var(--text-muted)',
+            border: activeSection === 'events' ? '1.5px solid var(--accent-gold-light)' : '1px solid rgba(255, 255, 255, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            boxShadow: activeSection === 'events' ? '0 4px 15px rgba(230, 81, 0, 0.35)' : 'none'
+          }}
+        >
+          <Calendar size={17} />
+          <span>उत्सव कार्यक्रम व फीड (Festival Feed & Events)</span>
         </button>
       </div>
+
+      {/* 24-Hour Statuses Management */}
+      {activeSection === 'statuses' && <AdminStatusManager />}
+
+      {/* Festival Events & Feed Management */}
+      {activeSection === 'events' && (
+        <>
+          {/* Header Bar */}
+          <div
+            className="glass-panel no-print"
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: 'clamp(0.85rem, 3vw, 1.35rem)',
+              gap: '0.85rem'
+            }}
+          >
+            <div style={{ minWidth: '220px' }}>
+              <h2 className="text-page-title" style={{ fontWeight: 800, margin: '0 0 0.25rem', color: 'var(--text-main)' }}>
+                {t('manageEventsTitle')}
+              </h2>
+              <p className="text-subtext-responsive" style={{ color: 'var(--text-subtle)', margin: 0 }}>
+                येथे जोडलेला प्रत्येक कार्यक्रम थेट सार्वजनिक पोर्टलवरील इन्स्टाग्राम फीड व स्टोरीजमध्ये दिसेल
+              </p>
+            </div>
+
+            <button className="btn btn-primary btn-sm" onClick={handleOpenCreate} style={{ minHeight: '42px', padding: '0.45rem 1rem', fontSize: 'var(--font-btn)' }}>
+              <PlusCircle size={18} />
+              <span>{t('addEventBtn')}</span>
+            </button>
+          </div>
 
       {/* Status Filter Chips */}
       <div className="glass-panel no-print" style={{ padding: 'clamp(0.75rem, 2.5vw, 1.15rem)' }}>
@@ -660,6 +731,8 @@ export const ManageEvents = () => {
         onConfirm={handleConfirmDelete}
         onCancel={() => setIsConfirmDeleteOpen(false)}
       />
+        </>
+      )}
     </div>
   );
 };

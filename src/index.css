@@ -1544,6 +1544,340 @@ html, body, #root {
   box-shadow: 0 0 8px rgba(245, 158, 11, 0.25);
 }
 
+/* ==========================================================================
+   Lord Ganesha Premium Welcome Intro Animation Screen
+   Shown when user first opens the website link, smoothly transitioning to Login
+   ========================================================================== */
+.ganesh-welcome-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 40%, #2b0f05 0%, #17070b 45%, #0c0307 100%);
+  overflow: hidden;
+  user-select: none;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.65s;
+}
+
+.ganesh-welcome-overlay.fade-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: scale(1.02);
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s ease-out, visibility 0.65s;
+}
+
+/* Background Animated Saffron & Gold Radiance Rays */
+.welcome-rays-glow {
+  position: absolute;
+  width: 700px;
+  height: 700px;
+  max-width: 140vw;
+  max-height: 140vw;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -55%);
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.22) 0%, rgba(230, 81, 0, 0.14) 40%, rgba(180, 83, 9, 0.04) 65%, transparent 80%);
+  filter: blur(40px);
+  pointer-events: none;
+  animation: welcomeRaysPulse 4s ease-in-out infinite alternate;
+  z-index: 1;
+}
+
+@keyframes welcomeRaysPulse {
+  0% { transform: translate(-50%, -55%) scale(0.9); opacity: 0.7; }
+  100% { transform: translate(-50%, -55%) scale(1.15); opacity: 1; }
+}
+
+.welcome-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.welcome-orb.orb-top {
+  top: -10%;
+  right: 15%;
+  width: 320px;
+  height: 320px;
+  background: rgba(251, 146, 60, 0.15);
+}
+
+.welcome-orb.orb-bottom {
+  bottom: -10%;
+  left: 10%;
+  width: 360px;
+  height: 360px;
+  background: rgba(239, 68, 68, 0.12);
+}
+
+/* Floating Golden Dust Particles Canvas / Orbs */
+.welcome-particles-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.welcome-particle {
+  position: absolute;
+  bottom: -15px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fef08a 0%, #fbbf24 60%, rgba(245, 158, 11, 0) 100%);
+  box-shadow: 0 0 8px #fef08a, 0 0 14px #f59e0b;
+  opacity: 0;
+  animation: particleDriftUp linear infinite;
+}
+
+@keyframes particleDriftUp {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.6);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.9;
+  }
+  80% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-105vh) translateX(35px) scale(1.2);
+    opacity: 0;
+  }
+}
+
+/* Skip Button */
+.welcome-skip-btn {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #ffedd5;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  border-radius: 9999px;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.welcome-skip-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(251, 191, 36, 0.5);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* Center Presentation Card */
+.welcome-center-card {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.5rem;
+  max-width: 580px;
+  width: 90%;
+}
+
+/* Lord Ganesha Illuminated Divine Mūrti Frame */
+.welcome-murti-container {
+  position: relative;
+  width: 170px;
+  height: 170px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.35rem;
+}
+
+.welcome-murti-halo {
+  position: absolute;
+  inset: -16px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.32) 0%, rgba(245, 158, 11, 0.16) 55%, transparent 75%);
+  box-shadow: 0 0 35px rgba(245, 158, 11, 0.35);
+  animation: murtiHaloPulse 2.8s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes murtiHaloPulse {
+  0% { transform: scale(0.92); opacity: 0.6; }
+  100% { transform: scale(1.08); opacity: 1; }
+}
+
+.welcome-murti-img {
+  width: 155px;
+  height: 155px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2.5px solid rgba(251, 191, 36, 0.65);
+  box-shadow: 0 0 25px rgba(245, 158, 11, 0.45), 0 10px 30px rgba(0, 0, 0, 0.5);
+  animation: ganeshMurtiAppear 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes ganeshMurtiAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.78);
+    filter: brightness(0.6) blur(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: brightness(1) blur(0);
+  }
+}
+
+/* Sacred Shlok */
+.welcome-shlok {
+  margin-bottom: 0.6rem;
+  opacity: 0;
+  animation: welcomeFadeSlideUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
+}
+
+.welcome-shlok span {
+  font-family: 'Noto Sans Devanagari', 'Poppins', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  background: linear-gradient(135deg, #fef08a 0%, #fbbf24 45%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+}
+
+/* Mandal Title & Greeting */
+.welcome-mandal-text {
+  opacity: 0;
+  animation: welcomeFadeSlideUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.7s forwards;
+  margin-bottom: 1.15rem;
+}
+
+.welcome-mandal-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #fff7ed;
+  line-height: 1.25;
+  margin: 0 0 0.45rem 0;
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+}
+
+.welcome-greeting-sub {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #fde68a;
+  line-height: 1.4;
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+/* Ganpati Bappa Morya Tagline */
+.welcome-cheer-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  border-radius: 9999px;
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  animation: welcomeFadeSlideUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) 1.05s forwards, cheerPulse 2s ease-in-out 1.95s infinite;
+}
+
+.welcome-cheer-tag span {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.03em;
+  text-shadow: 0 0 12px rgba(251, 191, 36, 0.5);
+}
+
+@keyframes cheerPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 12px rgba(251, 191, 36, 0.2);
+  }
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 0 24px rgba(251, 191, 36, 0.45);
+  }
+}
+
+.sparkle-left {
+  animation: sparkleRotate 2.5s linear infinite;
+}
+
+.sparkle-right {
+  animation: sparkleRotate 2.5s linear infinite reverse;
+}
+
+@keyframes sparkleRotate {
+  0% { transform: rotate(0deg) scale(0.9); }
+  50% { transform: rotate(180deg) scale(1.15); }
+  100% { transform: rotate(360deg) scale(0.9); }
+}
+
+@keyframes welcomeFadeSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile Responsiveness for Welcome Screen */
+@media (max-width: 640px) {
+  .welcome-murti-container {
+    width: 140px;
+    height: 140px;
+    margin-bottom: 1.1rem;
+  }
+  .welcome-murti-img {
+    width: 125px;
+    height: 125px;
+  }
+  .welcome-shlok span {
+    font-size: 1.05rem;
+  }
+  .welcome-mandal-title {
+    font-size: 1.4rem;
+  }
+  .welcome-greeting-sub {
+    font-size: 1rem;
+  }
+  .welcome-cheer-tag {
+    padding: 0.45rem 1rem;
+  }
+  .welcome-cheer-tag span {
+    font-size: 0.95rem;
+  }
+}
+
+
 
 
 
