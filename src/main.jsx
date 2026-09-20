@@ -4,6 +4,7 @@ import { App } from './App';
 import { LanguageProvider } from './context/LanguageContext';
 import { AuthProvider } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
+import { MusicProvider } from './context/MusicContext';
 import './index.css';
 
 // Register PWA Service Worker
@@ -25,7 +26,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <LanguageProvider>
       <AuthProvider>
         <DataProvider>
-          <App />
+          <MusicProvider>
+            <App />
+          </MusicProvider>
         </DataProvider>
       </AuthProvider>
     </LanguageProvider>

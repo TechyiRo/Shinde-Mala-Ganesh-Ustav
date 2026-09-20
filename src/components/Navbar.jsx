@@ -2,16 +2,18 @@ import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
-import { Sun, Moon, Languages, LogOut, ShieldCheck, UserCheck } from 'lucide-react';
+import { Sun, Moon, Languages, LogOut, ShieldCheck, UserCheck, Play, Pause } from 'lucide-react';
+import { useMusic } from '../context/MusicContext';
 
 export const Navbar = ({ onBackToPublic }) => {
   const { lang, toggleLang, t } = useLanguage();
   const { user, logout, isAdmin } = useAuth();
   const { theme, toggleTheme, mandalSettings } = useData();
+  const { isPlaying, togglePlayPause } = useMusic();
 
   return (
     <header
-      className="glass-panel navbar-container no-print"
+      className={`glass-panel navbar-container no-print ${isPlaying ? 'navbar-music-active' : ''}`}
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -70,6 +72,21 @@ export const Navbar = ({ onBackToPublic }) => {
 
       {/* Right Controls */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.3rem, 1.2vw, 0.6rem)', flexShrink: 0 }}>
+        {/* Circular Minimal Music Toggle Button with Music-Reactive Gradient Ring */}
+        <button
+          type="button"
+          onClick={togglePlayPause}
+          className={`navbar-music-circle-btn ${isPlaying ? 'playing' : 'paused'}`}
+          title={isPlaying ? 'संगीत थांबवा (Pause)' : 'संगीत सुरू करा (Play Music)'}
+          aria-label={isPlaying ? 'Pause Music' : 'Play Music'}
+        >
+          {isPlaying ? (
+            <Pause size={14} fill="currentColor" color="var(--primary-light)" />
+          ) : (
+            <Play size={13} fill="currentColor" color="var(--text-muted)" style={{ marginLeft: '1.5px' }} />
+          )}
+        </button>
+
         {/* Back to Public Transparency View Button */}
         {onBackToPublic && (
           <button

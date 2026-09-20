@@ -250,7 +250,17 @@ export const translations = {
     toastDataRestored: 'नमुना डेटा पुनर्स्थापित केला!',
     toastBackupDownloaded: 'बॅकअप फाइल डाउनलोड झाली!',
     themeLight: 'लाईट मोड',
-    themeDark: 'डार्क मोड'
+    themeDark: 'डार्क मोड',
+    musicOn: 'संगीत चालू',
+    musicOff: 'संगीत बंद',
+    musicPlayDevotional: '🔊 मंगल संगीत सुरू करा',
+    musicPlaying: 'मंगल संगीत सुरू आहे',
+    musicPaused: 'संगीत थांबवले आहे',
+    musicTooltip: 'गणेश मंगल संगीत (चालू / बंद)',
+    volumeLabel: 'आवाज',
+    trackSuktam: 'गणपती सूक्तम् (Vedic Chant)',
+    trackFlute: 'बासरी धून (Bansuri Flute)',
+    musicAttribution: 'पवित्र वैदिक गणपती सूक्तम् व बासरी धून (Creative Commons)'
   },
 
   en: {
@@ -504,6 +514,16 @@ export const translations = {
     toastDataRestored: 'Sample data restored successfully!',
     toastBackupDownloaded: 'Backup file downloaded!',
     themeLight: 'Light Mode',
-    themeDark: 'Dark Mode'
+    themeDark: 'Dark Mode',
+    musicOn: 'Music ON',
+    musicOff: 'Music OFF',
+    musicPlayDevotional: '🔊 Play Devotional Music',
+    musicPlaying: 'Devotional Music Playing',
+    musicPaused: 'Music Paused',
+    musicTooltip: 'Devotional Background Music (On/Off)',
+    volumeLabel: 'Volume',
+    trackSuktam: 'Ganapathi Suktam (Vedic Chant)',
+    trackFlute: 'Bansuri Flute (Instrumental)',
+    musicAttribution: 'Sacred Ganapathi Suktam & Bansuri Flute (Creative Commons)'
   }
 };

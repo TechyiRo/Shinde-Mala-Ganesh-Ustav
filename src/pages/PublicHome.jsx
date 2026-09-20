@@ -10,6 +10,7 @@ import { EventStoriesViewer } from '../components/EventStoriesViewer';
 import { EventPostCard } from '../components/EventPostCard';
 import { DeveloperBadge } from '../components/DeveloperBadge';
 import { PavtiModal } from '../components/PavtiModal';
+import { useMusic } from '../context/MusicContext';
 import confetti from 'canvas-confetti';
 import {
   TrendingUp,
@@ -33,7 +34,10 @@ import {
   Moon,
   Languages,
   Radio,
-  Download
+  Download,
+  Play,
+  Pause,
+  Music
 } from 'lucide-react';
 import { formatCurrency } from '../i18n/numberToWords';
 
@@ -45,6 +49,7 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
   const [selectedPublicEventCat, setSelectedPublicEventCat] = useState('');
   const [selectedViewingPavti, setSelectedViewingPavti] = useState(null);
   const { user } = useAuth();
+  const { isPlaying, togglePlayPause } = useMusic();
 
   // Celebration mini-confetti burst when a new Pavti is added in real time
   useEffect(() => {
@@ -181,9 +186,9 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
       {/* Falling Flower Petals Particle Canvas */}
       <FlowerPetalsCanvas />
 
-      {/* Sticky Top Public Glass Navbar */}
+      {/* Sticky Top Public Glass Navbar with Music Reactive Border */}
       <nav
-        className="glass-panel no-print"
+        className={`glass-panel no-print ${isPlaying ? 'navbar-music-active' : ''}`}
         style={{
           position: 'sticky',
           top: '0.5rem',
@@ -293,8 +298,23 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
           </button>
         </div>
 
-        {/* Right Controls: Lang, Theme & Admin Portal */}
+        {/* Right Controls: Music Button, Lang, Theme & Admin Portal */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.3rem, 1.2vw, 0.6rem)', flexShrink: 0 }}>
+          {/* Circular Minimal Music Toggle Button with Music-Reactive Gradient Ring */}
+          <button
+            type="button"
+            onClick={togglePlayPause}
+            className={`navbar-music-circle-btn ${isPlaying ? 'playing' : 'paused'}`}
+            title={isPlaying ? 'संगीत चालू आहे (थांबवण्यासाठी क्लिक करा)' : 'संगीत सुरू करा (Play Music)'}
+            aria-label={isPlaying ? 'Pause Music' : 'Play Music'}
+          >
+            {isPlaying ? (
+              <Pause size={14} fill="currentColor" color="var(--primary-light)" />
+            ) : (
+              <Play size={13} fill="currentColor" color="var(--text-muted)" style={{ marginLeft: '1.5px' }} />
+            )}
+          </button>
+
           <button onClick={toggleLang} className="btn btn-secondary btn-sm" title="Switch Language" style={{ padding: '0.35rem 0.55rem', fontSize: '0.8rem' }}>
             <Languages size={14} color="#f59e0b" />
             <span>{lang === 'mr' ? 'EN' : 'मराठी'}</span>

@@ -1446,4 +1446,107 @@ html, body, #root {
   color: #fff;
 }
 
+/* ==========================================================================
+   Navbar Border Music Visualization - Flowing Animated Gradient & Glow
+   Applied to the entire rounded navbar border when music is playing
+   ========================================================================== */
+.navbar-music-active {
+  border: 1.5px solid transparent !important;
+  background-image: 
+    linear-gradient(rgba(20, 11, 26, 0.94), rgba(20, 11, 26, 0.94)),
+    linear-gradient(135deg, #ff7722, #fbbf24, #ef4444, #f59e0b, #10b981, #fbbf24, #ff7722) !important;
+  background-origin: border-box !important;
+  background-clip: padding-box, border-box !important;
+  background-size: 100% 100%, 300% 300% !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
+              0 0 16px rgba(245, 158, 11, 0.35),
+              0 0 28px rgba(239, 68, 68, 0.15) !important;
+  animation: navbarMusicBorderFlow 6s ease infinite, navbarMusicSubtleGlow 3s ease-in-out infinite alternate !important;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+[data-theme="light"] .navbar-music-active {
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.94)),
+    linear-gradient(135deg, #ea580c, #f59e0b, #dc2626, #d97706, #059669, #ea580c) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08),
+              0 0 16px rgba(245, 158, 11, 0.3),
+              0 0 24px rgba(239, 68, 68, 0.12) !important;
+}
+
+@keyframes navbarMusicBorderFlow {
+  0% {
+    background-position: 0% 0%, 0% 50%;
+  }
+  50% {
+    background-position: 0% 0%, 100% 50%;
+  }
+  100% {
+    background-position: 0% 0%, 0% 50%;
+  }
+}
+
+@keyframes navbarMusicSubtleGlow {
+  0% {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5),
+                0 0 10px rgba(245, 158, 11, 0.22),
+                0 0 20px rgba(239, 68, 68, 0.1);
+  }
+  50% {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55),
+                0 0 20px rgba(245, 158, 11, 0.45),
+                0 0 32px rgba(251, 191, 36, 0.22);
+  }
+  100% {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5),
+                0 0 10px rgba(245, 158, 11, 0.22),
+                0 0 20px rgba(239, 68, 68, 0.1);
+  }
+}
+
+/* ==========================================================================
+   Minimal Clean Music Icon Button on Menu Bar
+   ========================================================================== */
+.navbar-music-circle-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.navbar-music-circle-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(251, 191, 36, 0.4);
+  color: var(--text-main);
+  transform: scale(1.05);
+}
+
+.navbar-music-circle-btn:active {
+  transform: scale(0.95);
+}
+
+.navbar-music-circle-btn.playing {
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.16);
+  border-color: rgba(251, 191, 36, 0.5);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.25);
+}
+
+
+
+
+
+
 
