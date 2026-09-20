@@ -277,12 +277,12 @@ app.post('/api/wipe-all', async (req, res) => {
 const distPath = path.join(__dirname, '../dist');
 app.use(express.static(distPath));
 
-// Fallback for React Router / SPA (Express 5 compatible)
-app.use((req, res, next) => {
-  if (req.method === 'GET' && !req.path.startsWith('/api')) {
-    return res.sendFile(path.join(distPath, 'index.html'));
+// Fallback for React Router / SPA
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    return next();
   }
-  next();
+  res.sendFile(path.join(distPath, 'index.html'));
 });
 
 // Start Server after connecting to MongoDB Atlas

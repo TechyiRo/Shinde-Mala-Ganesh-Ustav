@@ -9,6 +9,8 @@ import { ExpenseDonutChart } from '../components/Charts/ExpenseDonutChart';
 import { EventStoriesViewer } from '../components/EventStoriesViewer';
 import { EventPostCard } from '../components/EventPostCard';
 import { DeveloperBadge } from '../components/DeveloperBadge';
+import { PavtiModal } from '../components/PavtiModal';
+import confetti from 'canvas-confetti';
 import {
   TrendingUp,
   TrendingDown,
@@ -30,17 +32,35 @@ import {
   Sun,
   Moon,
   Languages,
-  Radio
+  Radio,
+  Download
 } from 'lucide-react';
 import { formatCurrency } from '../i18n/numberToWords';
 
 export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
   const { lang, toggleLang, t } = useLanguage();
-  const { mandalSettings, pavtiList, expenseList, eventList = [], totalCollection, totalExpense, balance, pavtiCount, theme, toggleTheme } = useData();
+  const { mandalSettings, pavtiList, expenseList, eventList = [], totalCollection, totalExpense, balance, pavtiCount, theme, toggleTheme, recentlyAddedPavtiId } = useData();
   const [isStoriesViewerOpen, setIsStoriesViewerOpen] = useState(false);
   const [selectedDayStory, setSelectedDayStory] = useState(1);
   const [selectedPublicEventCat, setSelectedPublicEventCat] = useState('');
+  const [selectedViewingPavti, setSelectedViewingPavti] = useState(null);
   const { user } = useAuth();
+
+  // Celebration mini-confetti burst when a new Pavti is added in real time
+  useEffect(() => {
+    if (recentlyAddedPavtiId) {
+      try {
+        confetti({
+          particleCount: 50,
+          spread: 60,
+          origin: { y: 0.65 },
+          colors: ['#10b981', '#fbbf24', '#ff7722']
+        });
+      } catch {
+        // ignore
+      }
+    }
+  }, [recentlyAddedPavtiId]);
 
   // Target Budget (e.g., ₹2,50,000)
   const targetBudget = 250000;
@@ -707,45 +727,68 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
                     <th>{t('addressArea')} (परिसर)</th>
                     <th>{t('donationType')}</th>
                     <th style={{ textAlign: 'right' }}>{t('amount')}</th>
+                    <th style={{ textAlign: 'center' }}>पावती (PDF)</th>
                   </tr>
                 </thead>
                 <tbody>
                   {paginatedPublicPavti.length === 0 ? (
                     <tr>
-                      <td colSpan={6} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-subtle)' }}>
+                      <td colSpan={7} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-subtle)' }}>
                         {t('noRecordsFound')}
                       </td>
                     </tr>
                   ) : (
-                    paginatedPublicPavti.map((p) => (
-                      <tr key={p.id}>
-                        <td>
-                          <strong style={{ color: 'var(--accent-gold-light)' }}>{p.pavtiNo}</strong>
-                        </td>
-                        <td style={{ whiteSpace: 'nowrap', fontSize: '0.85rem' }}>{p.date}</td>
-                        <td style={{ fontWeight: 700 }}>{p.donorName}</td>
-                        <td style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                          {getMaskedAddress(p.address)}
-                        </td>
-                        <td>
-                          <span
-                            style={{
-                              padding: '0.2rem 0.55rem',
-                              borderRadius: '6px',
-                              backgroundColor: 'rgba(245, 158, 11, 0.15)',
-                              color: 'var(--accent-gold-light)',
-                              fontSize: '0.82rem',
-                              fontWeight: 600
-                            }}
-                          >
-                            {t(`type${p.donationType}`) || p.donationType}
-                          </span>
-                        </td>
-                        <td style={{ textAlign: 'right', fontWeight: 800, color: '#34d399', fontSize: '1rem' }}>
-                          {formatCurrency(p.amount)}
-                        </td>
-                      </tr>
-                    ))
+                    paginatedPublicPavti.map((p) => {
+                      const isNew = p.id === recentlyAddedPavtiId;
+                      return (
+                        <tr key={p.id} className={isNew ? 'new-pavti-highlight-row' : ''}>
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                              <strong style={{ color: 'var(--accent-gold-light)' }}>{p.pavtiNo}</strong>
+                              {isNew && <span className="badge-new-pavti">🎉 नवीन!</span>}
+                            </div>
+                          </td>
+                          <td style={{ whiteSpace: 'nowrap', fontSize: '0.85rem' }}>{p.date}</td>
+                          <td style={{ fontWeight: 700 }}>{p.donorName}</td>
+                          <td style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                            {getMaskedAddress(p.address)}
+                          </td>
+                          <td>
+                            <span
+                              style={{
+                                padding: '0.2rem 0.55rem',
+                                borderRadius: '6px',
+                                backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                                color: 'var(--accent-gold-light)',
+                                fontSize: '0.82rem',
+                                fontWeight: 600
+                              }}
+                            >
+                              {t(`type${p.donationType}`) || p.donationType}
+                            </span>
+                          </td>
+                          <td style={{ textAlign: 'right', fontWeight: 800, color: '#34d399', fontSize: '1rem' }}>
+                            {formatCurrency(p.amount)}
+                          </td>
+                          <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => setSelectedViewingPavti(p)}
+                              style={{
+                                padding: '0.28rem 0.65rem',
+                                fontSize: '0.8rem',
+                                color: '#60a5fa',
+                                borderColor: 'rgba(59, 130, 246, 0.4)'
+                              }}
+                              title="पावती पाहा व PDF डाउनलोड करा"
+                            >
+                              <Download size={14} />
+                              <span>PDF</span>
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>
@@ -758,51 +801,75 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
                   {t('noRecordsFound')}
                 </div>
               ) : (
-                paginatedPublicPavti.map((p) => (
-                  <div
-                    key={p.id}
-                    style={{
-                      padding: '0.85rem 1rem',
-                      marginBottom: '0.75rem',
-                      borderRadius: 'var(--radius-md)',
-                      backgroundColor: 'rgba(255, 255, 255, 0.04)',
-                      border: '1px solid var(--glass-border)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.4rem'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--accent-gold-light)' }}>
-                        {p.pavtiNo}
-                      </span>
-                      <strong style={{ fontSize: '1.15rem', color: '#34d399' }}>
-                        {formatCurrency(p.amount)}
-                      </strong>
+                paginatedPublicPavti.map((p) => {
+                  const isNew = p.id === recentlyAddedPavtiId;
+                  return (
+                    <div
+                      key={p.id}
+                      className={isNew ? 'new-pavti-highlight-card' : ''}
+                      style={{
+                        padding: '0.85rem 1rem',
+                        marginBottom: '0.75rem',
+                        borderRadius: 'var(--radius-md)',
+                        backgroundColor: isNew ? 'rgba(16, 185, 129, 0.12)' : 'rgba(255, 255, 255, 0.04)',
+                        border: isNew ? '1.5px solid #10b981' : '1px solid var(--glass-border)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.4rem'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                          <span style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--accent-gold-light)' }}>
+                            {p.pavtiNo}
+                          </span>
+                          {isNew && <span className="badge-new-pavti">🎉 नवीन!</span>}
+                        </div>
+                        <strong style={{ fontSize: '1.15rem', color: '#34d399' }}>
+                          {formatCurrency(p.amount)}
+                        </strong>
+                      </div>
+                      <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-main)' }}>
+                        {p.donorName}
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: 'var(--text-subtle)' }}>
+                        <span>📍 {getMaskedAddress(p.address)}</span>
+                        <span>📅 {p.date}</span>
+                      </div>
+                      <div style={{ marginTop: '0.2rem' }}>
+                        <span
+                          style={{
+                            padding: '0.15rem 0.5rem',
+                            borderRadius: '6px',
+                            backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                            color: 'var(--accent-gold-light)',
+                            fontSize: '0.75rem',
+                            fontWeight: 600
+                          }}
+                        >
+                          {t(`type${p.donationType}`) || p.donationType}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.4rem', paddingTop: '0.4rem', borderTop: '1px solid var(--glass-border)' }}>
+                        <button
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => setSelectedViewingPavti(p)}
+                          style={{
+                            padding: '0.35rem 0.75rem',
+                            fontSize: '0.82rem',
+                            color: '#60a5fa',
+                            borderColor: 'rgba(59, 130, 246, 0.4)',
+                            width: '100%',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          <Download size={14} />
+                          <span>पावती पाहा / PDF डाउनलोड</span>
+                        </button>
+                      </div>
                     </div>
-                    <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-main)' }}>
-                      {p.donorName}
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: 'var(--text-subtle)' }}>
-                      <span>📍 {getMaskedAddress(p.address)}</span>
-                      <span>📅 {p.date}</span>
-                    </div>
-                    <div style={{ marginTop: '0.2rem' }}>
-                      <span
-                        style={{
-                          padding: '0.15rem 0.5rem',
-                          borderRadius: '6px',
-                          backgroundColor: 'rgba(245, 158, 11, 0.15)',
-                          color: 'var(--accent-gold-light)',
-                          fontSize: '0.75rem',
-                          fontWeight: 600
-                        }}
-                      >
-                        {t(`type${p.donationType}`) || p.donationType}
-                      </span>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
 
@@ -1366,7 +1433,7 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
             </div>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-subtle)', lineHeight: 1.6, marginBottom: '0.5rem' }}>
               {mandalSettings.regNo || 'नोंदणी क्र. महा/१२४५/२०१२'}<br />
-              {mandalSettings.address || 'शिंदे मळा, हिंगणी Dumala, शिंदे मळा, ४१२२१०'}
+              {mandalSettings.address || 'शिंदे मळा, हिंगणी दुमाला , ४१२२१०'}
             </p>
             <div style={{ marginTop: '0.65rem' }}>
               <p style={{ fontSize: '0.88rem', color: 'var(--accent-gold-light)', fontWeight: 700, margin: '0 0 0.35rem' }}>
@@ -1484,6 +1551,14 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
           </div>
         </div>
       )}
+
+      {/* Public Pavti Viewing & PDF Download Modal (Read-Only) */}
+      <PavtiModal
+        isOpen={!!selectedViewingPavti}
+        pavti={selectedViewingPavti}
+        onClose={() => setSelectedViewingPavti(null)}
+        isPublic={true}
+      />
     </div>
   );
 };

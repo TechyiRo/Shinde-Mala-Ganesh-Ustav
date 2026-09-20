@@ -196,28 +196,74 @@ export const EventPostCard = ({ event }) => {
         ) : null}
       </div>
 
-      {/* 2. Media Carousel Area with Double-Tap to Like */}
+      {/* 2. Media Area with Natural Aspect Ratio & Ambient Backdrop */}
       <div
         style={{
           position: 'relative',
           width: '100%',
-          aspectRatio: '4 / 3',
-          backgroundColor: '#0a050d',
+          minHeight: '260px',
+          maxHeight: 'min(78vh, 650px)',
+          backgroundColor: '#07030a',
           overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           cursor: 'pointer'
         }}
         onClick={handleMediaTap}
       >
+        {/* Ambient Blurred Backdrop for portrait/mixed ratio photos */}
         <img
           src={currentMedia.url}
-          alt={event.title}
+          alt=""
+          aria-hidden="true"
           style={{
+            position: 'absolute',
+            inset: 0,
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            transition: 'transform 0.3s ease'
+            filter: 'blur(30px) brightness(0.35)',
+            transform: 'scale(1.15)',
+            pointerEvents: 'none',
+            zIndex: 1
           }}
         />
+
+        {/* Foreground Content with Natural Aspect Ratio (Never cropped or distorted) */}
+        {currentMedia.type === 'video' || currentMedia.url?.match(/\.(mp4|webm|mov)(\?.*)?$/i) ? (
+          <video
+            src={currentMedia.url}
+            controls
+            playsInline
+            preload="metadata"
+            style={{
+              position: 'relative',
+              width: '100%',
+              maxHeight: 'min(78vh, 650px)',
+              objectFit: 'contain',
+              zIndex: 2,
+              display: 'block'
+            }}
+          />
+        ) : (
+          <img
+            src={currentMedia.url}
+            alt={event.title}
+            style={{
+              position: 'relative',
+              maxWidth: '100%',
+              maxHeight: 'min(78vh, 650px)',
+              width: 'auto',
+              height: 'auto',
+              objectFit: 'contain',
+              zIndex: 2,
+              display: 'block',
+              margin: '0 auto',
+              transition: 'transform 0.3s ease'
+            }}
+          />
+        )}
 
         {/* Fullscreen view trigger button */}
         <button
@@ -232,15 +278,15 @@ export const EventPostCard = ({ event }) => {
             width: '34px',
             height: '34px',
             borderRadius: '50%',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
+            backgroundColor: 'rgba(0, 0, 0, 0.55)',
+            border: '1px solid rgba(255, 255, 255, 0.25)',
             color: '#fff',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
             backdropFilter: 'blur(8px)',
-            zIndex: 4
+            zIndex: 6
           }}
           title="Fullscreen Lightbox"
         >
@@ -278,20 +324,21 @@ export const EventPostCard = ({ event }) => {
                 top: '50%',
                 left: '10px',
                 transform: 'translateY(-50%)',
-                width: '32px',
-                height: '32px',
+                width: '34px',
+                height: '34px',
                 borderRadius: '50%',
-                backgroundColor: 'rgba(0, 0, 0, 0.45)',
-                border: 'none',
+                backgroundColor: 'rgba(0, 0, 0, 0.55)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
                 color: '#fff',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backdropFilter: 'blur(6px)'
+                backdropFilter: 'blur(6px)',
+                zIndex: 6
               }}
             >
-              <ChevronLeft size={18} />
+              <ChevronLeft size={20} />
             </button>
             <button
               onClick={(e) => {
@@ -303,31 +350,37 @@ export const EventPostCard = ({ event }) => {
                 top: '50%',
                 right: '10px',
                 transform: 'translateY(-50%)',
-                width: '32px',
-                height: '32px',
+                width: '34px',
+                height: '34px',
                 borderRadius: '50%',
-                backgroundColor: 'rgba(0, 0, 0, 0.45)',
-                border: 'none',
+                backgroundColor: 'rgba(0, 0, 0, 0.55)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
                 color: '#fff',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backdropFilter: 'blur(6px)'
+                backdropFilter: 'blur(6px)',
+                zIndex: 6
               }}
             >
-              <ChevronRight size={18} />
+              <ChevronRight size={20} />
             </button>
 
             {/* Dots */}
             <div
               style={{
                 position: 'absolute',
-                bottom: '10px',
+                bottom: '12px',
                 left: '50%',
                 transform: 'translateX(-50%)',
                 display: 'flex',
-                gap: '5px'
+                gap: '6px',
+                zIndex: 6,
+                backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                padding: '4px 8px',
+                borderRadius: '999px',
+                backdropFilter: 'blur(6px)'
               }}
             >
               {mediaList.map((_, i) => (
@@ -533,11 +586,21 @@ export const EventPostCard = ({ event }) => {
             >
               <X size={20} />
             </button>
-            <img
-              src={currentMedia.url}
-              alt="Enlarged view"
-              style={{ width: '100%', maxHeight: '80vh', objectFit: 'contain', borderRadius: '12px' }}
-            />
+            {currentMedia.type === 'video' || currentMedia.url?.match(/\.(mp4|webm|mov)(\?.*)?$/i) ? (
+              <video
+                src={currentMedia.url}
+                controls
+                autoPlay
+                playsInline
+                style={{ width: '100%', maxHeight: '80vh', objectFit: 'contain', borderRadius: '12px' }}
+              />
+            ) : (
+              <img
+                src={currentMedia.url}
+                alt="Enlarged view"
+                style={{ width: '100%', maxHeight: '80vh', objectFit: 'contain', borderRadius: '12px' }}
+              />
+            )}
             <div style={{ marginTop: '0.75rem', fontWeight: 700, color: 'var(--text-main)', fontSize: '1rem' }}>
               {displayTitle}
             </div>

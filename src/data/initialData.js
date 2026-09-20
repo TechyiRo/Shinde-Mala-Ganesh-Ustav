@@ -4,7 +4,7 @@ export const initialMandalSettings = {
   mandalName: 'शिंदे मळा गणेश उत्सव मंडळ',
   mandalNameEn: 'Shinde Mala Ganesh Utsav Mandal',
   regNo: 'नोंदणी क्र. महा/१२४५/२०१२ (Reg. No. MAH/1245/2012)',
-  address: 'शिंदे मळा, हिंगणी Dumala, शिंदे मळा, ४१२२१०',
+  address: 'शिंदे मळा, हिंगणी दुमाला , ४१२२१०',
   tagline: '॥ श्री गणेशाय नमः ॥ गणपती बाप्पा मोरया',
   president: 'श्री. तुषार शिंदे',
   treasurer: 'श्री. तुकाराम शिंदे व श्री. धनंजय शिंदे',
@@ -264,7 +264,7 @@ export const initialExpenseList = [
     category: 'Murti',
     description: 'श्री गणेश मूर्ती बुकिंग व कारागीर मानधन (८ फूट मूर्ती)',
     amount: 28000,
-    paidTo: 'ओंकार कला केंद्र, पेण/सातारा',
+    paidTo: 'ओंकार कला केंद्र, पेण/शिंदे मळा',
     paymentMode: 'Bank Transfer',
     billPhoto: ''
   },

@@ -233,17 +233,54 @@ export const EventStoriesViewer = ({ isOpen, initialDay = 1, stories = [], onClo
           </div>
         </div>
 
-        {/* Media Display Area */}
-        <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {/* Media Display Area with Ambient Blurred Backdrop */}
+        <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', backgroundColor: '#07030a' }}>
+          {/* Ambient Blurred Backdrop */}
           <img
             src={currentMedia.url}
-            alt="Story"
+            alt=""
+            aria-hidden="true"
             style={{
+              position: 'absolute',
+              inset: 0,
               width: '100%',
               height: '100%',
-              objectFit: 'cover'
+              objectFit: 'cover',
+              filter: 'blur(30px) brightness(0.4)',
+              transform: 'scale(1.15)',
+              pointerEvents: 'none',
+              zIndex: 1
             }}
           />
+
+          {/* Foreground Uncropped Media */}
+          {currentMedia.type === 'video' || currentMedia.url?.match(/\.(mp4|webm|mov)(\?.*)?$/i) ? (
+            <video
+              src={currentMedia.url}
+              autoPlay
+              playsInline
+              controls
+              style={{
+                position: 'relative',
+                maxWidth: '100%',
+                maxHeight: '100%',
+                objectFit: 'contain',
+                zIndex: 2
+              }}
+            />
+          ) : (
+            <img
+              src={currentMedia.url}
+              alt="Story"
+              style={{
+                position: 'relative',
+                maxWidth: '100%',
+                maxHeight: '100%',
+                objectFit: 'contain',
+                zIndex: 2
+              }}
+            />
+          )}
 
           {/* Left & Right Touch Areas for Navigation */}
           <div

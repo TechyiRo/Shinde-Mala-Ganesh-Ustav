@@ -1,17 +1,64 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useData } from '../context/DataContext';
-import { Printer, Download, Share2, X } from 'lucide-react';
+import { Printer, Download, Share2, X, Loader2 } from 'lucide-react';
 import { numberToWordsMr, numberToWordsEn, formatCurrency } from '../i18n/numberToWords';
+import html2pdf from 'html2pdf.js';
 
-export const PavtiModal = ({ isOpen, pavti, onClose }) => {
+export const PavtiModal = ({ isOpen, pavti, onClose, isPublic = false }) => {
   const { lang, t } = useLanguage();
   const { mandalSettings } = useData();
+  const receiptRef = useRef(null);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   if (!isOpen || !pavti) return null;
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!receiptRef.current) return;
+    setIsGeneratingPdf(true);
+    try {
+      // Ensure web fonts are completely loaded before rendering canvas
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+
+      const element = receiptRef.current;
+      const cleanPavtiNo = (pavti.pavtiNo || 'Receipt').replace(/[^a-zA-Z0-9_-]/g, '_');
+      
+      const opt = {
+        margin: [4, 4, 4, 4], // mm margins
+        filename: `Pavti_${cleanPavtiNo}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+          scale: 2.5,
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+          letterRendering: true,
+          scrollX: 0,
+          scrollY: 0
+        },
+        jsPDF: {
+          unit: 'mm',
+          format: 'a5',
+          orientation: 'landscape',
+          compress: true
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      };
+
+      await html2pdf().set(opt).from(element).save();
+    } catch (err) {
+      console.error('PDF download error:', err);
+      // Fallback to native print / save as PDF
+      window.print();
+    } finally {
+      setIsGeneratingPdf(false);
+    }
   };
 
   const handleWhatsApp = () => {
@@ -23,9 +70,9 @@ export const PavtiModal = ({ isOpen, pavti, onClose }) => {
     const formattedAmt = formatCurrency(pavti.amount);
 
     const mandalTitle = mandalSettings.mandalName || 'शिंदे मळा गणेश उत्सव मंडळ';
-    const textMarathi = `॥ गणपती बाप्पा मोरया ॥\n\nसस्नेह नमस्कार,\n*${mandalTitle}* कडून आपल्या देणगीची पावती तपशील:\n\n📜 *पावती क्र.:* ${pavti.pavtiNo}\n📅 *तारीख:* ${pavti.date}\n👤 *देणगीदार:* ${pavti.donorName}\n💰 *रक्कम:* ${formattedAmt}\n📝 *अक्षरी:* ${wordsMr}\n💳 *पेमेंट मोड:* ${pavti.paymentMode} ${pavti.refNo ? `(${pavti.refNo})` : ''}\n🙏 *देणगी प्रकार:* ${pavti.donationType}\n✍️ *स्वीकारकर्ता:* ${pavti.receivedBy}\n\nआपल्या मोलाच्या योगदानाबद्दल मनःपूर्वक धन्यवाद! श्री गणरायाच्या कृपेने आपल्या सर्व मनोकामना पूर्ण होवोत!\n\n_शिंदे मळा गणेश उत्सव मंडळ, सातारा_`;
+    const textMarathi = `॥ गणपती बाप्पा मोरया ॥\n\nसस्नेह नमस्कार,\n*${mandalTitle}* कडून आपल्या देणगीची पावती तपशील:\n\n📜 *पावती क्र.:* ${pavti.pavtiNo}\n📅 *तारीख:* ${pavti.date}\n👤 *देणगीदार:* ${pavti.donorName}\n💰 *रक्कम:* ${formattedAmt}\n📝 *अक्षरी:* ${wordsMr}\n💳 *पेमेंट मोड:* ${pavti.paymentMode} ${pavti.refNo ? `(${pavti.refNo})` : ''}\n🙏 *देणगी प्रकार:* ${pavti.donationType}\n✍️ *स्वीकारकर्ता:* ${pavti.receivedBy || mandalSettings.treasurer || 'व्यवस्थापक'}\n\nआपल्या मोलाच्या योगदानाबद्दल मनःपूर्वक धन्यवाद! श्री गणरायाच्या कृपेने आपल्या सर्व मनोकामना पूर्ण होवोत!\n\n_शिंदे मळा गणेश उत्सव मंडळ, शिंदे मळा_`;
 
-    const textEnglish = `|| Ganpati Bappa Morya ||\n\nDear Devotee,\n*${mandalSettings.mandalNameEn || mandalTitle}* has received your generous contribution:\n\n📜 *Receipt No.:* ${pavti.pavtiNo}\n📅 *Date:* ${pavti.date}\n👤 *Donor:* ${pavti.donorName}\n💰 *Amount:* ${formattedAmt}\n📝 *In Words:* ${wordsEn}\n💳 *Mode:* ${pavti.paymentMode} ${pavti.refNo ? `(${pavti.refNo})` : ''}\n🙏 *Type:* ${pavti.donationType}\n✍️ *Received By:* ${pavti.receivedBy}\n\nThank you heartfelt for your support! May Lord Ganesha bless you and your family!\n\n_Shinde Mala Ganesh Utsav Mandal_`;
+    const textEnglish = `|| Ganpati Bappa Morya ||\n\nDear Devotee,\n*${mandalSettings.mandalNameEn || mandalTitle}* has received your generous contribution:\n\n📜 *Receipt No.:* ${pavti.pavtiNo}\n📅 *Date:* ${pavti.date}\n👤 *Donor:* ${pavti.donorName}\n💰 *Amount:* ${formattedAmt}\n📝 *In Words:* ${wordsEn}\n💳 *Mode:* ${pavti.paymentMode} ${pavti.refNo ? `(${pavti.refNo})` : ''}\n🙏 *Type:* ${pavti.donationType}\n✍️ *Received By:* ${pavti.receivedBy || mandalSettings.treasurer || 'Manager'}\n\nThank you heartfelt for your support! May Lord Ganesha bless you and your family!\n\n_Shinde Mala Ganesh Utsav Mandal_`;
 
     const message = lang === 'mr' ? textMarathi : textEnglish;
     const url = `https://wa.me/${cleanMobile}?text=${encodeURIComponent(message)}`;
@@ -38,7 +85,14 @@ export const PavtiModal = ({ isOpen, pavti, onClose }) => {
     <div className="modal-overlay" onClick={onClose}>
       <div
         className="modal-content"
-        style={{ maxWidth: '680px', padding: '1.25rem', position: 'relative' }}
+        style={{
+          maxWidth: '720px',
+          width: '95%',
+          padding: 'clamp(0.75rem, 3vw, 1.25rem)',
+          position: 'relative',
+          maxHeight: '92vh',
+          overflowY: 'auto'
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Action Header (Hidden on Print) */}
@@ -49,26 +103,59 @@ export const PavtiModal = ({ isOpen, pavti, onClose }) => {
             alignItems: 'center',
             justifyContent: 'space-between',
             borderBottom: '1px solid var(--glass-border)',
-            paddingBottom: '0.85rem',
-            marginBottom: '1rem'
+            paddingBottom: '0.75rem',
+            marginBottom: '0.9rem',
+            flexWrap: 'wrap',
+            gap: '0.5rem'
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <img src="/ganesh-icon.svg" alt="Ganesh" style={{ width: '32px', height: '32px' }} />
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>
+            <img src="/ganesh-icon.svg" alt="Ganesh" style={{ width: '30px', height: '30px' }} />
+            <h3
+              style={{
+                fontSize: 'clamp(1rem, 3.5vw, 1.15rem)',
+                fontWeight: 800,
+                margin: 0,
+                fontFamily: "'Yatra One', 'Anek Devanagari', sans-serif"
+              }}
+            >
               {t('receiptTitle')} — <span style={{ color: 'var(--accent-gold-light)' }}>{pavti.pavtiNo}</span>
             </h3>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <button className="btn btn-whatsapp btn-sm" onClick={handleWhatsApp} title="Share on WhatsApp">
-              <Share2 size={16} />
-              <span>{t('shareWhatsApp')}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+            {!isPublic && (
+              <button
+                className="btn btn-whatsapp btn-sm"
+                onClick={handleWhatsApp}
+                title="Share on WhatsApp"
+                style={{ padding: '0.4rem 0.75rem', fontSize: '0.82rem' }}
+              >
+                <Share2 size={15} />
+                <span>{t('shareWhatsApp')}</span>
+              </button>
+            )}
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={handleDownloadPDF}
+              disabled={isGeneratingPdf}
+              title="Download PDF"
+              style={{ padding: '0.4rem 0.75rem', fontSize: '0.82rem', borderColor: '#3b82f6', color: '#60a5fa' }}
+            >
+              {isGeneratingPdf ? <Loader2 size={15} className="spin-slow" /> : <Download size={15} />}
+              <span>{isGeneratingPdf ? 'PDF तयार होत आहे...' : t('downloadPdf')}</span>
             </button>
-            <button className="btn btn-primary btn-sm" onClick={handlePrint} title="Print A5">
-              <Printer size={16} />
-              <span>{t('printReceipt')}</span>
-            </button>
+            {!isPublic && (
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={handlePrint}
+                title="Print A5 Receipt"
+                style={{ padding: '0.4rem 0.75rem', fontSize: '0.82rem' }}
+              >
+                <Printer size={15} />
+                <span>{t('printReceipt')}</span>
+              </button>
+            )}
             <button
               onClick={onClose}
               style={{
@@ -77,55 +164,121 @@ export const PavtiModal = ({ isOpen, pavti, onClose }) => {
                 color: 'var(--text-subtle)',
                 cursor: 'pointer',
                 padding: '4px',
-                marginLeft: '4px'
+                marginLeft: '2px',
+                display: 'flex',
+                alignItems: 'center'
               }}
+              title={t('close')}
             >
-              <X size={22} />
+              <X size={20} />
             </button>
           </div>
         </div>
 
-        {/* Printable A5 Pavti Sheet */}
+        {/* Printable & Downloadable A5 Pavti Sheet */}
         <div
+          ref={receiptRef}
           className="a5-receipt-sheet"
           style={{
-            background: 'linear-gradient(180deg, #fffdf8 0%, #fff7eb 100%)',
+            background: 'linear-gradient(180deg, #ffffff 0%, #fffdf8 60%, #fffbf2 100%)',
             color: '#1a1006',
-            border: '2px solid #b45309',
-            borderRadius: '16px',
-            padding: '1.5rem',
+            border: '2.5px solid #b45309',
+            borderRadius: '14px',
+            padding: 'clamp(0.85rem, 3vw, 1.35rem)',
             position: 'relative',
-            boxShadow: '0 8px 30px rgba(0, 0, 0, 0.15)',
-            fontFamily: "'Mukta', 'Noto Sans Devanagari', sans-serif"
+            boxShadow: '0 8px 30px rgba(0, 0, 0, 0.12)',
+            fontFamily: "'Yatra One', 'Anek Devanagari', 'Baloo 2', 'Mukta', sans-serif",
+            width: '100%',
+            boxSizing: 'border-box',
+            overflow: 'hidden'
           }}
         >
-          {/* Watermark Motif */}
+          {/* Decorative Corner Ornaments (Traditional Mandal Pavti Style) */}
           <div
             style={{
               position: 'absolute',
-              top: '50%',
+              top: '4px',
+              left: '6px',
+              color: '#d97706',
+              fontSize: '11px',
+              lineHeight: 1,
+              userSelect: 'none',
+              pointerEvents: 'none'
+            }}
+          >
+            ❖
+          </div>
+          <div
+            style={{
+              position: 'absolute',
+              top: '4px',
+              right: '6px',
+              color: '#d97706',
+              fontSize: '11px',
+              lineHeight: 1,
+              userSelect: 'none',
+              pointerEvents: 'none'
+            }}
+          >
+            ❖
+          </div>
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '4px',
+              left: '6px',
+              color: '#d97706',
+              fontSize: '11px',
+              lineHeight: 1,
+              userSelect: 'none',
+              pointerEvents: 'none'
+            }}
+          >
+            ❖
+          </div>
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '4px',
+              right: '6px',
+              color: '#d97706',
+              fontSize: '11px',
+              lineHeight: 1,
+              userSelect: 'none',
+              pointerEvents: 'none'
+            }}
+          >
+            ❖
+          </div>
+
+          {/* Central Watermark Motif */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '52%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              opacity: 0.05,
+              opacity: 0.045,
               pointerEvents: 'none',
               zIndex: 0
             }}
           >
-            <img src="/ganesh-icon.svg" alt="Watermark" style={{ width: '280px', height: '280px' }} />
+            <img src="/ganesh-icon.svg" alt="Watermark" style={{ width: '260px', height: '260px' }} />
           </div>
 
-          {/* Top Tagline */}
+          {/* Top Auspicious Tagline */}
           <div
             style={{
               textAlign: 'center',
-              fontSize: '0.88rem',
-              fontWeight: 700,
+              fontSize: 'clamp(0.85rem, 2.5vw, 0.95rem)',
+              fontWeight: 800,
               color: '#c2410c',
-              letterSpacing: '0.05em',
-              marginBottom: '0.25rem'
+              letterSpacing: '0.04em',
+              marginBottom: '0.35rem',
+              fontFamily: "'Yatra One', 'Anek Devanagari', sans-serif"
             }}
           >
-            {mandalSettings.tagline || '॥ श्री गणेशाय नमः ॥ गणपती बाप्पा मोरया'}
+            {mandalSettings.tagline || '॥ श्री गणेशाय नमः ॥ गणपती बाप्पा मोरया ॥'}
           </div>
 
           {/* Mandal Header */}
@@ -134,33 +287,51 @@ export const PavtiModal = ({ isOpen, pavti, onClose }) => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              borderBottom: '2px dashed #d97706',
-              paddingBottom: '0.75rem',
-              marginBottom: '1rem',
+              borderBottom: '2px solid #b45309',
+              paddingBottom: '0.65rem',
+              marginBottom: '0.85rem',
               position: 'relative',
-              zIndex: 1
+              zIndex: 1,
+              gap: '0.65rem'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flex: 1, minWidth: 0 }}>
               <img
                 src="/ganesh-icon.svg"
                 alt="Logo"
-                style={{ width: '56px', height: '56px', filter: 'drop-shadow(0 2px 4px rgba(230,81,0,0.25))' }}
+                style={{
+                  width: 'clamp(44px, 8vw, 56px)',
+                  height: 'clamp(44px, 8vw, 56px)',
+                  flexShrink: 0,
+                  filter: 'drop-shadow(0 2px 4px rgba(230,81,0,0.3))'
+                }}
               />
-              <div>
+              <div style={{ minWidth: 0, flex: 1 }}>
                 <h1
                   style={{
-                    fontSize: '1.45rem',
+                    fontSize: 'clamp(1.15rem, 4vw, 1.45rem)',
                     fontWeight: 800,
                     color: '#7c2d12',
-                    lineHeight: '1.2',
-                    margin: 0
+                    lineHeight: '1.25',
+                    margin: 0,
+                    fontFamily: "'Yatra One', 'Anek Devanagari', sans-serif",
+                    letterSpacing: '0.01em',
+                    whiteSpace: 'normal',
+                    wordBreak: 'break-word'
                   }}
                 >
                   {mandalSettings.mandalName || 'शिंदे मळा गणेश उत्सव मंडळ'}
                 </h1>
-                <p style={{ fontSize: '0.82rem', color: '#78350f', margin: '2px 0 0' }}>
-                  {mandalSettings.regNo || 'नोंदणी क्र. महा/१२४५/२०१२'} | {mandalSettings.address || 'सातारा'}
+                <p
+                  style={{
+                    fontSize: 'clamp(0.75rem, 2.2vw, 0.82rem)',
+                    fontWeight: 700,
+                    color: '#92400e',
+                    margin: '2px 0 0',
+                    fontFamily: "'Anek Devanagari', sans-serif"
+                  }}
+                >
+                  {mandalSettings.regNo || 'नोंदणी क्र. महा/१२४५/२०१२'} | {mandalSettings.address || 'शिंदे मळा, हिंगणी दुमाला , ४१२२१०'}
                 </p>
               </div>
             </div>
@@ -168,108 +339,236 @@ export const PavtiModal = ({ isOpen, pavti, onClose }) => {
             <div
               style={{
                 textAlign: 'right',
-                border: '1px solid #d97706',
-                padding: '0.35rem 0.75rem',
+                border: '1.5px solid #d97706',
+                padding: '0.3rem 0.65rem',
                 borderRadius: '8px',
-                backgroundColor: 'rgba(254, 243, 199, 0.6)'
+                backgroundColor: 'rgba(254, 243, 199, 0.85)',
+                flexShrink: 0
               }}
             >
-              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#9a3412', textTransform: 'uppercase' }}>
+              <div
+                style={{
+                  fontSize: 'clamp(0.72rem, 2vw, 0.78rem)',
+                  fontWeight: 800,
+                  color: '#9a3412',
+                  fontFamily: "'Anek Devanagari', 'Yatra One', sans-serif"
+                }}
+              >
                 {t('receiptDevoteeCopy')}
               </div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#b45309' }}>
-                {mandalSettings.year || '2026'}
+              <div
+                style={{
+                  fontSize: 'clamp(0.8rem, 2.2vw, 0.9rem)',
+                  fontWeight: 800,
+                  color: '#b45309',
+                  fontFamily: "'Yatra One', sans-serif"
+                }}
+              >
+                उत्सव {mandalSettings.year || '२०२६'}
               </div>
             </div>
           </div>
 
-          {/* Receipt Info Bar */}
+          {/* Receipt Info Ribbon */}
           <div
             style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              backgroundColor: 'rgba(254, 243, 199, 0.7)',
-              padding: '0.45rem 0.85rem',
-              borderRadius: '8px',
+              backgroundColor: '#fef3c7',
+              padding: '0.4rem 0.75rem',
+              borderRadius: '7px',
               border: '1px solid #fde68a',
-              marginBottom: '1rem',
+              marginBottom: '0.85rem',
               position: 'relative',
-              zIndex: 1
+              zIndex: 1,
+              flexWrap: 'wrap',
+              gap: '0.4rem',
+              fontFamily: "'Anek Devanagari', 'Yatra One', sans-serif"
             }}
           >
             <div>
-              <span style={{ fontSize: '0.85rem', color: '#78350f', fontWeight: 600 }}>{t('pavtiNo')}: </span>
-              <strong style={{ fontSize: '1rem', color: '#b45309' }}>{pavti.pavtiNo}</strong>
+              <span style={{ fontSize: '0.88rem', color: '#78350f', fontWeight: 700 }}>
+                {t('pavtiNo')}:{' '}
+              </span>
+              <strong
+                style={{
+                  fontSize: '1rem',
+                  color: '#b45309',
+                  fontWeight: 800,
+                  fontFamily: "'Yatra One', sans-serif"
+                }}
+              >
+                {pavti.pavtiNo}
+              </strong>
             </div>
             <div>
-              <span style={{ fontSize: '0.85rem', color: '#78350f', fontWeight: 600 }}>{t('receiptDate')}: </span>
-              <strong style={{ fontSize: '0.92rem', color: '#1a1006' }}>
+              <span style={{ fontSize: '0.85rem', color: '#78350f', fontWeight: 700 }}>
+                {t('receiptDate')}:{' '}
+              </span>
+              <strong style={{ fontSize: '0.9rem', color: '#1a1006', fontWeight: 800 }}>
                 {pavti.date} {pavti.time ? `(${pavti.time})` : ''}
               </strong>
             </div>
           </div>
 
-          {/* Donor Details Table */}
-          <div style={{ position: 'relative', zIndex: 1, marginBottom: '1rem' }}>
+          {/* Devotee Details Table */}
+          <div
+            style={{
+              position: 'relative',
+              zIndex: 1,
+              marginBottom: '0.85rem',
+              fontFamily: "'Anek Devanagari', 'Mukta', sans-serif"
+            }}
+          >
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <tbody>
-                <tr>
-                  <td style={{ padding: '0.35rem 0', width: '28%', color: '#78350f', fontWeight: 600, fontSize: '0.92rem' }}>
+                {/* Devotee Name - Highlighted in Blue & Bold */}
+                <tr style={{ borderBottom: '1px dashed #fde68a' }}>
+                  <td
+                    style={{
+                      padding: '0.4rem 0',
+                      width: '30%',
+                      color: '#78350f',
+                      fontWeight: 800,
+                      fontSize: 'clamp(0.88rem, 2.5vw, 0.95rem)',
+                      fontFamily: "'Anek Devanagari', 'Yatra One', sans-serif"
+                    }}
+                  >
                     {t('donorName')}:
                   </td>
-                  <td style={{ padding: '0.35rem 0', fontWeight: 700, fontSize: '1.05rem', color: '#1a1006' }}>
-                    {pavti.donorName}
-                  </td>
-                </tr>
-                <tr>
-                  <td style={{ padding: '0.35rem 0', color: '#78350f', fontWeight: 600, fontSize: '0.92rem' }}>
-                    {t('mobileNumber')}:
-                  </td>
-                  <td style={{ padding: '0.35rem 0', fontWeight: 600, fontSize: '0.95rem', color: '#1a1006' }}>
-                    {pavti.mobile || '—'}
-                  </td>
-                </tr>
-                <tr>
-                  <td style={{ padding: '0.35rem 0', color: '#78350f', fontWeight: 600, fontSize: '0.92rem' }}>
-                    {t('addressArea')}:
-                  </td>
-                  <td style={{ padding: '0.35rem 0', color: '#332211', fontSize: '0.92rem' }}>
-                    {pavti.address || 'स्थानिक'}
-                  </td>
-                </tr>
-                <tr>
-                  <td style={{ padding: '0.35rem 0', color: '#78350f', fontWeight: 600, fontSize: '0.92rem' }}>
-                    {t('donationType')}:
-                  </td>
-                  <td style={{ padding: '0.35rem 0', color: '#1a1006', fontWeight: 600 }}>
+                  <td
+                    style={{
+                      padding: '0.4rem 0',
+                      fontFamily: "'Anek Devanagari', 'Yatra One', sans-serif"
+                    }}
+                  >
                     <span
                       style={{
-                        padding: '0.15rem 0.55rem',
-                        borderRadius: '6px',
-                        backgroundColor: '#fed7aa',
-                        color: '#9a3412',
-                        fontSize: '0.85rem'
+                        color: '#1d4ed8', // Vibrant Blue Color
+                        fontWeight: 800, // Bold Font
+                        fontSize: 'clamp(1.05rem, 3.2vw, 1.25rem)',
+                        letterSpacing: '0.01em',
+                        display: 'inline-block'
                       }}
                     >
-                      {t(`type${pavti.donationType}`) || pavti.donationType}
+                      {pavti.donorName}
                     </span>
                   </td>
                 </tr>
-                <tr>
-                  <td style={{ padding: '0.35rem 0', color: '#78350f', fontWeight: 600, fontSize: '0.92rem' }}>
-                    {t('paymentMode')}:
+
+                {/* Mobile Number */}
+                <tr style={{ borderBottom: '1px dashed #fde68a' }}>
+                  <td
+                    style={{
+                      padding: '0.35rem 0',
+                      color: '#78350f',
+                      fontWeight: 700,
+                      fontSize: 'clamp(0.85rem, 2.4vw, 0.92rem)',
+                      fontFamily: "'Anek Devanagari', sans-serif"
+                    }}
+                  >
+                    {t('mobileNumber')}:
                   </td>
-                  <td style={{ padding: '0.35rem 0', color: '#1a1006', fontWeight: 600, fontSize: '0.92rem' }}>
-                    {t(`mode${pavti.paymentMode}`) || pavti.paymentMode} {pavti.refNo ? `[${pavti.refNo}]` : ''}
+                  <td
+                    style={{
+                      padding: '0.35rem 0',
+                      fontWeight: 700,
+                      fontSize: '0.92rem',
+                      color: '#1a1006'
+                    }}
+                  >
+                    {pavti.mobile || '—'}
                   </td>
                 </tr>
+
+                {/* Address */}
+                <tr style={{ borderBottom: '1px dashed #fde68a' }}>
+                  <td
+                    style={{
+                      padding: '0.35rem 0',
+                      color: '#78350f',
+                      fontWeight: 700,
+                      fontSize: 'clamp(0.85rem, 2.4vw, 0.92rem)',
+                      fontFamily: "'Anek Devanagari', sans-serif"
+                    }}
+                  >
+                    {t('addressArea')}:
+                  </td>
+                  <td
+                    style={{
+                      padding: '0.35rem 0',
+                      color: '#261b11',
+                      fontWeight: 700,
+                      fontSize: '0.92rem'
+                    }}
+                  >
+                    {pavti.address || 'स्थानिक (शिंदे मळा)'}
+                  </td>
+                </tr>
+
+                {/* Donation Type & Payment Mode */}
+                <tr style={{ borderBottom: '1px dashed #fde68a' }}>
+                  <td
+                    style={{
+                      padding: '0.35rem 0',
+                      color: '#78350f',
+                      fontWeight: 700,
+                      fontSize: 'clamp(0.85rem, 2.4vw, 0.92rem)',
+                      fontFamily: "'Anek Devanagari', sans-serif"
+                    }}
+                  >
+                    {t('donationType')}:
+                  </td>
+                  <td style={{ padding: '0.35rem 0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <span
+                        style={{
+                          padding: '0.12rem 0.55rem',
+                          borderRadius: '5px',
+                          backgroundColor: '#fed7aa',
+                          color: '#9a3412',
+                          fontSize: '0.85rem',
+                          fontWeight: 800,
+                          fontFamily: "'Anek Devanagari', 'Yatra One', sans-serif"
+                        }}
+                      >
+                        {t(`type${pavti.donationType}`) || pavti.donationType}
+                      </span>
+                      <span style={{ fontSize: '0.82rem', color: '#78350f', fontWeight: 600 }}>
+                        ({t('paymentMode')}:{' '}
+                        <strong style={{ color: '#1a1006' }}>
+                          {t(`mode${pavti.paymentMode}`) || pavti.paymentMode}
+                          {pavti.refNo ? ` - ${pavti.refNo}` : ''}
+                        </strong>
+                        )
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+
                 {pavti.remarks && (
                   <tr>
-                    <td style={{ padding: '0.35rem 0', color: '#78350f', fontWeight: 600, fontSize: '0.92rem' }}>
+                    <td
+                      style={{
+                        padding: '0.35rem 0',
+                        color: '#78350f',
+                        fontWeight: 700,
+                        fontSize: 'clamp(0.85rem, 2.4vw, 0.92rem)',
+                        fontFamily: "'Anek Devanagari', sans-serif"
+                      }}
+                    >
                       {t('remarks')}:
                     </td>
-                    <td style={{ padding: '0.35rem 0', color: '#4b3b2b', fontStyle: 'italic', fontSize: '0.88rem' }}>
+                    <td
+                      style={{
+                        padding: '0.35rem 0',
+                        color: '#4b3b2b',
+                        fontWeight: 600,
+                        fontSize: '0.88rem',
+                        fontStyle: 'italic'
+                      }}
+                    >
                       {pavti.remarks}
                     </td>
                   </tr>
@@ -278,34 +577,70 @@ export const PavtiModal = ({ isOpen, pavti, onClose }) => {
             </table>
           </div>
 
-          {/* Big Highlight Amount Box */}
+          {/* Prominent Amount Box - Price in Vibrant Blue & Bold */}
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               backgroundColor: '#fef3c7',
-              border: '2px solid #f59e0b',
-              borderRadius: '12px',
-              padding: '0.75rem 1.25rem',
-              marginBottom: '1rem',
+              border: '2px solid #3b82f6', // Accent blue border pairing
+              borderRadius: '10px',
+              padding: 'clamp(0.5rem, 2vw, 0.75rem) clamp(0.75rem, 2.5vw, 1.25rem)',
+              marginBottom: '0.85rem',
               position: 'relative',
-              zIndex: 1
+              zIndex: 1,
+              flexWrap: 'wrap',
+              gap: '0.5rem',
+              boxShadow: '0 2px 8px rgba(59, 130, 246, 0.1)'
             }}
           >
-            <div>
-              <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#92400e', textTransform: 'uppercase' }}>
+            <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 'clamp(0.75rem, 2vw, 0.82rem)',
+                  fontWeight: 800,
+                  color: '#92400e',
+                  textTransform: 'uppercase',
+                  fontFamily: "'Anek Devanagari', 'Yatra One', sans-serif"
+                }}
+              >
                 {t('amountInWords')}
               </div>
-              <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#78350f' }}>
+              <div
+                style={{
+                  fontSize: 'clamp(0.88rem, 2.4vw, 1rem)',
+                  fontWeight: 800,
+                  color: '#1e40af', // Blue font for words
+                  fontFamily: "'Anek Devanagari', 'Yatra One', sans-serif",
+                  marginTop: '1px'
+                }}
+              >
                 {amountInWordsText}
               </div>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#92400e' }}>
+
+            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              <div
+                style={{
+                  fontSize: 'clamp(0.75rem, 2vw, 0.82rem)',
+                  fontWeight: 800,
+                  color: '#92400e',
+                  fontFamily: "'Anek Devanagari', sans-serif"
+                }}
+              >
                 {t('amount')}
               </div>
-              <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#b45309' }}>
+              <div
+                style={{
+                  fontSize: 'clamp(1.5rem, 4.5vw, 1.95rem)',
+                  fontWeight: 900, // Extra Bold
+                  color: '#1d4ed8', // Vibrant Blue Color
+                  lineHeight: '1.1',
+                  fontFamily: "'Anek Devanagari', 'Yatra One', sans-serif",
+                  letterSpacing: '0.01em'
+                }}
+              >
                 {formatCurrency(pavti.amount)}
               </div>
             </div>
@@ -315,13 +650,15 @@ export const PavtiModal = ({ isOpen, pavti, onClose }) => {
           <div
             style={{
               textAlign: 'center',
-              fontSize: '0.85rem',
-              fontWeight: 600,
+              fontSize: 'clamp(0.78rem, 2.2vw, 0.86rem)',
+              fontWeight: 700,
               color: '#9a3412',
               fontStyle: 'italic',
-              marginBottom: '1.25rem',
+              marginBottom: '1rem',
               position: 'relative',
-              zIndex: 1
+              zIndex: 1,
+              fontFamily: "'Anek Devanagari', 'Yatra One', sans-serif",
+              lineHeight: 1.35
             }}
           >
             {t('receiptBlessing')}
@@ -333,26 +670,35 @@ export const PavtiModal = ({ isOpen, pavti, onClose }) => {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'flex-end',
-              paddingTop: '1.25rem',
-              borderTop: '1px solid #e5e7eb',
+              paddingTop: '0.85rem',
+              borderTop: '1px solid #d97706',
               position: 'relative',
-              zIndex: 1
+              zIndex: 1,
+              fontFamily: "'Anek Devanagari', sans-serif"
             }}
           >
             <div style={{ textAlign: 'center' }}>
-              <div style={{ height: '35px' }}></div>
-              <div style={{ width: '150px', borderTop: '1px solid #78350f', margin: '0 auto 4px' }}></div>
-              <div style={{ fontSize: '0.82rem', color: '#78350f', fontWeight: 600 }}>
+              <div style={{ height: '24px' }}></div>
+              <div style={{ width: 'clamp(110px, 25vw, 150px)', borderTop: '1px solid #78350f', margin: '0 auto 4px' }}></div>
+              <div style={{ fontSize: '0.82rem', color: '#78350f', fontWeight: 700 }}>
                 {t('receiptDevoteeSign')}
               </div>
             </div>
 
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '0.82rem', color: '#1a1006', fontWeight: 700, marginBottom: '4px' }}>
-                {pavti.receivedBy || mandalSettings.treasurer}
+              <div
+                style={{
+                  fontSize: '0.85rem',
+                  color: '#1a1006',
+                  fontWeight: 800,
+                  marginBottom: '2px',
+                  fontFamily: "'Anek Devanagari', 'Yatra One', sans-serif"
+                }}
+              >
+                {pavti.receivedBy || mandalSettings.treasurer || 'खजिनदार'}
               </div>
-              <div style={{ width: '180px', borderTop: '1px solid #78350f', margin: '0 auto 4px' }}></div>
-              <div style={{ fontSize: '0.82rem', color: '#78350f', fontWeight: 600 }}>
+              <div style={{ width: 'clamp(130px, 30vw, 170px)', borderTop: '1px solid #78350f', margin: '0 auto 4px' }}></div>
+              <div style={{ fontSize: '0.82rem', color: '#78350f', fontWeight: 700 }}>
                 {t('receiptAuthorizedSign')}
               </div>
             </div>
@@ -365,23 +711,37 @@ export const PavtiModal = ({ isOpen, pavti, onClose }) => {
           style={{
             display: 'flex',
             justifyContent: 'flex-end',
-            gap: '0.75rem',
-            marginTop: '1.25rem',
-            paddingTop: '0.85rem',
-            borderTop: '1px solid var(--glass-border)'
+            gap: '0.65rem',
+            marginTop: '1rem',
+            paddingTop: '0.75rem',
+            borderTop: '1px solid var(--glass-border)',
+            flexWrap: 'wrap'
           }}
         >
           <button className="btn btn-secondary" onClick={onClose}>
             {t('close')}
           </button>
-          <button className="btn btn-whatsapp" onClick={handleWhatsApp}>
-            <Share2 size={16} />
-            <span>{t('shareWhatsApp')}</span>
+          {!isPublic && (
+            <button className="btn btn-whatsapp" onClick={handleWhatsApp}>
+              <Share2 size={16} />
+              <span>{t('shareWhatsApp')}</span>
+            </button>
+          )}
+          <button
+            className="btn btn-primary"
+            onClick={handleDownloadPDF}
+            disabled={isGeneratingPdf}
+            style={{ backgroundColor: '#2563eb', borderColor: '#3b82f6' }}
+          >
+            {isGeneratingPdf ? <Loader2 size={16} className="spin-slow" /> : <Download size={16} />}
+            <span>{isGeneratingPdf ? 'PDF तयार होत आहे...' : t('downloadPdf')}</span>
           </button>
-          <button className="btn btn-primary" onClick={handlePrint}>
-            <Printer size={16} />
-            <span>{t('printReceipt')}</span>
-          </button>
+          {!isPublic && (
+            <button className="btn btn-primary" onClick={handlePrint}>
+              <Printer size={16} />
+              <span>{t('printReceipt')}</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -3,7 +3,7 @@ export const translations = {
     // App & Header
     appTitle: 'शिंदे मळा गणेश उत्सव मंडळ',
     appSubtitle: 'पावती व हिशोब व्यवस्थापन प्रणाली २०२६',
-    mandalDefaultName: 'शिंदे मळा गणेश उत्सव मंडळ, सातारा',
+    mandalDefaultName: 'शिंदे मळा गणेश उत्सव मंडळ, शिंदे मळा',
     mandalRegNo: 'नोंदणी क्र. महा/१२४५/२०१२',
     mandalTagline: '॥ श्री गणेशाय नमः ॥ गणपती बाप्पा मोरया',
     year: '२०२६',
@@ -257,7 +257,7 @@ export const translations = {
     // App & Header
     appTitle: 'Shinde Mala Ganesh Utsav Mandal',
     appSubtitle: 'Pavti & Expense Management System 2026',
-    mandalDefaultName: 'Shinde Mala Ganesh Utsav Mandal, Satara',
+    mandalDefaultName: 'Shinde Mala Ganesh Utsav Mandal, Shinde Mala',
     mandalRegNo: 'Reg. No. MAH/1245/2012',
     mandalTagline: '|| Shri Ganeshaya Namah || Ganpati Bappa Morya',
     year: '2026',

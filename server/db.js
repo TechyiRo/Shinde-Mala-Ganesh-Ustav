@@ -67,10 +67,15 @@ async function seedInitialData(db) {
       });
       console.log('🌱 Seeded official Mandal Settings to MongoDB Atlas');
     } else {
-      // Ensure official contact is up to date
+      // Ensure official contact and address are up to date
       await settingsCol.updateOne(
-        { _id: 'mandal_settings', contact: '9822012345' },
-        { $set: { contact: '9922466579' } }
+        { _id: 'mandal_settings' },
+        {
+          $set: {
+            contact: '9922466579',
+            address: 'शिंदे मळा, हिंगणी दुमाला , ४१२२१०'
+          }
+        }
       );
     }
     // Note: Pavtis, expenses, and events are not automatically re-seeded

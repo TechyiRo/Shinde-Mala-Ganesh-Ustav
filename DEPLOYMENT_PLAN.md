@@ -11,7 +11,7 @@ This document provides a comprehensive, step-by-step guide to deploying the **�
 | **MongoDB Atlas Cluster** | ✅ Ready | `cluster0.cosetsy.mongodb.net` (Database: `ganesh_utsav`) |
 | **Data Clean Slate** | ✅ Wiped | All sample receipts, expenses & events wiped; counters at ₹0 |
 | **Official Committee** | ✅ Saved | अध्यक्ष: श्री. तुषार शिंदे \| खजिनदार: श्री. तुकाराम शिंदे व श्री. धनंजय शिंदे \| कार्यवाह: श्री. मानस शिंदे |
-| **Mandal Address** | ✅ Saved | शिंदे मळा, हिंगणी Dumala, शिंदे मळा, ४१२२१० |
+| **Mandal Address** | ✅ Saved | शिंदे मळा, हिंगणी दुमाला , ४१२२१० |
 | **First Pavti Serial** | ✅ Ready | Starts at `GU-2026-0001` |
 | **Production Build** | ✅ Tested | `npm run build` generates clean `dist/` bundle |
 | **Security** | ✅ Protected | `.env` added to `.gitignore` to prevent credential exposure |

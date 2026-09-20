@@ -55,7 +55,7 @@ export const DataProvider = ({ children }) => {
         return {
           ...parsed,
           mandalName: 'शिंदे मळा गणेश उत्सव मंडळ',
-          address: 'शिंदे मळा, हिंगणी Dumala, शिंदे मळा, ४१२२१०',
+          address: 'शिंदे मळा, हिंगणी दुमाला , ४१२२१०',
           president: 'श्री. तुषार शिंदे',
           treasurer: 'श्री. तुकाराम शिंदे व श्री. धनंजय शिंदे',
           secretary: 'श्री. मानस शिंदे'
@@ -106,6 +106,7 @@ export const DataProvider = ({ children }) => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isMongoConnected, setIsMongoConnected] = useState(false);
   const [offlineQueue, setOfflineQueue] = useState([]);
+  const [recentlyAddedPavtiId, setRecentlyAddedPavtiId] = useState(null);
 
   // Fetch initial data from MongoDB Atlas backend
   useEffect(() => {
@@ -117,7 +118,11 @@ export const DataProvider = ({ children }) => {
           const data = await res.json();
           if (isMounted) {
             if (data.settings && Object.keys(data.settings).length > 0) {
-              setMandalSettings((prev) => ({ ...prev, ...data.settings }));
+              const incomingSettings = { ...data.settings };
+              if (!incomingSettings.address || incomingSettings.address.includes('Dumala') || incomingSettings.address.includes('सातारा') || incomingSettings.address.includes('शिंदे मळा, हिंगणी दुमाला, शिंदे मळा')) {
+                incomingSettings.address = 'शिंदे मळा, हिंगणी दुमाला , ४१२२१०';
+              }
+              setMandalSettings((prev) => ({ ...prev, ...incomingSettings }));
             }
             if (Array.isArray(data.pavtiList)) {
               setPavtiList(data.pavtiList);
@@ -271,6 +276,12 @@ export const DataProvider = ({ children }) => {
       createdAt: new Date().toISOString()
     };
     setPavtiList((prev) => [newPavti, ...prev]);
+
+    // Live celebration highlight for newly created Pavti
+    setRecentlyAddedPavtiId(newPavti.id);
+    setTimeout(() => {
+      setRecentlyAddedPavtiId((cur) => (cur === newPavti.id ? null : cur));
+    }, 3500);
 
     // Sync to MongoDB Atlas
     fetch('/api/pavtis', {
@@ -471,6 +482,7 @@ export const DataProvider = ({ children }) => {
         mandalSettings,
         updateSettings,
         pavtiList,
+        recentlyAddedPavtiId,
         createPavti,
         updatePavti,
         deletePavti,
