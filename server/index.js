@@ -18,6 +18,18 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
+// Ensure MongoDB Atlas connection is active for API requests (supports Vercel Serverless & Node.js)
+app.use(async (req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    try {
+      await connectDB();
+    } catch (err) {
+      console.warn('MongoDB Atlas connection check:', err.message);
+    }
+  }
+  next();
+});
+
 // ================= REAL-TIME SERVER-SENT EVENTS (SSE) =================
 const sseClients = new Set();
 
@@ -525,7 +537,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Start Server after connecting to MongoDB Atlas
+// Start Server after connecting to MongoDB Atlas (for local dev & Node.js hosts like Render/Railway)
 async function startServer() {
   try {
     await connectDB();
@@ -538,4 +550,9 @@ async function startServer() {
   }
 }
 
-startServer();
+// In local / standalone Node.js, run HTTP listener; on Vercel Serverless, export app
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export default app;
