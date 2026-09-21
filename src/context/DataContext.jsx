@@ -361,29 +361,61 @@ export const DataProvider = ({ children }) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Sync to LocalStorage
+  // Safe LocalStorage setter with QuotaExceededError protection (avoids React crash on large images)
+  const safeSetLocalStorage = (key, value) => {
+    try {
+      localStorage.setItem(key, value);
+    } catch (err) {
+      console.warn(`[Storage] Could not cache ${key} in localStorage (${err.name}):`, err.message);
+      if (err.name === 'QuotaExceededError') {
+        try {
+          // If quota exceeded, strip large base64 media strings for lightweight fallback cache
+          const parsed = JSON.parse(value);
+          if (Array.isArray(parsed)) {
+            const lightweight = parsed.map((item) => {
+              if (item && item.media && Array.isArray(item.media)) {
+                return {
+                  ...item,
+                  media: item.media.map((m) => ({
+                    ...m,
+                    url: typeof m.url === 'string' && m.url.length > 500 ? '/logo.png' : m.url
+                  }))
+                };
+              }
+              return item;
+            });
+            localStorage.setItem(key, JSON.stringify(lightweight));
+          }
+        } catch {
+          // Ignore secondary fallback failure
+        }
+      }
+    }
+  };
+
+  // Sync to LocalStorage safely
   useEffect(() => {
-    localStorage.setItem('mandal_settings', JSON.stringify(mandalSettings));
+    safeSetLocalStorage('mandal_settings', JSON.stringify(mandalSettings));
   }, [mandalSettings]);
 
   useEffect(() => {
-    localStorage.setItem('mandal_pavti_data', JSON.stringify(pavtiList));
+    safeSetLocalStorage('mandal_pavti_data', JSON.stringify(pavtiList));
   }, [pavtiList]);
 
   useEffect(() => {
-    localStorage.setItem('mandal_expense_data', JSON.stringify(expenseList));
+    safeSetLocalStorage('mandal_expense_data', JSON.stringify(expenseList));
   }, [expenseList]);
 
   useEffect(() => {
-    localStorage.setItem('mandal_events_data', JSON.stringify(eventList));
+    safeSetLocalStorage('mandal_events_data', JSON.stringify(eventList));
   }, [eventList]);
 
   useEffect(() => {
-    localStorage.setItem('mandal_status_data', JSON.stringify(statusList));
+    safeSetLocalStorage('mandal_status_data', JSON.stringify(statusList));
   }, [statusList]);
 
   useEffect(() => {
-    localStorage.setItem('mandal_theme', theme);
+    safeSetLocalStorage('mandal_theme', theme);
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 

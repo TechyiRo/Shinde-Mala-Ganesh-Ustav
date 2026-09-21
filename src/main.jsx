@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './App';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { LanguageProvider } from './context/LanguageContext';
 import { AuthProvider } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
@@ -23,14 +24,16 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <LanguageProvider>
-      <AuthProvider>
-        <DataProvider>
-          <MusicProvider>
-            <App />
-          </MusicProvider>
-        </DataProvider>
-      </AuthProvider>
-    </LanguageProvider>
+    <ErrorBoundary>
+      <LanguageProvider>
+        <AuthProvider>
+          <DataProvider>
+            <MusicProvider>
+              <App />
+            </MusicProvider>
+          </DataProvider>
+        </AuthProvider>
+      </LanguageProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );
