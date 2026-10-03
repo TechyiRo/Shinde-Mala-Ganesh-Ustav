@@ -10,6 +10,7 @@ import { EventStoriesViewer } from '../components/EventStoriesViewer';
 import { EventPostCard } from '../components/EventPostCard';
 import { DeveloperBadge } from '../components/DeveloperBadge';
 import { PavtiModal } from '../components/PavtiModal';
+import { AnnualReportModal } from '../components/AnnualReportModal';
 import { useMusic } from '../context/MusicContext';
 import confetti from 'canvas-confetti';
 import {
@@ -37,13 +38,16 @@ import {
   Download,
   Play,
   Pause,
-  Music
+  Music,
+  FileText,
+  Share2
 } from 'lucide-react';
 import { formatCurrency } from '../i18n/numberToWords';
 
 export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
   const { lang, toggleLang, t } = useLanguage();
   const { mandalSettings, pavtiList, expenseList, eventList = [], activeStatuses = [], totalCollection, totalExpense, balance, pavtiCount, theme, toggleTheme, recentlyAddedPavtiId } = useData();
+  const [isAnnualReportOpen, setIsAnnualReportOpen] = useState(false);
   const [isStoriesViewerOpen, setIsStoriesViewerOpen] = useState(false);
   const [selectedDayStory, setSelectedDayStory] = useState(1);
   const [selectedStatusId, setSelectedStatusId] = useState(null);
@@ -376,6 +380,26 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
           >
             {t('topDonors')}
           </button>
+          <button
+            onClick={() => setIsAnnualReportOpen(true)}
+            style={{
+              background: 'rgba(245, 158, 11, 0.15)',
+              border: '1px solid rgba(251, 191, 36, 0.4)',
+              color: 'var(--accent-gold-light)',
+              fontSize: '0.82rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              padding: '0.25rem 0.65rem',
+              borderRadius: '999px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.35rem'
+            }}
+            title="वार्षिक जमा-खर्च हिशोब अहवाल व ताळेबंद PDF पहा व डाउनलोड करा"
+          >
+            <FileText size={14} />
+            <span>वार्षिक अहवाल PDF</span>
+          </button>
         </div>
 
         {/* Right Controls: Music Button, Lang, Theme & Admin Portal */}
@@ -688,6 +712,200 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
                   transition: 'width 1s cubic-bezier(0.16, 1, 0.3, 1)'
                 }}
               />
+            </div>
+          </div>
+
+          {/* 4. Complete Annual Audit Report PDF Showcase Banner (Public & Mobile Friendly) */}
+          <div
+            className="annual-report-banner"
+            style={{
+              marginTop: '1.5rem',
+              padding: 'clamp(1rem, 3.5vw, 1.85rem)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1.15rem'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.85rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', minWidth: 0, flex: '1 1 340px' }}>
+                <div
+                  className="annual-report-badge-glow"
+                  style={{
+                    width: 'clamp(46px, 10vw, 56px)',
+                    height: 'clamp(46px, 10vw, 56px)',
+                    borderRadius: '16px',
+                    background: 'linear-gradient(135deg, #ff7722, #b45309)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#fff',
+                    flexShrink: 0
+                  }}
+                >
+                  <FileText size={28} />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      padding: '0.2rem 0.65rem',
+                      borderRadius: '999px',
+                      backgroundColor: 'rgba(245, 158, 11, 0.18)',
+                      color: 'var(--accent-gold-light)',
+                      fontSize: '0.74rem',
+                      fontWeight: 800,
+                      marginBottom: '0.35rem',
+                      border: '1px solid rgba(251, 191, 36, 0.4)'
+                    }}
+                  >
+                    <Sparkles size={13} />
+                    <span>अधिकृत सार्वजनिक ताळेबंद २०२६</span>
+                  </div>
+                  <h3
+                    style={{
+                      fontSize: 'clamp(1.05rem, 3vw, 1.35rem)',
+                      fontWeight: 800,
+                      color: 'var(--text-main)',
+                      margin: '0 0 0.35rem',
+                      lineHeight: 1.3
+                    }}
+                  >
+                    संपूर्ण वार्षिक जमा-खर्च हिशोब अहवाल (Audit PDF)
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: 'clamp(0.82rem, 2vw, 0.88rem)',
+                      color: 'var(--text-subtle)',
+                      margin: 0,
+                      lineHeight: 1.5,
+                      maxWidth: '720px'
+                    }}
+                  >
+                    मंडळाची एकूण जमा झालेली पावती वर्गणी, झालेला सर्व उत्सव खर्च, शिल्लक निधी व देणगीदारांची संपूर्ण अधिकृत हिशोब PDF मोबाईलवर पहा व डाउनलोड करा.
+                  </p>
+                </div>
+              </div>
+
+              {/* Action Buttons: View Report & Download PDF */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.65rem',
+                  flexWrap: 'wrap',
+                  width: 'auto'
+                }}
+              >
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setIsAnnualReportOpen(true)}
+                  style={{
+                    padding: '0.55rem 1rem',
+                    fontSize: '0.88rem',
+                    fontWeight: 700,
+                    borderColor: 'rgba(251, 191, 36, 0.5)',
+                    color: 'var(--text-main)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.45rem',
+                    minHeight: '42px'
+                  }}
+                  title="अहवाल पहा (View Full Report Preview)"
+                >
+                  <Eye size={17} color="#f59e0b" />
+                  <span>अहवाल पहा (View)</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => setIsAnnualReportOpen(true)}
+                  style={{
+                    padding: '0.55rem 1.15rem',
+                    fontSize: '0.88rem',
+                    fontWeight: 800,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.45rem',
+                    boxShadow: '0 6px 18px rgba(230, 81, 0, 0.45)',
+                    minHeight: '42px'
+                  }}
+                  title="PDF डाउनलोड करा (Download PDF)"
+                >
+                  <Download size={17} />
+                  <span>PDF डाउनलोड करा</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Metrics Strip */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                gap: '0.65rem',
+                paddingTop: '0.75rem',
+                borderTop: '1px solid rgba(251, 191, 36, 0.2)'
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  fontSize: '0.82rem',
+                  color: 'var(--text-subtle)'
+                }}
+              >
+                <span style={{ color: '#34d399', fontWeight: 800 }}>● एकूण जमा:</span>
+                <strong style={{ color: '#34d399' }}>{formatCurrency(totalCollection)}</strong>
+                <span style={{ fontSize: '0.74rem' }}>({pavtiCount} पावत्या)</span>
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  fontSize: '0.82rem',
+                  color: 'var(--text-subtle)'
+                }}
+              >
+                <span style={{ color: '#f87171', fontWeight: 800 }}>● एकूण खर्च:</span>
+                <strong style={{ color: '#f87171' }}>{formatCurrency(totalExpense)}</strong>
+                <span style={{ fontSize: '0.74rem' }}>({expenseList.length} खर्च नोंदी)</span>
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  fontSize: '0.82rem',
+                  color: 'var(--text-subtle)'
+                }}
+              >
+                <span style={{ color: 'var(--accent-gold-light)', fontWeight: 800 }}>● शिल्लक बचत:</span>
+                <strong style={{ color: 'var(--accent-gold-light)' }}>{formatCurrency(balance)}</strong>
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  fontSize: '0.76rem',
+                  color: '#10b981',
+                  fontWeight: 600,
+                  justifyContent: 'flex-end'
+                }}
+              >
+                <ShieldCheck size={14} />
+                <span>१००% अचूक व पारदर्शक</span>
+              </div>
             </div>
           </div>
         </section>
@@ -1799,6 +2017,12 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
         pavti={selectedViewingPavti}
         onClose={() => setSelectedViewingPavti(null)}
         isPublic={true}
+      />
+
+      {/* Complete Annual Financial Audit Report Modal */}
+      <AnnualReportModal
+        isOpen={isAnnualReportOpen}
+        onClose={() => setIsAnnualReportOpen(false)}
       />
     </div>
   );

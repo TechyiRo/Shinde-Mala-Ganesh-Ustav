@@ -6,6 +6,7 @@ import { DailyTrendChart } from '../components/Charts/DailyTrendChart';
 import { ExpenseDonutChart } from '../components/Charts/ExpenseDonutChart';
 import { PaymentModeBarChart } from '../components/Charts/PaymentModeBarChart';
 import { PavtiModal } from '../components/PavtiModal';
+import { AnnualReportModal } from '../components/AnnualReportModal';
 import {
   TrendingUp,
   TrendingDown,
@@ -16,7 +17,9 @@ import {
   Eye,
   Trophy,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  FileText,
+  Download
 } from 'lucide-react';
 import { formatCurrency } from '../i18n/numberToWords';
 
@@ -26,6 +29,7 @@ export const Dashboard = ({ setActiveTab }) => {
 
   const [selectedPavti, setSelectedPavti] = useState(null);
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
+  const [isAnnualReportOpen, setIsAnnualReportOpen] = useState(false);
 
   const handleViewReceipt = (pavti) => {
     setSelectedPavti(pavti);
@@ -67,6 +71,23 @@ export const Dashboard = ({ setActiveTab }) => {
         </div>
 
         <div className="dashboard-header-actions" style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap' }}>
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={() => setIsAnnualReportOpen(true)}
+            style={{
+              minHeight: '40px',
+              padding: '0.45rem 0.95rem',
+              fontSize: 'var(--font-btn)',
+              borderColor: 'rgba(251, 191, 36, 0.5)',
+              color: 'var(--accent-gold-light)',
+              fontWeight: 700,
+              backgroundColor: 'rgba(245, 158, 11, 0.1)'
+            }}
+            title="वार्षिक जमा-खर्च हिशोब अहवाल व ताळेबंद PDF पहा व डाउनलोड करा"
+          >
+            <FileText size={16} />
+            <span>वार्षिक अहवाल PDF</span>
+          </button>
           <button className="btn btn-primary btn-sm" onClick={() => setActiveTab('createPavti')} style={{ minHeight: '40px', padding: '0.45rem 0.9rem', fontSize: 'var(--font-btn)' }}>
             <FilePlus size={16} />
             <span>{t('navCreatePavti')}</span>
@@ -379,6 +400,12 @@ export const Dashboard = ({ setActiveTab }) => {
         isOpen={isReceiptOpen}
         pavti={selectedPavti}
         onClose={() => setIsReceiptOpen(false)}
+      />
+
+      {/* Complete Annual Financial Audit Report Modal */}
+      <AnnualReportModal
+        isOpen={isAnnualReportOpen}
+        onClose={() => setIsAnnualReportOpen(false)}
       />
     </div>
   );
