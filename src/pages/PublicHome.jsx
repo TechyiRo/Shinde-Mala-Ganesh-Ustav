@@ -1926,7 +1926,20 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
             </h4>
             <ul style={{ listStyle: 'none', padding: 0, fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.8 }}>
               <li><strong>अध्यक्ष:</strong> {mandalSettings.president || 'श्री. तुषार शिंदे'}</li>
-              <li><strong>खजिनदार:</strong> {mandalSettings.treasurer || 'श्री. तुकाराम शिंदे व श्री. धनंजय शिंदे'}</li>
+              <li>
+                <strong>खजिनदार:</strong> {mandalSettings.treasurer || 'श्री. तुकाराम शिंदे व श्री. धनंजय शिंदे'}
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', marginLeft: '0.45rem', verticalAlign: 'middle' }}>
+                  <img
+                    src="/signatures/mayur-signature.png"
+                    alt="खजिनदार स्वाक्षरी"
+                    style={{ height: '20px', maxWidth: '70px', objectFit: 'contain', filter: 'brightness(1.05)' }}
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                  <span style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 700 }} title="अधिकृत डिजिटल स्वाक्षरी प्रमाणीत">
+                    (स्वाक्षरी ✓)
+                  </span>
+                </span>
+              </li>
               <li><strong>कार्यवाह:</strong> {mandalSettings.secretary || 'श्री. मानस शिंदे'}</li>
             </ul>
           </div>

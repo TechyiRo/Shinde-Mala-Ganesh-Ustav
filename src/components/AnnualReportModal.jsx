@@ -1001,8 +1001,16 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                           <div style={{ fontSize: '8.5px', color: '#ea580c', fontWeight: 700 }}>अध्यक्ष</div>
                         </div>
                         <div>
-                          <div style={{ height: '22px', borderBottom: '1px dashed #c2410c', margin: '0 auto', width: '80%' }} />
-                          <div style={{ fontSize: '10px', fontWeight: 800, color: '#451a03', marginTop: '3px' }}>
+                          <div style={{ height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <img
+                              src="/signatures/mayur-signature.png"
+                              alt="खजिनदार स्वाक्षरी"
+                              style={{ maxHeight: '24px', maxWidth: '90px', objectFit: 'contain' }}
+                              onError={(e) => { e.target.style.display = 'none'; }}
+                            />
+                          </div>
+                          <div style={{ height: '1px', borderBottom: '1px dashed #c2410c', margin: '2px auto 3px', width: '80%' }} />
+                          <div style={{ fontSize: '10px', fontWeight: 800, color: '#451a03' }}>
                             {mandalSettings.treasurer || 'श्री. तुकाराम शिंदे व श्री. धनंजय शिंदे'}
                           </div>
                           <div style={{ fontSize: '8.5px', color: '#ea580c', fontWeight: 700 }}>खजिनदार</div>
@@ -1231,10 +1239,16 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
 
                         {/* Treasurer */}
                         <div>
-                          <div style={{ height: '30px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-                            <span style={{ borderBottom: '1px dashed #c2410c', width: '80%', display: 'inline-block' }} />
+                          <div style={{ height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <img
+                              src="/signatures/mayur-signature.png"
+                              alt="खजिनदार स्वाक्षरी"
+                              style={{ maxHeight: '32px', maxWidth: '105px', objectFit: 'contain' }}
+                              onError={(e) => { e.target.style.display = 'none'; }}
+                            />
                           </div>
-                          <div style={{ fontSize: '10.5px', fontWeight: 800, color: '#451a03', marginTop: '3px' }}>
+                          <div style={{ height: '1px', borderBottom: '1px dashed #c2410c', margin: '2px auto 3px', width: '80%' }} />
+                          <div style={{ fontSize: '10.5px', fontWeight: 800, color: '#451a03' }}>
                             {mandalSettings.treasurer || 'श्री. तुकाराम शिंदे व श्री. धनंजय शिंदे'}
                           </div>
                           <div style={{ fontSize: '9px', color: '#ea580c', fontWeight: 700 }}>

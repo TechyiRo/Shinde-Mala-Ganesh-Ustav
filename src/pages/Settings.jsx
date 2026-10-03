@@ -286,6 +286,16 @@ export const Settings = () => {
                 value={formData.treasurer || ''}
                 onChange={(e) => handleInputChange('treasurer', e.target.value)}
               />
+              <div style={{ marginTop: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'rgba(255, 255, 255, 0.04)', padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid var(--glass-border)' }}>
+                <span style={{ fontSize: '0.74rem', color: 'var(--text-subtle)' }}>अधिकृत डिजिटल स्वाक्षरी:</span>
+                <img
+                  src="/signatures/mayur-signature.png"
+                  alt="Mayur Signature"
+                  style={{ maxHeight: '24px', maxWidth: '80px', objectFit: 'contain' }}
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+                <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 700 }}>✓ Mayur Signature सक्रिय (Active)</span>
+              </div>
             </div>
 
             <div className="form-group">

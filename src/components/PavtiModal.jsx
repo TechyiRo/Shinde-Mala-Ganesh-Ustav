@@ -678,7 +678,7 @@ export const PavtiModal = ({ isOpen, pavti, onClose, isPublic = false }) => {
             }}
           >
             <div style={{ textAlign: 'center' }}>
-              <div style={{ height: '24px' }}></div>
+              <div style={{ height: '36px' }}></div>
               <div style={{ width: 'clamp(110px, 25vw, 150px)', borderTop: '1px solid #78350f', margin: '0 auto 4px' }}></div>
               <div style={{ fontSize: '0.82rem', color: '#78350f', fontWeight: 700 }}>
                 {t('receiptDevoteeSign')}
@@ -686,6 +686,18 @@ export const PavtiModal = ({ isOpen, pavti, onClose, isPublic = false }) => {
             </div>
 
             <div style={{ textAlign: 'center' }}>
+              <div style={{ height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '2px' }}>
+                <img
+                  src="/signatures/mayur-signature.png"
+                  alt="अधिकृत स्वाक्षरी"
+                  style={{
+                    maxHeight: '34px',
+                    maxWidth: '120px',
+                    objectFit: 'contain'
+                  }}
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+              </div>
               <div
                 style={{
                   fontSize: '0.85rem',
