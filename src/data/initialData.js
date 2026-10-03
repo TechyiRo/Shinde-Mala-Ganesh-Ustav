@@ -568,3 +568,16 @@ export const initialEventList = [
     ]
   }
 ];
+
+export const initialMahaprasadData = {
+  id: 'MAHAPRASAD-2026',
+  title: 'श्री गणेश जयंती व अनंत चतुर्दशी महाप्रसाद अन्नदान सोहळा',
+  titleEn: 'Shri Ganesh Utsav Grand Mahaprasad & Annadan Seva 2026',
+  year: '2026',
+  date: '2026-09-24',
+  totalExpense: 0,
+  notes: '',
+  manakariList: []
+};
+
+

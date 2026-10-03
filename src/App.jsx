@@ -7,6 +7,7 @@ import { Dashboard } from './pages/Dashboard';
 import { CreatePavti } from './pages/CreatePavti';
 import { ManagePavti } from './pages/ManagePavti';
 import { Expenses } from './pages/Expenses';
+import { ManageMahaprasad } from './pages/ManageMahaprasad';
 import { ManageEvents } from './pages/ManageEvents';
 import { Settings } from './pages/Settings';
 import { Login } from './pages/Login';
@@ -122,6 +123,7 @@ export const App = () => {
             {activeTab === 'createPavti' && <CreatePavti />}
             {activeTab === 'managePavti' && <ManagePavti />}
             {activeTab === 'expenses' && <Expenses />}
+            {activeTab === 'mahaprasad' && <ManageMahaprasad />}
             {activeTab === 'events' && <ManageEvents />}
             {activeTab === 'settings' && <Settings />}
           </main>

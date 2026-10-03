@@ -11,6 +11,7 @@ import { EventPostCard } from '../components/EventPostCard';
 import { DeveloperBadge } from '../components/DeveloperBadge';
 import { PavtiModal } from '../components/PavtiModal';
 import { AnnualReportModal } from '../components/AnnualReportModal';
+import { MahaprasadPublicSection } from '../components/MahaprasadPublicSection';
 import { useMusic } from '../context/MusicContext';
 import confetti from 'canvas-confetti';
 import {
@@ -40,7 +41,8 @@ import {
   Pause,
   Music,
   FileText,
-  Share2
+  Share2,
+  UtensilsCrossed
 } from 'lucide-react';
 import { formatCurrency } from '../i18n/numberToWords';
 
@@ -361,6 +363,23 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
             style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.88rem', fontWeight: 600, cursor: 'pointer' }}
           >
             {t('navManagePavti')}
+          </button>
+          <button
+            onClick={() => scrollToSection('mahaprasad-section')}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--accent-gold-light)',
+              fontSize: '0.88rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+          >
+            <UtensilsCrossed size={14} color="#f59e0b" />
+            <span>महाप्रसाद</span>
           </button>
           <button
             onClick={() => scrollToSection('public-events-section')}
@@ -1226,6 +1245,12 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
             )}
           </div>
         </section>
+
+        {/* ================================================================= */}
+        {/* 4.5 MAHAPRASAD MANAKARI & PER-HEAD EXPENSE DIVISION SECTION       */}
+        {/* Placed immediately below Public Pavti Ledger as requested         */}
+        {/* ================================================================= */}
+        <MahaprasadPublicSection />
 
         {/* ================================================================= */}
         {/* 5. PUBLIC EXPENSES TRANSPARENCY SECTION */}

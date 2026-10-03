@@ -127,12 +127,13 @@ app.get('/api/data', async (req, res) => {
     const db = getDB();
     const nowIso = new Date().toISOString();
 
-    const [settingsDoc, pavtiList, expenseList, eventList, statusList] = await Promise.all([
+    const [settingsDoc, pavtiList, expenseList, eventList, statusList, mahaprasadDoc] = await Promise.all([
       db.collection('settings').findOne({ _id: 'mandal_settings' }),
       db.collection('pavtis').find({}).sort({ pavtiNo: -1 }).toArray(),
       db.collection('expenses').find({}).sort({ date: -1 }).toArray(),
       db.collection('events').find({}).sort({ isPinned: -1, dayNumber: -1, date: -1 }).toArray(),
-      db.collection('statuses').find({}).sort({ isPinned: -1, createdAt: -1 }).toArray()
+      db.collection('statuses').find({}).sort({ isPinned: -1, createdAt: -1 }).toArray(),
+      db.collection('mahaprasad').findOne({ _id: 'mahaprasad_2026' })
     ]);
 
     // Format docs to ensure clean string ids
@@ -147,12 +148,18 @@ app.get('/api/data', async (req, res) => {
       delete settings._id;
     }
 
+    let mahaprasad = mahaprasadDoc;
+    if (mahaprasad && mahaprasad._id) {
+      delete mahaprasad._id;
+    }
+
     res.json({
       settings: settings || null,
       pavtiList: sanitize(pavtiList),
       expenseList: sanitize(expenseList),
       eventList: sanitize(eventList),
-      statusList: sanitize(statusList)
+      statusList: sanitize(statusList),
+      mahaprasadData: mahaprasad || null
     });
   } catch (err) {
     console.error('Error in /api/data:', err);
@@ -509,6 +516,37 @@ app.put('/api/settings', async (req, res) => {
 
     broadcastEvent('SETTINGS_UPDATED', newSettings);
     res.json({ success: true, settings: newSettings });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ================= MAHAPRASAD CRUD =================
+app.get('/api/mahaprasad', async (req, res) => {
+  try {
+    const db = getDB();
+    const doc = await db.collection('mahaprasad').findOne({ _id: 'mahaprasad_2026' });
+    if (doc && doc._id) delete doc._id;
+    res.json(doc || {});
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/mahaprasad', async (req, res) => {
+  try {
+    const db = getDB();
+    const data = req.body;
+    delete data._id;
+    const doc = { _id: 'mahaprasad_2026', ...data, updatedAt: new Date().toISOString() };
+    await db.collection('mahaprasad').replaceOne(
+      { _id: 'mahaprasad_2026' },
+      doc,
+      { upsert: true }
+    );
+
+    broadcastEvent('MAHAPRASAD_UPDATED', data);
+    res.json({ success: true, item: data });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

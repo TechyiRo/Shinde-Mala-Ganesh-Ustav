@@ -13,7 +13,8 @@ import {
   RotateCcw,
   CheckCircle2,
   ShieldCheck,
-  Sparkles
+  Sparkles,
+  UtensilsCrossed
 } from 'lucide-react';
 import { formatCurrency, numberToWordsMr } from '../i18n/numberToWords';
 import { jsPDF } from 'jspdf';
@@ -21,7 +22,22 @@ import html2canvas from 'html2canvas';
 
 export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => {
   const { t } = useLanguage();
-  const { mandalSettings, pavtiList, expenseList, totalCollection, totalExpense, balance, pavtiCount } = useData();
+  const {
+    mandalSettings,
+    pavtiList,
+    expenseList,
+    totalCollection,
+    totalExpense,
+    balance,
+    pavtiCount,
+    mahaprasadData,
+    mahaprasadTotalExpense,
+    manakariList,
+    manakariCount,
+    perHeadShare,
+    totalMahaprasadCollected,
+    totalMahaprasadPending
+  } = useData();
   const reportRef = useRef(null);
 
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -146,8 +162,9 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
   // Total pages calculation
   const totalPagesCount = useMemo(() => {
     if (reportScope === 'summary') return 1;
-    if (!includeReceipts) return 2;
-    return 2 + pavtiChunks.length;
+    if (reportScope === 'mahaprasad') return 1;
+    if (!includeReceipts) return 3;
+    return 3 + pavtiChunks.length;
   }, [reportScope, includeReceipts, pavtiChunks.length]);
 
   // Formatted Generation Date & Time
@@ -177,7 +194,9 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
       }
 
       const cleanYear = mandalSettings.year || '2026';
-      const filename = `Shinde_Mala_Ganesh_Utsav_Ahaval_${cleanYear}.pdf`;
+      const filename = reportScope === 'mahaprasad'
+        ? `Shinde_Mala_Mahaprasad_Ahaval_${cleanYear}.pdf`
+        : `Shinde_Mala_Ganesh_Utsav_Ahaval_${cleanYear}.pdf`;
 
       // Select all individual pages from the report
       const pageElements = reportRef.current.querySelectorAll('.pdf-page');
@@ -751,6 +770,23 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
               >
                 १-पानी ताळेबंद (Single Page Summary)
               </button>
+              <button
+                className={`chip-btn ${reportScope === 'mahaprasad' ? 'active' : ''}`}
+                onClick={() => setReportScope('mahaprasad')}
+                style={{
+                  padding: '0.2rem 0.6rem',
+                  fontSize: '0.76rem',
+                  borderRadius: '999px',
+                  backgroundColor: reportScope === 'mahaprasad' ? '#d97706' : 'rgba(255, 255, 255, 0.06)',
+                  color: reportScope === 'mahaprasad' ? '#fff' : 'var(--text-muted)',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                🍲 महाप्रसाद अहवाल (Mahaprasad Statement)
+              </button>
             </div>
           </div>
 
@@ -819,6 +855,7 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                 {/* ========================================================================= */}
                 {/* PAGE 1: EXECUTIVE AUDIT SUMMARY & TAALEBAND (मुख्य ताळेबंद व गोषवारा)    */}
                 {/* ========================================================================= */}
+                {reportScope !== 'mahaprasad' && (
                 <div
                   className="pdf-page pdf-page-break-after"
                   style={{
@@ -1281,13 +1318,12 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                   {renderPdfPageFooter('शिंदे मळा गणेश उत्सव मंडळ • अधिकृत ताळेबंद', 1)}
                 </div>
               </div>
+              )}
 
               {/* ========================================================================= */}
               {/* PAGE 2: ITEMIZED EXPENSES TABLE (तपशीलवार खर्च व्हाउचर्स यादी)            */}
-              {/* Note: If includeReceipts is false, Signatures are here as the LAST page.  */}
-              {/* If includeReceipts is true, Signatures appear on the LAST page (Page 3+).*/}
               {/* ========================================================================= */}
-              {reportScope !== 'summary' && (
+              {reportScope !== 'summary' && reportScope !== 'mahaprasad' && (
                 <div
                   className="pdf-page pdf-page-break-after"
                   style={{
@@ -1301,8 +1337,8 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
-                    pageBreakAfter: includeReceipts ? 'always' : 'auto',
-                    breakAfter: includeReceipts ? 'page' : 'auto',
+                    pageBreakAfter: 'always',
+                    breakAfter: 'page',
                     position: 'relative',
                     overflow: 'hidden'
                   }}
@@ -1479,9 +1515,6 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                       </div>
                     </div>
 
-                    {/* If Receipts are NOT included, Page 2 is the LAST page, so render Signatures Block here */}
-                    {!includeReceipts && renderSignaturesBlock()}
-
                     {/* Page 2 Bottom Footer */}
                     {renderPdfPageFooter('शिंदे मळा गणेश उत्सव मंडळ • खर्च अहवाल', 2)}
                   </div>
@@ -1489,12 +1522,223 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
               )}
 
               {/* ========================================================================= */}
-              {/* PAGE 3+ : DETAILED PAVTI LEDGER & FINAL SIGNATURES BLOCK                  */}
+              {/* PAGE 3: MAHAPRASAD STATEMENT & MANAKARI CONTRIBUTION LEDGER                */}
+              {/* ========================================================================= */}
+              {(reportScope === 'all' || reportScope === 'mahaprasad') && (
+                <div
+                  className="pdf-page pdf-page-break-after"
+                  style={{
+                    width: '670px',
+                    minHeight: '960px',
+                    maxHeight: '960px',
+                    boxSizing: 'border-box',
+                    backgroundColor: '#ffffff',
+                    color: '#1a1006',
+                    padding: '12px 14px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    pageBreakAfter: (reportScope === 'all' && includeReceipts) ? 'always' : 'auto',
+                    breakAfter: (reportScope === 'all' && includeReceipts) ? 'page' : 'auto',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <div
+                    style={{
+                      border: '2px solid #b45309',
+                      borderRadius: '6px',
+                      padding: '10px 12px',
+                      boxSizing: 'border-box',
+                      width: '100%',
+                      height: '100%',
+                      backgroundColor: '#ffffff',
+                      position: 'relative',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between'
+                    }}
+                  >
+                    {/* Top Content */}
+                    <div>
+                      {/* Mini Header */}
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          borderBottom: '2px solid #ea580c',
+                          paddingBottom: '4px',
+                          marginBottom: '6px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <img
+                            src="/logo.png"
+                            onError={(e) => {
+                              e.target.src = '/ganesh-icon.svg';
+                            }}
+                            alt="Logo"
+                            style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }}
+                          />
+                          <div>
+                            <div style={{ fontSize: '11.5px', fontWeight: 900, color: '#9a3412', lineHeight: 1.1 }}>
+                              {mandalSettings.mandalName}
+                            </div>
+                            <div style={{ fontSize: '7.8px', color: '#78350f', fontWeight: 600 }}>
+                              {mandalSettings.address} • {mandalSettings.regNo}
+                            </div>
+                          </div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: '9px', fontWeight: 800, color: '#c2410c' }}>
+                            महाप्रसाद मानकरी व खर्च विभागणी
+                          </div>
+                          <div style={{ fontSize: '7.8px', color: '#78350f' }}>
+                            वर्ष: {mandalSettings.year || '२०२६'}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Sacred Mantra & Section Title */}
+                      <div
+                        style={{
+                          backgroundColor: '#fffbeb',
+                          border: '1px solid #fde68a',
+                          borderRadius: '4px',
+                          padding: '3.5px 8px',
+                          marginBottom: '6px',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center'
+                        }}
+                      >
+                        <span style={{ fontSize: '9.5px', fontWeight: 800, color: '#b45309' }}>
+                          ॥ अन्नदान हेच श्रेष्ठ दान ॥ महाप्रसाद मानकरी हिशोब अहवाल
+                        </span>
+                        <span style={{ fontSize: '8px', color: '#92400e', fontWeight: 600 }}>
+                          तारीख: {mahaprasadData?.date || '२४ सप्टेंबर २०२६'}
+                        </span>
+                      </div>
+
+                      {/* 4-Column Mahaprasad Analytics Banner */}
+                      <div
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(4, 1fr)',
+                          gap: '5px',
+                          marginBottom: '6px'
+                        }}
+                      >
+                        <div style={{ backgroundColor: '#fff7ed', border: '1px solid #fed7aa', borderRadius: '4px', padding: '3.5px 6px', textAlign: 'center' }}>
+                          <div style={{ fontSize: '7.2px', color: '#c2410c', fontWeight: 700 }}>एकूण महाप्रसाद खर्च</div>
+                          <div style={{ fontSize: '10.5px', fontWeight: 900, color: '#9a3412' }}>{formatCurrency(mahaprasadTotalExpense)}</div>
+                        </div>
+                        <div style={{ backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '4px', padding: '3.5px 6px', textAlign: 'center' }}>
+                          <div style={{ fontSize: '7.2px', color: '#b45309', fontWeight: 700 }}>सहभागी मानकरी</div>
+                          <div style={{ fontSize: '10.5px', fontWeight: 900, color: '#78350f' }}>{manakariCount} मानकरी</div>
+                        </div>
+                        <div style={{ backgroundColor: '#f0fdf4', border: '1.5px solid #86efac', borderRadius: '4px', padding: '3.5px 6px', textAlign: 'center' }}>
+                          <div style={{ fontSize: '7.2px', color: '#15803d', fontWeight: 800 }}>⭐ प्रत्येकी खर्च (वाटा)</div>
+                          <div style={{ fontSize: '11px', fontWeight: 900, color: '#166534' }}>{formatCurrency(perHeadShare)}</div>
+                        </div>
+                        <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '4px', padding: '3.5px 6px', textAlign: 'center' }}>
+                          <div style={{ fontSize: '7.2px', color: '#1d4ed8', fontWeight: 700 }}>जमा स्थिती</div>
+                          <div style={{ fontSize: '10.5px', fontWeight: 900, color: '#1e40af' }}>{formatCurrency(totalMahaprasadCollected)} (१००%)</div>
+                        </div>
+                      </div>
+
+                      {/* Manakari Statement Table */}
+                      <div style={{ border: '1px solid #fed7aa', borderRadius: '4px', overflow: 'hidden', marginBottom: '5px' }}>
+                        <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: '8px', color: '#1a1006' }}>
+                          <thead>
+                            <tr style={{ backgroundColor: '#ffedd5', borderBottom: '1.5px solid #fdba74', color: '#9a3412', fontWeight: 800 }}>
+                              <th style={{ padding: '2.5px 4px', textAlign: 'center', width: '6%' }}>क्र.</th>
+                              <th style={{ padding: '2.5px 6px', textAlign: 'left', width: '33%' }}>मानकऱ्याचे नाव</th>
+                              <th style={{ padding: '2.5px 6px', textAlign: 'left', width: '22%' }}>पत्ता / परिसर</th>
+                              <th style={{ padding: '2.5px 6px', textAlign: 'right', width: '13%' }}>प्रत्येकी वाटा</th>
+                              <th style={{ padding: '2.5px 6px', textAlign: 'right', width: '13%' }}>जमा रक्कम</th>
+                              <th style={{ padding: '2.5px 4px', textAlign: 'center', width: '13%' }}>स्थिती</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {manakariList.map((m, idx) => {
+                              const isPaid = m.status === 'Paid';
+                              return (
+                                <tr
+                                  key={m.id || idx}
+                                  style={{
+                                    backgroundColor: idx % 2 === 0 ? '#ffffff' : '#fffdfa',
+                                    borderBottom: '1px solid #fed7aa'
+                                  }}
+                                >
+                                  <td style={{ padding: '2px 4px', textAlign: 'center', color: '#78350f', fontWeight: 700 }}>{idx + 1}</td>
+                                  <td style={{ padding: '2px 6px', fontWeight: 800, color: '#1a1006' }}>{m.name}</td>
+                                  <td style={{ padding: '2px 6px', color: '#451a03', fontWeight: 600 }}>{m.address || 'स्थानिक परिसर'}</td>
+                                  <td style={{ padding: '2px 6px', textAlign: 'right', fontWeight: 800, color: '#9a3412' }}>{formatCurrency(perHeadShare)}</td>
+                                  <td style={{ padding: '2px 6px', textAlign: 'right', fontWeight: 900, color: isPaid ? '#15803d' : '#dc2626' }}>
+                                    {formatCurrency(m.paidAmount || 0)}
+                                  </td>
+                                  <td style={{ padding: '2px 4px', textAlign: 'center', fontWeight: 800, color: isPaid ? '#15803d' : '#dc2626' }}>
+                                    {isPaid ? '✅ पूर्ण जमा' : '⏳ बाकी'}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                            <tr style={{ backgroundColor: '#fff7ed', fontWeight: 900, borderTop: '1.5px solid #ea580c' }}>
+                              <td colSpan={3} style={{ padding: '3.5px 6px', textAlign: 'right', color: '#9a3412', fontSize: '8.5px' }}>
+                                एकूण महाप्रसाद मानकरी जमा बेरीज:
+                              </td>
+                              <td style={{ padding: '3.5px 6px', textAlign: 'right', color: '#9a3412', fontSize: '8.8px' }}>
+                                {formatCurrency(mahaprasadTotalExpense)}
+                              </td>
+                              <td style={{ padding: '3.5px 6px', textAlign: 'right', color: '#15803d', fontSize: '8.8px' }}>
+                                {formatCurrency(totalMahaprasadCollected)}
+                              </td>
+                              <td style={{ padding: '3.5px 4px', textAlign: 'center', color: '#15803d', fontSize: '8px' }}>
+                                {totalMahaprasadPending === 0 ? '१००% पूर्ण' : 'शिल्लक'}
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Devotional Note */}
+                      <div
+                        style={{
+                          backgroundColor: '#fef3c7',
+                          border: '1px solid #fde68a',
+                          borderRadius: '4px',
+                          padding: '3.5px 8px',
+                          fontSize: '7.5px',
+                          color: '#92400e',
+                          fontWeight: 600,
+                          lineHeight: 1.3
+                        }}
+                      >
+                        📌 <strong>महाप्रसाद मानकरी नोंदणी नियम:</strong> महाप्रसादाचा एकूण खर्च सर्व सहभागी मानकऱ्यांमध्ये समसमान विभागला असून प्रत्येकी आलेला खर्च मंडळाच्या बँक/रोख खात्यात जमा झाला आहे. सर्व अन्नदात्यांचे मनःपूर्वक आभार!
+                      </div>
+                    </div>
+
+                    {/* If this is the LAST page, render Signatures Block */}
+                    {(reportScope === 'mahaprasad' || !includeReceipts) && renderSignaturesBlock()}
+
+                    {/* Page Bottom Footer with RS Logo & Link */}
+                    {renderPdfPageFooter(
+                      'शिंदे मळा गणेश उत्सव मंडळ • महाप्रसाद अहवाल',
+                      reportScope === 'mahaprasad' ? 1 : 3
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* ========================================================================= */}
+              {/* PAGE 4+ : DETAILED PAVTI LEDGER & FINAL SIGNATURES BLOCK                  */}
               {/* The Signatures Section is ALWAYS placed on the LAST page!                */}
               {/* ========================================================================= */}
-              {reportScope !== 'summary' && includeReceipts && (
+              {reportScope !== 'summary' && reportScope !== 'mahaprasad' && includeReceipts && (
                 pavtiChunks.map((chunk, chunkIdx) => {
-                  const currentPageNum = 3 + chunkIdx;
+                  const currentPageNum = 4 + chunkIdx;
                   const isLastChunk = chunkIdx === pavtiChunks.length - 1;
                   const startIndex = chunkIdx * 20;
 

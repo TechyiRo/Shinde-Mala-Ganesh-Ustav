@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import { initialMandalSettings, initialPavtiList, initialExpenseList, initialEventList } from '../data/initialData';
+import { initialMandalSettings, initialPavtiList, initialExpenseList, initialEventList, initialMahaprasadData } from '../data/initialData';
 
 const DataContext = createContext();
 
@@ -107,6 +107,24 @@ export const DataProvider = ({ children }) => {
     }
   });
 
+  // 6. Mahaprasad & Manakari Data (Starts clean, only admin added data appears)
+  const [mahaprasadData, setMahaprasadData] = useState(() => {
+    try {
+      const saved = localStorage.getItem('mandal_mahaprasad_data');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.manakariList && parsed.manakariList.some((m) => m.id === 'MK-01' || m.id === 'MK-02')) {
+          localStorage.removeItem('mandal_mahaprasad_data');
+          return initialMahaprasadData;
+        }
+        return parsed;
+      }
+      return initialMahaprasadData;
+    } catch {
+      return initialMahaprasadData;
+    }
+  });
+
   // Real-time client-side ticker every 10 seconds for instant 24-hour expiry check
   const [currentTimestamp, setCurrentTimestamp] = useState(Date.now());
   useEffect(() => {
@@ -170,6 +188,9 @@ export const DataProvider = ({ children }) => {
             }
             if (Array.isArray(data.statusList)) {
               setStatusList(data.statusList);
+            }
+            if (data.mahaprasadData) {
+              setMahaprasadData(data.mahaprasadData);
             }
             setIsMongoConnected(true);
             console.log('✅ MongoDB Atlas data successfully synchronized!');
@@ -279,6 +300,11 @@ export const DataProvider = ({ children }) => {
                 break;
               case 'EVENT_DELETED':
                 setEventList((prev) => prev.filter((e) => e.id !== parsed.data.id));
+                break;
+              case 'MAHAPRASAD_UPDATED':
+                if (parsed.data) {
+                  setMahaprasadData(parsed.data);
+                }
                 break;
               case 'EVENT_LIKED':
                 setEventList((prev) =>
@@ -413,6 +439,10 @@ export const DataProvider = ({ children }) => {
   useEffect(() => {
     safeSetLocalStorage('mandal_status_data', JSON.stringify(statusList));
   }, [statusList]);
+
+  useEffect(() => {
+    safeSetLocalStorage('mandal_mahaprasad_data', JSON.stringify(mahaprasadData));
+  }, [mahaprasadData]);
 
   useEffect(() => {
     safeSetLocalStorage('mandal_theme', theme);
@@ -769,6 +799,105 @@ export const DataProvider = ({ children }) => {
     }
   };
 
+  // Mahaprasad Management Functions
+  const updateMahaprasadSettings = (updatedFields) => {
+    setMahaprasadData((prev) => {
+      const next = { ...prev, ...updatedFields };
+      fetch('/api/mahaprasad', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(next)
+      }).catch((err) => console.warn('Could not sync mahaprasad to MongoDB:', err.message));
+      return next;
+    });
+    addToast('महाप्रसाद माहिती यशस्वीरित्या सेव्ह झाली!', 'success');
+  };
+
+  const addManakari = (newManakari) => {
+    setMahaprasadData((prev) => {
+      const currentList = prev.manakariList || [];
+      const newCount = currentList.length + 1;
+      const expectedShare = Number(prev.totalExpense || 0) > 0 ? Math.round(Number(prev.totalExpense) / newCount) : 0;
+      const id = 'MK-' + String(Date.now()).slice(-6);
+      const item = {
+        id,
+        name: newManakari.name || '',
+        phone: newManakari.phone || '',
+        address: newManakari.address || '',
+        status: newManakari.status || 'Paid',
+        paidAmount: Number(newManakari.paidAmount ?? (newManakari.status === 'Pending' ? 0 : expectedShare)),
+        paidDate: newManakari.paidDate || new Date().toISOString().split('T')[0],
+        paymentMode: newManakari.paymentMode || 'Cash',
+        remarks: newManakari.remarks || 'मानकरी वाटा'
+      };
+      const updatedList = [...currentList, item];
+      const next = { ...prev, manakariList: updatedList };
+      fetch('/api/mahaprasad', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(next)
+      }).catch((err) => console.warn('Could not sync mahaprasad to MongoDB:', err.message));
+      return next;
+    });
+    addToast('नवीन मानकरी यशस्वीरित्या जोडले गेले!', 'success');
+  };
+
+  const updateManakari = (id, updatedFields) => {
+    setMahaprasadData((prev) => {
+      const updatedList = (prev.manakariList || []).map((m) =>
+        m.id === id ? { ...m, ...updatedFields } : m
+      );
+      const next = { ...prev, manakariList: updatedList };
+      fetch('/api/mahaprasad', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(next)
+      }).catch((err) => console.warn('Could not sync mahaprasad to MongoDB:', err.message));
+      return next;
+    });
+    addToast('मानकरी माहिती अपडेट झाली!', 'success');
+  };
+
+  const deleteManakari = (id) => {
+    setMahaprasadData((prev) => {
+      const updatedList = (prev.manakariList || []).filter((m) => m.id !== id);
+      const next = { ...prev, manakariList: updatedList };
+      fetch('/api/mahaprasad', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(next)
+      }).catch((err) => console.warn('Could not sync mahaprasad to MongoDB:', err.message));
+      return next;
+    });
+    addToast('मानकरी यादीतून काढण्यात आले!', 'info');
+  };
+
+  const toggleManakariPaidStatus = (id) => {
+    setMahaprasadData((prev) => {
+      const currentList = prev.manakariList || [];
+      const perShare = currentList.length > 0 ? Math.round(Number(prev.totalExpense || 0) / currentList.length) : 0;
+      const updatedList = currentList.map((m) => {
+        if (m.id === id) {
+          const newStatus = m.status === 'Paid' ? 'Pending' : 'Paid';
+          return {
+            ...m,
+            status: newStatus,
+            paidAmount: newStatus === 'Paid' ? perShare : 0,
+            paidDate: newStatus === 'Paid' ? new Date().toISOString().split('T')[0] : ''
+          };
+        }
+        return m;
+      });
+      const next = { ...prev, manakariList: updatedList };
+      fetch('/api/mahaprasad', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(next)
+      }).catch((err) => console.warn('Could not sync mahaprasad to MongoDB:', err.message));
+      return next;
+    });
+  };
+
   // Settings & Reset
   const updateSettings = (newSettings) => {
     setMandalSettings((prev) => ({ ...prev, ...newSettings }));
@@ -785,6 +914,7 @@ export const DataProvider = ({ children }) => {
     setPavtiList(initialPavtiList);
     setExpenseList(initialExpenseList);
     setEventList(initialEventList);
+    setMahaprasadData(initialMahaprasadData);
   };
 
   const clearAllData = () => {
@@ -792,10 +922,12 @@ export const DataProvider = ({ children }) => {
     setExpenseList([]);
     setEventList([]);
     setStatusList([]);
+    setMahaprasadData({ ...initialMahaprasadData, manakariList: [], totalExpense: 0 });
     localStorage.removeItem('mandal_pavti_data');
     localStorage.removeItem('mandal_expense_data');
     localStorage.removeItem('mandal_events_data');
     localStorage.removeItem('mandal_status_data');
+    localStorage.removeItem('mandal_mahaprasad_data');
 
     fetch('/api/wipe-all', {
       method: 'POST'
@@ -814,6 +946,17 @@ export const DataProvider = ({ children }) => {
   const totalExpense = expenseList.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
   const balance = totalCollection - totalExpense;
   const pavtiCount = pavtiList.length;
+
+  // Mahaprasad Analytics Calculations
+  const mahaprasadTotalExpense = Number(mahaprasadData?.totalExpense) || 0;
+  const manakariList = useMemo(() => mahaprasadData?.manakariList || [], [mahaprasadData]);
+  const manakariCount = manakariList.length;
+  // प्रत्येकी आलेला खर्च / प्रत्येकाचा वाटा
+  const perHeadShare = manakariCount > 0 ? Math.round(mahaprasadTotalExpense / manakariCount) : 0;
+  const totalMahaprasadCollected = manakariList.reduce((acc, curr) => acc + (Number(curr.paidAmount) || 0), 0);
+  const totalMahaprasadPending = Math.max(0, mahaprasadTotalExpense - totalMahaprasadCollected);
+  const paidManakariCount = manakariList.filter((m) => m.status === 'Paid').length;
+  const pendingManakariCount = manakariList.filter((m) => m.status !== 'Paid').length;
 
   return (
     <DataContext.Provider
@@ -846,6 +989,20 @@ export const DataProvider = ({ children }) => {
         togglePinStatus,
         reActivateStatus,
         likeStatus,
+        mahaprasadData,
+        mahaprasadTotalExpense,
+        manakariList,
+        manakariCount,
+        perHeadShare,
+        totalMahaprasadCollected,
+        totalMahaprasadPending,
+        paidManakariCount,
+        pendingManakariCount,
+        updateMahaprasadSettings,
+        addManakari,
+        updateManakari,
+        deleteManakari,
+        toggleManakariPaidStatus,
         resetToSampleData,
         clearAllData,
         totalCollection,

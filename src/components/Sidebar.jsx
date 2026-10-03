@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, FilePlus, ListOrdered, Wallet, Settings, Globe, Calendar } from 'lucide-react';
+import { LayoutDashboard, FilePlus, ListOrdered, Wallet, Settings, Globe, Calendar, UtensilsCrossed } from 'lucide-react';
 import { DeveloperBadge } from './DeveloperBadge';
 
 export const Sidebar = ({ activeTab, setActiveTab, onBackToPublic }) => {
@@ -13,6 +13,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onBackToPublic }) => {
     { id: 'createPavti', label: t('navCreatePavti'), shortLabel: 'पावती +', icon: FilePlus, highlight: true },
     { id: 'managePavti', label: t('navManagePavti'), shortLabel: 'यादी', icon: ListOrdered },
     { id: 'expenses', label: t('navExpenses'), shortLabel: 'खर्च', icon: Wallet },
+    { id: 'mahaprasad', label: 'महाप्रसाद मानकरी', shortLabel: 'महाप्रसाद', icon: UtensilsCrossed },
     { id: 'events', label: t('navEvents'), shortLabel: 'कार्यक्रम', icon: Calendar },
     { id: 'settings', label: t('navSettings'), shortLabel: 'सेटिंग्ज', icon: Settings }
   ];
