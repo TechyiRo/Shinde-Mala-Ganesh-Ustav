@@ -331,7 +331,7 @@ export const PavtiModal = ({ isOpen, pavti, onClose, isPublic = false }) => {
                     fontFamily: "'Anek Devanagari', sans-serif"
                   }}
                 >
-                  {mandalSettings.regNo || 'नोंदणी क्र. महा/१२४५/२०१२'} | {mandalSettings.address || 'शिंदे मळा, हिंगणी दुमाला , ४१२२१०'}
+                  {mandalSettings.regNo || 'नोंदणी क्र. महा/१२४५/२०१२'} | {(mandalSettings.address || 'शिंदे मळा, हिंगणी दुमाला, ४१२२१०').replace(/,?\s*ता\.\s*दौंड/g, '').replace(/,?\s*जि\.\s*पुणे\s*-?/g, '').replace(/,?\s*दौंड/g, '').trim()}
                 </p>
               </div>
             </div>

@@ -45,6 +45,19 @@ export const compressImage = (file, maxWidth = 1920, quality = 0.90) => {
   });
 };
 
+const sanitizeMandalAddress = (addr) => {
+  if (!addr || typeof addr !== 'string') return 'शिंदे मळा, हिंगणी दुमाला, ४१२२१०';
+  return addr
+    .replace(/,?\s*दौंड,\s*ता\.\s*दौंड,\s*जि\.\s*पुणे\s*-?/g, '')
+    .replace(/,?\s*ता\.\s*दौंड,\s*जि\.\s*पुणे\s*-?/g, '')
+    .replace(/,?\s*ता\.\s*दौंड/g, '')
+    .replace(/,?\s*जि\.\s*पुणे\s*-?/g, '')
+    .replace(/,?\s*दौंड/g, '')
+    .replace(/\s+,/g, ',')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
 export const DataProvider = ({ children }) => {
   // 1. Mandal Settings
   const [mandalSettings, setMandalSettings] = useState(() => {
@@ -55,7 +68,7 @@ export const DataProvider = ({ children }) => {
         return {
           ...parsed,
           mandalName: 'शिंदे मळा गणेश उत्सव मंडळ',
-          address: 'शिंदे मळा, हिंगणी दुमाला , ४१२२१०',
+          address: sanitizeMandalAddress(parsed.address),
           president: 'श्री. तुषार शिंदे',
           treasurer: 'श्री. तुकाराम शिंदे व श्री. धनंजय शिंदे',
           secretary: 'श्री. मानस शिंदे'
@@ -172,8 +185,10 @@ export const DataProvider = ({ children }) => {
           if (isMounted) {
             if (data.settings && Object.keys(data.settings).length > 0) {
               const incomingSettings = { ...data.settings };
-              if (!incomingSettings.address || incomingSettings.address.includes('Dumala') || incomingSettings.address.includes('सातारा') || incomingSettings.address.includes('शिंदे मळा, हिंगणी दुमाला, शिंदे मळा')) {
-                incomingSettings.address = 'शिंदे मळा, हिंगणी दुमाला , ४१२२१०';
+              if (!incomingSettings.address || incomingSettings.address.includes('Dumala') || incomingSettings.address.includes('सातारा') || incomingSettings.address.includes('शिंदे मळा, हिंगणी दुमाला, शिंदे मळा') || incomingSettings.address.includes('दौंड') || incomingSettings.address.includes('पुणे')) {
+                incomingSettings.address = 'शिंदे मळा, हिंगणी दुमाला, ४१२२१०';
+              } else {
+                incomingSettings.address = sanitizeMandalAddress(incomingSettings.address);
               }
               setMandalSettings((prev) => ({ ...prev, ...incomingSettings }));
             }
@@ -900,12 +915,16 @@ export const DataProvider = ({ children }) => {
 
   // Settings & Reset
   const updateSettings = (newSettings) => {
-    setMandalSettings((prev) => ({ ...prev, ...newSettings }));
+    const cleaned = { ...newSettings };
+    if (cleaned.address) {
+      cleaned.address = sanitizeMandalAddress(cleaned.address);
+    }
+    setMandalSettings((prev) => ({ ...prev, ...cleaned }));
 
     fetch('/api/settings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newSettings)
+      body: JSON.stringify(cleaned)
     }).catch((err) => console.warn('Could not sync settings to MongoDB:', err.message));
   };
 

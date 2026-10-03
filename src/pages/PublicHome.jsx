@@ -1917,7 +1917,7 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
             </div>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-subtle)', lineHeight: 1.6, marginBottom: '0.5rem' }}>
               {mandalSettings.regNo || 'नोंदणी क्र. महा/१२४५/२०१२'}<br />
-              {mandalSettings.address || 'शिंदे मळा, हिंगणी दुमाला , ४१२२१०'}
+              {(mandalSettings.address || 'शिंदे मळा, हिंगणी दुमाला, ४१२२१०').replace(/,?\s*ता\.\s*दौंड/g, '').replace(/,?\s*जि\.\s*पुणे\s*-?/g, '').replace(/,?\s*दौंड/g, '').trim()}
             </p>
             <div style={{ marginTop: '0.65rem' }}>
               <p style={{ fontSize: '0.88rem', color: 'var(--accent-gold-light)', fontWeight: 700, margin: '0 0 0.35rem' }}>

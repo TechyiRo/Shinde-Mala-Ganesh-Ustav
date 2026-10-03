@@ -74,7 +74,7 @@ async function seedInitialData(db) {
         {
           $set: {
             contact: '9922466579',
-            address: 'शिंदे मळा, हिंगणी दुमाला , ४१२२१०'
+            address: 'शिंदे मळा, हिंगणी दुमाला, ४१२२१०'
           }
         }
       );

@@ -4,7 +4,7 @@ export const initialMandalSettings = {
   mandalName: 'शिंदे मळा गणेश उत्सव मंडळ',
   mandalNameEn: 'Shinde Mala Ganesh Utsav Mandal',
   regNo: 'नोंदणी क्र. महा/१२४५/२०१२ (Reg. No. MAH/1245/2012)',
-  address: 'शिंदे मळा, हिंगणी दुमाला , ४१२२१०',
+  address: 'शिंदे मळा, हिंगणी दुमाला, ४१२२१०',
   tagline: '॥ श्री गणेशाय नमः ॥ गणपती बाप्पा मोरया',
   president: 'श्री. तुषार शिंदे',
   treasurer: 'श्री. तुकाराम शिंदे व श्री. धनंजय शिंदे',

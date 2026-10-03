@@ -466,7 +466,7 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
             </a>
           </span>
         </div>
-        <span>शिंदे मळा गणेश उत्सव मंडळ, हिंगणी दुमाला, दौंड</span>
+        <span>शिंदे मळा गणेश उत्सव मंडळ, हिंगणी दुमाला</span>
       </div>
     </div>
   );
@@ -951,7 +951,7 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                           {mandalSettings.mandalName || 'शिंदे मळा गणेश उत्सव मंडळ'}
                         </h1>
                         <div style={{ fontSize: '10px', fontWeight: 700, color: '#451a03', marginBottom: '2px' }}>
-                          📍 {mandalSettings.address || 'शिंदे मळा, हिंगणी दुमाला, ता. दौंड, जि. पुणे - ४१२२१०'}
+                          📍 {(mandalSettings.address || 'शिंदे मळा, हिंगणी दुमाला, ४१२२१०').replace(/,?\s*ता\.\s*दौंड/g, '').replace(/,?\s*जि\.\s*पुणे\s*-?/g, '').replace(/,?\s*दौंड/g, '').trim()}
                         </div>
                         <div style={{ fontSize: '9px', color: '#78350f', fontWeight: 600 }}>
                           {mandalSettings.regNo || 'नोंदणी क्र. महा/१२४५/२०१२'} • संपर्क: {mandalSettings.contact || '9922466579'}
@@ -1586,7 +1586,7 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                               {mandalSettings.mandalName}
                             </div>
                             <div style={{ fontSize: '7.8px', color: '#78350f', fontWeight: 600 }}>
-                              {mandalSettings.address} • {mandalSettings.regNo}
+                              {(mandalSettings.address || 'शिंदे मळा, हिंगणी दुमाला, ४१२२१०').replace(/,?\s*ता\.\s*दौंड/g, '').replace(/,?\s*जि\.\s*पुणे\s*-?/g, '').replace(/,?\s*दौंड/g, '').trim()} • {mandalSettings.regNo}
                             </div>
                           </div>
                         </div>
