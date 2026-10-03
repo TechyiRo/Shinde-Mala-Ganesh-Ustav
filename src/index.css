@@ -725,6 +725,26 @@ body {
   }
 }
 
+/* Annual Report Document & PDF Print Color Normalization */
+.annual-report-pdf-doc,
+.pdf-page {
+  color: #1a1006 !important;
+  --text-main: #1a1006 !important;
+  --text-muted: #451a03 !important;
+  --text-subtle: #78350f !important;
+}
+
+.pdf-page table {
+  color: #1a1006 !important;
+}
+
+.pdf-page td,
+.pdf-page th,
+.pdf-page strong,
+.pdf-page span {
+  color: inherit;
+}
+
 /* Marathi Typography - Authentic Aakriti Bold Festival Style */
 .font-aakriti-bold {
   font-family: 'Yatra One', 'Anek Devanagari', 'Baloo 2', 'Mukta', sans-serif;

@@ -25,9 +25,21 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
   const reportRef = useRef(null);
 
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(1);
+  const [zoomLevel, setZoomLevel] = useState(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 680) {
+      return Math.max(0.48, Math.min(0.85, Number(((window.innerWidth - 32) / 670).toFixed(2))));
+    }
+    return 1;
+  });
   const [reportScope, setReportScope] = useState(defaultScope); // 'all' | 'summary'
   const [includeReceipts, setIncludeReceipts] = useState(true);
+
+  // Auto-adjust initial zoom when opened on a mobile device
+  React.useEffect(() => {
+    if (isOpen && typeof window !== 'undefined' && window.innerWidth < 680) {
+      setZoomLevel(Math.max(0.48, Math.min(0.85, Number(((window.innerWidth - 32) / 670).toFixed(2)))));
+    }
+  }, [isOpen]);
 
   // Grouping by Donation Type
   const donationTypeStats = useMemo(() => {
@@ -186,6 +198,7 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
       renderHost.style.padding = '0';
       renderHost.style.zIndex = '-99999';
       renderHost.style.backgroundColor = '#ffffff';
+      renderHost.style.color = '#1a1006';
       renderHost.style.overflow = 'visible';
       renderHost.style.pointerEvents = 'none';
       document.body.appendChild(renderHost);
@@ -211,6 +224,8 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
         clone.style.boxSizing = 'border-box';
         clone.style.overflow = 'hidden';
         clone.style.transform = 'none';
+        clone.style.color = '#1a1006';
+        clone.style.backgroundColor = '#ffffff';
         renderHost.appendChild(clone);
 
         // Wait for images in the clone to be ready
@@ -515,7 +530,7 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
             >
               <button
                 type="button"
-                onClick={() => setZoomLevel((prev) => Math.max(0.65, Number((prev - 0.1).toFixed(2))))}
+                onClick={() => setZoomLevel((prev) => Math.max(0.45, Number((prev - 0.08).toFixed(2))))}
                 style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
                 title="Zoom Out"
               >
@@ -526,7 +541,7 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
               </span>
               <button
                 type="button"
-                onClick={() => setZoomLevel((prev) => Math.min(1.4, Number((prev + 0.1).toFixed(2))))}
+                onClick={() => setZoomLevel((prev) => Math.min(1.5, Number((prev + 0.08).toFixed(2))))}
                 style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
                 title="Zoom In"
               >
@@ -534,7 +549,13 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
               </button>
               <button
                 type="button"
-                onClick={() => setZoomLevel(1)}
+                onClick={() => {
+                  if (typeof window !== 'undefined' && window.innerWidth < 680) {
+                    setZoomLevel(Math.max(0.48, Math.min(0.85, Number(((window.innerWidth - 32) / 670).toFixed(2)))));
+                  } else {
+                    setZoomLevel(1);
+                  }
+                }}
                 style={{ background: 'none', border: 'none', color: 'var(--text-subtle)', cursor: 'pointer', padding: '4px' }}
                 title="Reset Zoom"
               >
@@ -678,60 +699,71 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
             flex: 1,
             overflowY: 'auto',
             overflowX: 'auto',
-            padding: 'clamp(0.4rem, 2vw, 1.25rem)',
+            padding: 'clamp(0.35rem, 2vw, 1.25rem)',
             backgroundColor: '#0c0f16',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'flex-start'
+            WebkitOverflowScrolling: 'touch'
           }}
         >
-          {/* Zoom Wrapper */}
+          {/* Centering host: ensures full left-to-right horizontal scrollability on mobile without negative coordinate clipping */}
           <div
             style={{
-              transform: `scale(${zoomLevel})`,
-              transformOrigin: 'top center',
-              transition: 'transform 0.15s ease-out'
+              width: 'max-content',
+              minWidth: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'flex-start',
+              padding: '0 4px',
+              boxSizing: 'border-box'
             }}
           >
-            {/* ========================================================================= */}
-            {/* THE FORMAL ANNUAL AUDIT REPORT DOCUMENT (Captured by html2pdf.js)         */}
-            {/* Width: 670px, Height: 960px ensures NO extra page spillover & NO right cut */}
-            {/* ========================================================================= */}
+            {/* Zoom Wrapper */}
             <div
-              id="annual-report-pdf-doc"
-              ref={reportRef}
-              className="annual-report-pdf-doc"
               style={{
-                width: '670px',
-                backgroundColor: '#ffffff',
-                color: '#1a1006',
-                fontFamily: "'Noto Sans Devanagari', 'Mukta', 'Anek Devanagari', 'Baloo 2', sans-serif",
-                boxSizing: 'border-box',
-                margin: '0 auto',
-                padding: 0
+                transform: `scale(${zoomLevel})`,
+                transformOrigin: 'top center',
+                transition: 'transform 0.15s ease-out'
               }}
             >
               {/* ========================================================================= */}
-              {/* PAGE 1: EXECUTIVE AUDIT SUMMARY & TAALEBAND (मुख्य ताळेबंद व गोषवारा)    */}
+              {/* THE FORMAL ANNUAL AUDIT REPORT DOCUMENT (Captured by html2pdf.js)         */}
+              {/* Width: 670px, Height: 960px ensures NO extra page spillover & NO right cut */}
               {/* ========================================================================= */}
               <div
-                className="pdf-page pdf-page-break-after"
+                id="annual-report-pdf-doc"
+                ref={reportRef}
+                className="annual-report-pdf-doc"
                 style={{
                   width: '670px',
-                  minHeight: '960px',
-                  maxHeight: '960px',
-                  boxSizing: 'border-box',
                   backgroundColor: '#ffffff',
-                  padding: '12px 14px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  pageBreakAfter: reportScope === 'summary' ? 'auto' : 'always',
-                  breakAfter: reportScope === 'summary' ? 'auto' : 'page',
-                  position: 'relative',
-                  overflow: 'hidden'
+                  color: '#1a1006',
+                  fontFamily: "'Noto Sans Devanagari', 'Mukta', 'Anek Devanagari', 'Baloo 2', sans-serif",
+                  boxSizing: 'border-box',
+                  margin: '0 auto',
+                  padding: 0
                 }}
               >
+                {/* ========================================================================= */}
+                {/* PAGE 1: EXECUTIVE AUDIT SUMMARY & TAALEBAND (मुख्य ताळेबंद व गोषवारा)    */}
+                {/* ========================================================================= */}
+                <div
+                  className="pdf-page pdf-page-break-after"
+                  style={{
+                    width: '670px',
+                    minHeight: '960px',
+                    maxHeight: '960px',
+                    boxSizing: 'border-box',
+                    backgroundColor: '#ffffff',
+                    color: '#1a1006',
+                    padding: '12px 14px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    pageBreakAfter: reportScope === 'summary' ? 'auto' : 'always',
+                    breakAfter: reportScope === 'summary' ? 'auto' : 'page',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
                 {/* Decorative Marathi Outer Frame */}
                 <div
                   style={{
@@ -981,69 +1013,69 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                         <span style={{ fontSize: '9px', opacity: 0.95 }}>उत्सव वर्ष २०२६</span>
                       </div>
 
-                      <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: '9.5px', boxSizing: 'border-box' }}>
+                      <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: '9.5px', color: '#1a1006', boxSizing: 'border-box' }}>
                         <thead>
                           <tr style={{ backgroundColor: '#fff7ed', borderBottom: '1px solid #fed7aa', color: '#7c2d12', fontWeight: 800 }}>
-                            <th style={{ padding: '4px 6px', textAlign: 'left', width: '36%' }}>जमा तपशील (Receipts)</th>
-                            <th style={{ padding: '4px 8px', textAlign: 'right', width: '14%' }}>रक्कम (₹)</th>
-                            <th style={{ padding: '4px 6px', textAlign: 'left', width: '36%', borderLeft: '1px solid #fed7aa' }}>
+                            <th style={{ padding: '4px 6px', textAlign: 'left', width: '36%', color: '#7c2d12' }}>जमा तपशील (Receipts)</th>
+                            <th style={{ padding: '4px 8px', textAlign: 'right', width: '14%', color: '#7c2d12' }}>रक्कम (₹)</th>
+                            <th style={{ padding: '4px 6px', textAlign: 'left', width: '36%', borderLeft: '1px solid #fed7aa', color: '#7c2d12' }}>
                               खर्च तपशील (Expenditure)
                             </th>
-                            <th style={{ padding: '4px 8px', textAlign: 'right', width: '14%' }}>रक्कम (₹)</th>
+                            <th style={{ padding: '4px 8px', textAlign: 'right', width: '14%', color: '#7c2d12' }}>रक्कम (₹)</th>
                           </tr>
                         </thead>
                         <tbody>
                           <tr>
-                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5' }}>
-                              <strong>१. घरगुती वार्षिक वर्गणी</strong>
+                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', color: '#1a1006' }}>
+                              <strong style={{ color: '#261a0e' }}>१. घरगुती वार्षिक वर्गणी</strong>
                             </td>
                             <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#15803d' }}>
                               {formatCurrency(donationTypeStats.find((d) => d.key === 'Vargani')?.amount || 0)}
                             </td>
-                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa' }}>
-                              <strong>१. श्री गणेश मूर्ती व पूजा साहित्य</strong>
+                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa', color: '#1a1006' }}>
+                              <strong style={{ color: '#261a0e' }}>१. श्री गणेश मूर्ती व पूजा साहित्य</strong>
                             </td>
                             <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#dc2626' }}>
                               {formatCurrency(expenseCategoryStats.find((c) => c.key === 'Murti')?.amount || 0)}
                             </td>
                           </tr>
                           <tr style={{ backgroundColor: '#fffcf9' }}>
-                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5' }}>
-                              <strong>२. ऐच्छिक देणगी (Denagi)</strong>
+                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', color: '#1a1006' }}>
+                              <strong style={{ color: '#261a0e' }}>२. ऐच्छिक देणगी (Denagi)</strong>
                             </td>
                             <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#15803d' }}>
                               {formatCurrency(donationTypeStats.find((d) => d.key === 'Denagi')?.amount || 0)}
                             </td>
-                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa' }}>
-                              <strong>२. मंडप, स्टेज व छत व्यवस्था</strong>
+                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa', color: '#1a1006' }}>
+                              <strong style={{ color: '#261a0e' }}>२. मंडप, स्टेज व छत व्यवस्था</strong>
                             </td>
                             <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#dc2626' }}>
                               {formatCurrency(expenseCategoryStats.find((c) => c.key === 'Mandap')?.amount || 0)}
                             </td>
                           </tr>
                           <tr>
-                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5' }}>
-                              <strong>३. नवस पावती देणगी (Navas)</strong>
+                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', color: '#1a1006' }}>
+                              <strong style={{ color: '#261a0e' }}>३. नवस पावती देणगी (Navas)</strong>
                             </td>
                             <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#15803d' }}>
                               {formatCurrency(donationTypeStats.find((d) => d.key === 'Navas')?.amount || 0)}
                             </td>
-                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa' }}>
-                              <strong>३. डेकोरेशन व विद्युत रोषणाई</strong>
+                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa', color: '#1a1006' }}>
+                              <strong style={{ color: '#261a0e' }}>३. डेकोरेशन व विद्युत रोषणाई</strong>
                             </td>
                             <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#dc2626' }}>
                               {formatCurrency(expenseCategoryStats.find((c) => c.key === 'Decoration')?.amount || 0)}
                             </td>
                           </tr>
                           <tr style={{ backgroundColor: '#fffcf9' }}>
-                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5' }}>
-                              <strong>४. इतर जमा व सहाय्य</strong>
+                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', color: '#1a1006' }}>
+                              <strong style={{ color: '#261a0e' }}>४. इतर जमा व सहाय्य</strong>
                             </td>
                             <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#15803d' }}>
                               {formatCurrency(donationTypeStats.find((d) => d.key === 'Other')?.amount || 0)}
                             </td>
-                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa' }}>
-                              <strong>४. ध्वनी (Sound System) व लाईट</strong>
+                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa', color: '#1a1006' }}>
+                              <strong style={{ color: '#261a0e' }}>४. ध्वनी (Sound System) व लाईट</strong>
                             </td>
                             <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#dc2626' }}>
                               {formatCurrency(expenseCategoryStats.find((c) => c.key === 'SoundLight')?.amount || 0)}
@@ -1051,13 +1083,13 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                           </tr>
                           <tr>
                             <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', color: '#78350f' }}>
-                              <span>• रोख जमा: {formatCurrency(paymentModeStats.find((m) => m.key === 'Cash')?.amount || 0)}</span>
+                              <span style={{ color: '#451a03', fontWeight: 600 }}>• रोख जमा: {formatCurrency(paymentModeStats.find((m) => m.key === 'Cash')?.amount || 0)}</span>
                             </td>
-                            <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontSize: '8.5px' }}>
+                            <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontSize: '8.5px', color: '#78350f' }}>
                               ({paymentModeStats.find((m) => m.key === 'Cash')?.count || 0} पावत्या)
                             </td>
-                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa' }}>
-                              <strong>५. महाप्रसाद व अन्नदान भोजन</strong>
+                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa', color: '#1a1006' }}>
+                              <strong style={{ color: '#261a0e' }}>५. महाप्रसाद व अन्नदान भोजन</strong>
                             </td>
                             <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#dc2626' }}>
                               {formatCurrency(expenseCategoryStats.find((c) => c.key === 'Prasad')?.amount || 0)}
@@ -1065,13 +1097,13 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                           </tr>
                           <tr style={{ backgroundColor: '#fffcf9' }}>
                             <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', color: '#78350f' }}>
-                              <span>• ऑनलाइन UPI: {formatCurrency(paymentModeStats.find((m) => m.key === 'UPI')?.amount || 0)}</span>
+                              <span style={{ color: '#451a03', fontWeight: 600 }}>• ऑनलाइन UPI: {formatCurrency(paymentModeStats.find((m) => m.key === 'UPI')?.amount || 0)}</span>
                             </td>
-                            <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontSize: '8.5px' }}>
+                            <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontSize: '8.5px', color: '#78350f' }}>
                               ({paymentModeStats.find((m) => m.key === 'UPI')?.count || 0} पावत्या)
                             </td>
-                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa' }}>
-                              <strong>६. वीज, जनरेटर, सुरक्षा व इतर</strong>
+                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa', color: '#1a1006' }}>
+                              <strong style={{ color: '#261a0e' }}>६. वीज, जनरेटर, सुरक्षा व इतर</strong>
                             </td>
                             <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#dc2626' }}>
                               {formatCurrency(
@@ -1133,14 +1165,14 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                         <span style={{ fontSize: '8.5px' }}>देणगी व वर्गणी</span>
                       </div>
 
-                      <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: '9px', boxSizing: 'border-box' }}>
+                      <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: '9px', color: '#1a1006', boxSizing: 'border-box' }}>
                         <thead>
                           <tr style={{ backgroundColor: '#fffbeb', borderBottom: '1px solid #fde68a', color: '#92400e', fontWeight: 800 }}>
-                            <th style={{ padding: '3.5px 5px', textAlign: 'center', width: '8%' }}>क्र.</th>
-                            <th style={{ padding: '3.5px 5px', textAlign: 'left', width: '18%' }}>पावती क्र.</th>
-                            <th style={{ padding: '3.5px 5px', textAlign: 'left', width: '36%' }}>देणगीदाराचे नाव</th>
-                            <th style={{ padding: '3.5px 5px', textAlign: 'left', width: '22%' }}>पत्ता / परिसर</th>
-                            <th style={{ padding: '3.5px 8px', textAlign: 'right', width: '16%' }}>रक्कम (₹)</th>
+                            <th style={{ padding: '3.5px 5px', textAlign: 'center', width: '8%', color: '#92400e' }}>क्र.</th>
+                            <th style={{ padding: '3.5px 5px', textAlign: 'left', width: '18%', color: '#92400e' }}>पावती क्र.</th>
+                            <th style={{ padding: '3.5px 5px', textAlign: 'left', width: '36%', color: '#92400e' }}>देणगीदाराचे नाव</th>
+                            <th style={{ padding: '3.5px 5px', textAlign: 'left', width: '22%', color: '#92400e' }}>पत्ता / परिसर</th>
+                            <th style={{ padding: '3.5px 8px', textAlign: 'right', width: '16%', color: '#92400e' }}>रक्कम (₹)</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1156,8 +1188,8 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                                 {idx + 1}
                               </td>
                               <td style={{ padding: '3px 5px', fontWeight: 700, color: '#92400e' }}>{d.pavtiNo}</td>
-                              <td style={{ padding: '3px 5px', fontWeight: 700 }}>{d.donorName}</td>
-                              <td style={{ padding: '3px 5px', color: '#78350f' }}>{d.address || 'स्थानिक परिसर'}</td>
+                              <td style={{ padding: '3px 5px', fontWeight: 800, color: '#1a1006' }}>{d.donorName}</td>
+                              <td style={{ padding: '3px 5px', color: '#451a03', fontWeight: 600 }}>{d.address || 'स्थानिक परिसर'}</td>
                               <td style={{ padding: '3px 8px', textAlign: 'right', fontWeight: 900, color: '#15803d', whiteSpace: 'nowrap' }}>
                                 {formatCurrency(d.amount)}
                               </td>
@@ -1206,6 +1238,7 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                     maxHeight: '960px',
                     boxSizing: 'border-box',
                     backgroundColor: '#ffffff',
+                    color: '#1a1006',
                     padding: '12px 14px',
                     display: 'flex',
                     flexDirection: 'column',
@@ -1321,15 +1354,15 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                           <span style={{ fontSize: '9px' }}>एकूण {expenseList.length} खर्च नोंदी</span>
                         </div>
 
-                        <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: '9px', boxSizing: 'border-box' }}>
+                        <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: '9px', color: '#1a1006', boxSizing: 'border-box' }}>
                           <thead>
                             <tr style={{ backgroundColor: '#fff7ed', borderBottom: '1px solid #fed7aa', color: '#7c2d12', fontWeight: 800 }}>
-                              <th style={{ padding: '4px 5px', textAlign: 'center', width: '6%' }}>अ.क्र.</th>
-                              <th style={{ padding: '4px 5px', textAlign: 'left', width: '14%' }}>दिनांक</th>
-                              <th style={{ padding: '4px 5px', textAlign: 'left', width: '18%' }}>विभाग / प्रकार</th>
-                              <th style={{ padding: '4px 5px', textAlign: 'left', width: '32%' }}>खर्चाचे विवरण व तपशील</th>
-                              <th style={{ padding: '4px 5px', textAlign: 'left', width: '16%' }}>दुकानदार / व्यक्ती</th>
-                              <th style={{ padding: '4px 8px', textAlign: 'right', width: '14%' }}>रक्कम (₹)</th>
+                              <th style={{ padding: '4px 5px', textAlign: 'center', width: '6%', color: '#7c2d12' }}>अ.क्र.</th>
+                              <th style={{ padding: '4px 5px', textAlign: 'left', width: '14%', color: '#7c2d12' }}>दिनांक</th>
+                              <th style={{ padding: '4px 5px', textAlign: 'left', width: '18%', color: '#7c2d12' }}>विभाग / प्रकार</th>
+                              <th style={{ padding: '4px 5px', textAlign: 'left', width: '32%', color: '#7c2d12' }}>खर्चाचे विवरण व तपशील</th>
+                              <th style={{ padding: '4px 5px', textAlign: 'left', width: '16%', color: '#7c2d12' }}>दुकानदार / व्यक्ती</th>
+                              <th style={{ padding: '4px 8px', textAlign: 'right', width: '14%', color: '#7c2d12' }}>रक्कम (₹)</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -1348,10 +1381,10 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                                     borderBottom: '1px solid #ffedd5'
                                   }}
                                 >
-                                  <td style={{ padding: '4px 5px', textAlign: 'center', color: '#78350f' }}>{idx + 1}</td>
-                                  <td style={{ padding: '4px 5px', whiteSpace: 'nowrap' }}>{e.date}</td>
-                                  <td style={{ padding: '4px 5px', fontWeight: 600 }}>{t(`cat${e.category}`) || e.category}</td>
-                                  <td style={{ padding: '4px 5px', wordBreak: 'break-word' }}>{e.description}</td>
+                                  <td style={{ padding: '4px 5px', textAlign: 'center', color: '#78350f', fontWeight: 700 }}>{idx + 1}</td>
+                                  <td style={{ padding: '4px 5px', whiteSpace: 'nowrap', color: '#451a03' }}>{e.date}</td>
+                                  <td style={{ padding: '4px 5px', fontWeight: 700, color: '#261a0e' }}>{t(`cat${e.category}`) || e.category}</td>
+                                  <td style={{ padding: '4px 5px', wordBreak: 'break-word', color: '#1a1006', fontWeight: 600 }}>{e.description}</td>
                                   <td style={{ padding: '4px 5px', color: '#451a03', wordBreak: 'break-word' }}>{e.paidTo || '—'}</td>
                                   <td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 800, color: '#dc2626', whiteSpace: 'nowrap' }}>
                                     {formatCurrency(e.amount)}
@@ -1433,6 +1466,7 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                         maxHeight: '960px',
                         boxSizing: 'border-box',
                         backgroundColor: '#ffffff',
+                        color: '#1a1006',
                         padding: '12px 14px',
                         display: 'flex',
                         flexDirection: 'column',
@@ -1519,16 +1553,16 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                               <span style={{ fontSize: '8.5px' }}>उत्सव २०२६</span>
                             </div>
 
-                            <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: '8.5px', boxSizing: 'border-box' }}>
+                            <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: '8.5px', color: '#1a1006', boxSizing: 'border-box' }}>
                               <thead>
                                 <tr style={{ backgroundColor: '#fff7ed', borderBottom: '1px solid #fed7aa', color: '#7c2d12', fontWeight: 800 }}>
-                                  <th style={{ padding: '3px 4px', textAlign: 'center', width: '6%' }}>क्र.</th>
-                                  <th style={{ padding: '3px 5px', textAlign: 'left', width: '18%' }}>पावती क्र.</th>
-                                  <th style={{ padding: '3px 5px', textAlign: 'left', width: '13%' }}>दिनांक</th>
-                                  <th style={{ padding: '3px 5px', textAlign: 'left', width: '29%' }}>देणगीदाराचे नाव</th>
-                                  <th style={{ padding: '3px 5px', textAlign: 'left', width: '14%' }}>प्रकार</th>
-                                  <th style={{ padding: '3px 4px', textAlign: 'center', width: '8%' }}>मोड</th>
-                                  <th style={{ padding: '3px 8px', textAlign: 'right', width: '12%' }}>रक्कम (₹)</th>
+                                  <th style={{ padding: '3px 4px', textAlign: 'center', width: '6%', color: '#7c2d12' }}>क्र.</th>
+                                  <th style={{ padding: '3px 5px', textAlign: 'left', width: '18%', color: '#7c2d12' }}>पावती क्र.</th>
+                                  <th style={{ padding: '3px 5px', textAlign: 'left', width: '13%', color: '#7c2d12' }}>दिनांक</th>
+                                  <th style={{ padding: '3px 5px', textAlign: 'left', width: '29%', color: '#7c2d12' }}>देणगीदाराचे नाव</th>
+                                  <th style={{ padding: '3px 5px', textAlign: 'left', width: '14%', color: '#7c2d12' }}>प्रकार</th>
+                                  <th style={{ padding: '3px 4px', textAlign: 'center', width: '8%', color: '#7c2d12' }}>मोड</th>
+                                  <th style={{ padding: '3px 8px', textAlign: 'right', width: '12%', color: '#7c2d12' }}>रक्कम (₹)</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -1540,12 +1574,12 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                                       borderBottom: '1px solid #ffedd5'
                                     }}
                                   >
-                                    <td style={{ padding: '2.5px 4px', textAlign: 'center', color: '#78350f' }}>{startIndex + idx + 1}</td>
+                                    <td style={{ padding: '2.5px 4px', textAlign: 'center', color: '#78350f', fontWeight: 700 }}>{startIndex + idx + 1}</td>
                                     <td style={{ padding: '2.5px 5px', fontWeight: 700, color: '#9a3412', whiteSpace: 'nowrap' }}>{p.pavtiNo}</td>
-                                    <td style={{ padding: '2.5px 5px', whiteSpace: 'nowrap' }}>{p.date}</td>
-                                    <td style={{ padding: '2.5px 5px', fontWeight: 600, wordBreak: 'break-word' }}>{p.donorName}</td>
-                                    <td style={{ padding: '2.5px 5px', whiteSpace: 'nowrap' }}>{t(`type${p.donationType}`) || p.donationType}</td>
-                                    <td style={{ padding: '2.5px 4px', textAlign: 'center', whiteSpace: 'nowrap' }}>{p.paymentMode}</td>
+                                    <td style={{ padding: '2.5px 5px', whiteSpace: 'nowrap', color: '#451a03' }}>{p.date}</td>
+                                    <td style={{ padding: '2.5px 5px', fontWeight: 700, color: '#1a1006', wordBreak: 'break-word' }}>{p.donorName}</td>
+                                    <td style={{ padding: '2.5px 5px', whiteSpace: 'nowrap', color: '#451a03' }}>{t(`type${p.donationType}`) || p.donationType}</td>
+                                    <td style={{ padding: '2.5px 4px', textAlign: 'center', whiteSpace: 'nowrap', color: '#451a03' }}>{p.paymentMode}</td>
                                     <td style={{ padding: '2.5px 8px', textAlign: 'right', fontWeight: 800, color: '#15803d', whiteSpace: 'nowrap' }}>
                                       {formatCurrency(p.amount)}
                                     </td>
@@ -1597,6 +1631,7 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
             </div>
           </div>
         </div>
+      </div>
 
         {/* Modal Footer with Mobile Quick Action bar */}
         <div
