@@ -157,6 +157,8 @@ export const ManageMahaprasad = () => {
       paidDate: new Date().toISOString().split('T')[0],
       remarks: 'मानकरी वाटा'
     });
+    setFilterStatus('all');
+    setSearchTerm('');
     setIsAddModalOpen(false);
   };
 
