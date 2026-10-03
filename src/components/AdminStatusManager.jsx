@@ -740,10 +740,10 @@ export const AdminStatusManager = () => {
                 </label>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <select
-                    className="form-control"
+                    className="form-select"
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    style={{ width: '100%', padding: '0.65rem 0.85rem' }}
+                    style={{ width: '100%' }}
                   >
                     <option value="Ganesh Utsav 2026">Ganesh Utsav 2026</option>
                     <option value="Ganesh Chaturthi">Ganesh Chaturthi</option>
@@ -758,10 +758,10 @@ export const AdminStatusManager = () => {
                     <input
                       type="text"
                       placeholder="नवीन कॅटेगरीचे नाव लिहा (उदा. मिरवणूक २०२६)"
-                      className="form-control"
+                      className="form-input"
                       value={formData.customCategory}
                       onChange={(e) => setFormData({ ...formData, customCategory: e.target.value })}
-                      style={{ width: '100%', padding: '0.6rem 0.85rem', fontSize: '0.9rem' }}
+                      style={{ width: '100%', fontSize: '0.9rem' }}
                       required
                     />
                   )}
@@ -780,10 +780,10 @@ export const AdminStatusManager = () => {
                   type="text"
                   required
                   placeholder="उदा. सकाळची महाआरती व गणेश दर्शन"
-                  className="form-control"
+                  className="form-input"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  style={{ width: '100%', padding: '0.65rem 0.85rem', fontSize: '0.9rem' }}
+                  style={{ width: '100%', fontSize: '0.9rem' }}
                 />
               </div>
 
@@ -795,10 +795,10 @@ export const AdminStatusManager = () => {
                 <textarea
                   rows={2}
                   placeholder="उदा. सर्व भक्तांचे हार्दिक स्वागत! बाप्पाच्या आरतीचे पवित्र दर्शन घ्या."
-                  className="form-control"
+                  className="form-textarea"
                   value={formData.caption}
                   onChange={(e) => setFormData({ ...formData, caption: e.target.value })}
-                  style={{ width: '100%', padding: '0.65rem 0.85rem', fontSize: '0.9rem', resize: 'vertical' }}
+                  style={{ width: '100%', fontSize: '0.9rem', resize: 'vertical' }}
                 />
               </div>
 
@@ -808,10 +808,10 @@ export const AdminStatusManager = () => {
                   उत्सवाचा दिवस (Festival Day)
                 </label>
                 <select
-                  className="form-control"
+                  className="form-select"
                   value={formData.dayNumber}
                   onChange={(e) => setFormData({ ...formData, dayNumber: Number(e.target.value) })}
-                  style={{ width: '100%', padding: '0.65rem 0.85rem' }}
+                  style={{ width: '100%' }}
                 >
                   {Array.from({ length: 11 }, (_, i) => i + 1).map((d) => (
                     <option key={d} value={d}>

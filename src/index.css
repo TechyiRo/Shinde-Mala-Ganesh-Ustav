@@ -328,37 +328,86 @@ body {
 
 .form-input,
 .form-select,
-.form-textarea {
+.form-textarea,
+.form-control {
   width: 100%;
   font-family: inherit;
-  font-size: 0.95rem;
-  padding: 0.75rem 1rem;
+  font-size: 0.93rem;
+  padding: 0.7rem 0.95rem;
   background: var(--input-bg);
   border: 1px solid var(--input-border);
-  border-radius: var(--radius-md);
+  border-radius: 10px;
   color: var(--text-main);
-  backdrop-filter: blur(12px);
-  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, transform 0.15s;
   outline: none;
+  box-sizing: border-box;
 }
 
 .form-input:focus,
 .form-select:focus,
-.form-textarea:focus {
-  border-color: var(--glass-border-focus);
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+.form-textarea:focus,
+.form-control:focus {
+  border-color: #ea580c;
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.22), 0 2px 10px rgba(0, 0, 0, 0.3);
   background: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="light"] .form-input,
+[data-theme="light"] .form-select,
+[data-theme="light"] .form-textarea,
+[data-theme="light"] .form-control {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(230, 81, 0, 0.25);
+  color: #1f2937;
 }
 
 [data-theme="light"] .form-input:focus,
 [data-theme="light"] .form-select:focus,
-[data-theme="light"] .form-textarea:focus {
-  background: rgba(255, 255, 255, 0.95);
+[data-theme="light"] .form-textarea:focus,
+[data-theme="light"] .form-control:focus {
+  background: #ffffff;
+  border-color: #e65100;
+  box-shadow: 0 0 0 3px rgba(230, 81, 0, 0.18);
 }
 
 .form-input::placeholder,
-.form-textarea::placeholder {
+.form-textarea::placeholder,
+.form-control::placeholder {
   color: var(--text-subtle);
+  opacity: 0.75;
+}
+
+/* Styled Dropdowns */
+.form-select option,
+.form-control option {
+  background: #18111e;
+  color: #f3f4f6;
+  padding: 8px 12px;
+}
+
+[data-theme="light"] .form-select option,
+[data-theme="light"] .form-control option {
+  background: #ffffff;
+  color: #1f2937;
+}
+
+/* Calendar Date Picker Indicator */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8) sepia(40%) saturate(350%) hue-rotate(345deg);
+  cursor: pointer;
+  opacity: 0.85;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+[data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: none;
 }
 
 .form-error {
@@ -548,6 +597,87 @@ body {
     opacity: 1;
     transform: scale(1) translateY(0);
   }
+}
+
+/* Modal Structural Components */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.15rem 1.4rem;
+  border-bottom: 1px solid var(--glass-border);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+  gap: 0.75rem;
+}
+
+[data-theme="light"] .modal-header {
+  background: linear-gradient(180deg, rgba(230, 81, 0, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%);
+  border-bottom-color: rgba(230, 81, 0, 0.15);
+}
+
+.modal-body {
+  padding: 1.3rem 1.4rem;
+  max-height: calc(85vh - 140px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(234, 88, 12, 0.3) transparent;
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.4rem;
+  border-top: 1px solid var(--glass-border);
+  background: rgba(0, 0, 0, 0.22);
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+}
+
+[data-theme="light"] .modal-footer {
+  background: rgba(248, 249, 250, 0.95);
+  border-top-color: rgba(230, 81, 0, 0.15);
+}
+
+/* Close Button (Circular Glass) */
+.btn-close {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--glass-border);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-subtle);
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  outline: none;
+  padding: 0;
+}
+
+.btn-close:hover {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.45);
+  color: #ef4444;
+  transform: rotate(90deg) scale(1.08);
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.3);
+}
+
+[data-theme="light"] .btn-close {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #4b5563;
+}
+
+[data-theme="light"] .btn-close:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #dc2626;
 }
 
 /* Toast Notifications */

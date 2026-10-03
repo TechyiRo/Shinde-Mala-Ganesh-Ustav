@@ -24,7 +24,10 @@ import {
   ArrowRight,
   ShieldCheck,
   Check,
-  Calendar
+  Calendar,
+  User,
+  CreditCard,
+  FileText
 } from 'lucide-react';
 import { formatCurrency } from '../i18n/numberToWords';
 
@@ -430,7 +433,7 @@ export const ManageMahaprasad = () => {
           />
           <input
             type="text"
-            className="form-control"
+            className="form-input"
             placeholder="मानकऱ्याचे नाव किंवा मोबाईल शोधा..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -707,115 +710,243 @@ export const ManageMahaprasad = () => {
       {/* ========================================================================= */}
       {isAddModalOpen && (
         <div className="modal-overlay" onClick={() => setIsAddModalOpen(false)}>
-          <div className="modal-content glass-panel" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
-            <div className="modal-header">
-              <h2 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <PlusCircle size={18} color="var(--primary-light)" />
-                <span>नवीन महाप्रसाद मानकरी जोडा</span>
-              </h2>
-              <button type="button" className="btn-close" onClick={() => setIsAddModalOpen(false)}>
+          <div
+            className="modal-content glass-panel"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '520px',
+              borderRadius: '18px',
+              border: '1px solid rgba(16, 185, 129, 0.35)',
+              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8), 0 0 25px rgba(16, 185, 129, 0.15)',
+              overflow: 'hidden'
+            }}
+          >
+            <div
+              className="modal-header"
+              style={{
+                padding: '1.15rem 1.4rem',
+                borderBottom: '1px solid rgba(16, 185, 129, 0.25)',
+                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.14) 0%, rgba(245, 158, 11, 0.04) 100%)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div
+                  style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #10b981, #059669)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#fff',
+                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)',
+                    flexShrink: 0
+                  }}
+                >
+                  <PlusCircle size={20} />
+                </div>
+                <div>
+                  <h2 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: 'var(--text-main)', letterSpacing: '0.01em' }}>
+                    नवीन महाप्रसाद मानकरी जोडा
+                  </h2>
+                  <span style={{ fontSize: '0.78rem', color: '#10b981', fontWeight: 600 }}>
+                    सहभागी मानकरी व वाटा नोंदणी
+                  </span>
+                </div>
+              </div>
+              <button type="button" className="btn-close" onClick={() => setIsAddModalOpen(false)} aria-label="Close">
                 <X size={18} />
               </button>
             </div>
 
             <form onSubmit={handleAddSubmit}>
-              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                <div>
-                  <label className="form-label">मानकऱ्याचे पूर्ण नाव *</label>
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.35rem 1.4rem' }}>
+                <div className="form-group">
+                  <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
+                    <User size={15} color="var(--accent-gold-light)" />
+                    <span>मानकऱ्याचे पूर्ण नाव</span>
+                    <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
                   <input
                     type="text"
                     required
-                    className="form-control"
+                    className="form-input"
                     placeholder="उदा. श्री. सचिन विठ्ठल शिंदे"
                     value={addForm.name}
                     onChange={(e) => setAddForm({ ...addForm, name: e.target.value })}
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                  <div>
-                    <label className="form-label">मोबाईल क्रमांक</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem' }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
+                      <Phone size={15} color="var(--accent-gold-light)" />
+                      <span>मोबाईल क्रमांक</span>
+                    </label>
                     <input
                       type="tel"
-                      className="form-control"
-                      placeholder="98XXXXXXXX"
+                      maxLength="10"
+                      className="form-input"
+                      placeholder="९८XXXXXXXX"
                       value={addForm.phone}
                       onChange={(e) => setAddForm({ ...addForm, phone: e.target.value })}
                     />
                   </div>
-                  <div>
-                    <label className="form-label">पत्ता / गल्ली</label>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
+                      <MapPin size={15} color="var(--accent-gold-light)" />
+                      <span>पत्ता / गल्ली</span>
+                    </label>
                     <input
                       type="text"
-                      className="form-control"
-                      placeholder="शिंदे मळा, लेन २"
+                      className="form-input"
+                      placeholder="उदा. शिंदे मळा, लेन २"
                       value={addForm.address}
                       onChange={(e) => setAddForm({ ...addForm, address: e.target.value })}
                     />
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                  <div>
-                    <label className="form-label">जमा स्थिती (Status)</label>
-                    <select
-                      className="form-control"
-                      value={addForm.status}
-                      onChange={(e) => {
-                        const newStatus = e.target.value;
-                        setAddForm({
-                          ...addForm,
-                          status: newStatus,
-                          paidAmount: newStatus === 'Paid' ? (addForm.paidAmount || perHeadShare) : 0
-                        });
-                      }}
-                    >
-                      <option value="Paid">✅ पूर्ण जमा (Paid)</option>
-                      <option value="Pending">⏳ बाकी (Pending)</option>
-                    </select>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem' }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
+                      <CheckCircle2 size={15} color="var(--accent-gold-light)" />
+                      <span>जमा स्थिती (Status)</span>
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAddForm({
+                            ...addForm,
+                            status: 'Paid',
+                            paidAmount: addForm.paidAmount || perHeadShare
+                          });
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '5px',
+                          padding: '0.62rem 0.5rem',
+                          borderRadius: '9px',
+                          fontSize: '0.82rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          background: addForm.status === 'Paid' ? 'rgba(16, 185, 129, 0.22)' : 'rgba(255, 255, 255, 0.04)',
+                          border: `1.5px solid ${addForm.status === 'Paid' ? '#10b981' : 'var(--glass-border)'}`,
+                          color: addForm.status === 'Paid' ? '#10b981' : 'var(--text-subtle)'
+                        }}
+                      >
+                        <CheckCircle2 size={14} />
+                        <span>पूर्ण जमा</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAddForm({
+                            ...addForm,
+                            status: 'Pending',
+                            paidAmount: 0
+                          });
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '5px',
+                          padding: '0.62rem 0.5rem',
+                          borderRadius: '9px',
+                          fontSize: '0.82rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          background: addForm.status === 'Pending' ? 'rgba(245, 158, 11, 0.22)' : 'rgba(255, 255, 255, 0.04)',
+                          border: `1.5px solid ${addForm.status === 'Pending' ? '#f59e0b' : 'var(--glass-border)'}`,
+                          color: addForm.status === 'Pending' ? '#f59e0b' : 'var(--text-subtle)'
+                        }}
+                      >
+                        <Clock size={14} />
+                        <span>बाकी</span>
+                      </button>
+                    </div>
                   </div>
-                  <div>
-                    <label className="form-label">जमा रक्कम (₹)</label>
+
+                  <div className="form-group">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                      <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
+                        <IndianRupee size={15} color="var(--accent-gold-light)" />
+                        <span>जमा रक्कम (₹)</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setAddForm({ ...addForm, paidAmount: perHeadShare, status: 'Paid' })}
+                        style={{
+                          fontSize: '0.72rem',
+                          padding: '0.15rem 0.45rem',
+                          borderRadius: '5px',
+                          background: 'rgba(251, 191, 36, 0.15)',
+                          border: '1px solid rgba(251, 191, 36, 0.35)',
+                          color: 'var(--accent-gold-light)',
+                          cursor: 'pointer',
+                          fontWeight: 700
+                        }}
+                        title="प्रत्येकी वाटा रक्कम भरा"
+                      >
+                        वाटा ₹{perHeadShare}
+                      </button>
+                    </div>
                     <input
                       type="number"
-                      className="form-control"
-                      placeholder={`वाटा: ₹${perHeadShare}`}
+                      className="form-input"
+                      placeholder={`उदा. ₹${perHeadShare}`}
                       value={addForm.paidAmount}
                       onChange={(e) => setAddForm({ ...addForm, paidAmount: e.target.value })}
                     />
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                  <div>
-                    <label className="form-label">पेमेंट मोड</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem' }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
+                      <CreditCard size={15} color="var(--accent-gold-light)" />
+                      <span>पेमेंट मोड</span>
+                    </label>
                     <select
-                      className="form-control"
+                      className="form-select"
                       value={addForm.paymentMode}
                       onChange={(e) => setAddForm({ ...addForm, paymentMode: e.target.value })}
                     >
-                      <option value="Cash">रोख (Cash)</option>
-                      <option value="UPI">Google Pay / PhonePe (UPI)</option>
-                      <option value="Cheque">चेक (Cheque)</option>
-                      <option value="Bank Transfer">बँक ट्रान्सफर (NEFT)</option>
+                      <option value="Cash">💵 रोख (Cash)</option>
+                      <option value="UPI">📱 Google Pay / PhonePe (UPI)</option>
+                      <option value="Cheque">🏦 चेक (Cheque)</option>
+                      <option value="Bank Transfer">💳 बँक ट्रान्सफर (NEFT/IMPS)</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="form-label">जमा तारीख</label>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
+                      <Calendar size={15} color="var(--accent-gold-light)" />
+                      <span>जमा तारीख</span>
+                    </label>
                     <input
                       type="date"
-                      className="form-control"
+                      className="form-input"
                       value={addForm.paidDate}
                       onChange={(e) => setAddForm({ ...addForm, paidDate: e.target.value })}
                     />
                   </div>
                 </div>
 
-                <div>
-                  <label className="form-label">शेरा / टिप्पणी (Remarks)</label>
+                <div className="form-group">
+                  <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
+                    <FileText size={15} color="var(--accent-gold-light)" />
+                    <span>शेरा / टिप्पणी (Remarks)</span>
+                  </label>
                   <input
                     type="text"
-                    className="form-control"
+                    className="form-input"
                     placeholder="उदा. मानकरी वाटा पूर्ण जमा"
                     value={addForm.remarks}
                     onChange={(e) => setAddForm({ ...addForm, remarks: e.target.value })}
@@ -823,12 +954,41 @@ export const ManageMahaprasad = () => {
                 </div>
               </div>
 
-              <div className="modal-footer" style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end', gap: '0.65rem' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setIsAddModalOpen(false)}>
+              <div
+                className="modal-footer"
+                style={{
+                  padding: '1rem 1.4rem',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+                  background: 'rgba(0, 0, 0, 0.25)',
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: '0.75rem'
+                }}
+              >
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setIsAddModalOpen(false)}
+                  style={{ minHeight: '40px', padding: '0.5rem 1.15rem' }}
+                >
                   रद्द करा
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  मानकरी जोडा
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{
+                    minHeight: '40px',
+                    padding: '0.5rem 1.35rem',
+                    background: 'linear-gradient(135deg, #10b981, #059669)',
+                    borderColor: '#10b981',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontWeight: 700
+                  }}
+                >
+                  <PlusCircle size={16} />
+                  <span>मानकरी जोडा</span>
                 </button>
               </div>
             </form>
@@ -841,123 +1001,280 @@ export const ManageMahaprasad = () => {
       {/* ========================================================================= */}
       {isEditModalOpen && (
         <div className="modal-overlay" onClick={() => setIsEditModalOpen(false)}>
-          <div className="modal-content glass-panel" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
-            <div className="modal-header">
-              <h2 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Edit2 size={17} color="var(--primary-light)" />
-                <span>मानकरी माहिती संपादन करा</span>
-              </h2>
-              <button type="button" className="btn-close" onClick={() => setIsEditModalOpen(false)}>
+          <div
+            className="modal-content glass-panel"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '520px',
+              borderRadius: '18px',
+              border: '1px solid rgba(245, 158, 11, 0.35)',
+              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8), 0 0 25px rgba(234, 88, 12, 0.15)',
+              overflow: 'hidden'
+            }}
+          >
+            <div
+              className="modal-header"
+              style={{
+                padding: '1.15rem 1.4rem',
+                borderBottom: '1px solid rgba(245, 158, 11, 0.25)',
+                background: 'linear-gradient(135deg, rgba(234, 88, 12, 0.14) 0%, rgba(245, 158, 11, 0.04) 100%)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div
+                  style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #ea580c, #f59e0b)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#fff',
+                    boxShadow: '0 4px 12px rgba(234, 88, 12, 0.35)',
+                    flexShrink: 0
+                  }}
+                >
+                  <Edit2 size={18} />
+                </div>
+                <div>
+                  <h2 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: 'var(--text-main)', letterSpacing: '0.01em' }}>
+                    मानकरी माहिती संपादन करा
+                  </h2>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--accent-gold-light)', fontWeight: 600 }}>
+                    वाटा हिशोब व देयक स्थिती अपडेट करा
+                  </span>
+                </div>
+              </div>
+              <button type="button" className="btn-close" onClick={() => setIsEditModalOpen(false)} aria-label="Close">
                 <X size={18} />
               </button>
             </div>
 
             <form onSubmit={handleEditSubmit}>
-              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                <div>
-                  <label className="form-label">मानकऱ्याचे नाव *</label>
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.35rem 1.4rem' }}>
+                <div className="form-group">
+                  <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
+                    <User size={15} color="var(--accent-gold-light)" />
+                    <span>मानकऱ्याचे नाव</span>
+                    <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
                   <input
                     type="text"
                     required
-                    className="form-control"
+                    className="form-input"
                     value={editForm.name}
                     onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                  <div>
-                    <label className="form-label">मोबाईल क्रमांक</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem' }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
+                      <Phone size={15} color="var(--accent-gold-light)" />
+                      <span>मोबाईल क्रमांक</span>
+                    </label>
                     <input
                       type="tel"
-                      className="form-control"
+                      maxLength="10"
+                      className="form-input"
                       value={editForm.phone}
                       onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
                     />
                   </div>
-                  <div>
-                    <label className="form-label">पत्ता / गल्ली</label>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
+                      <MapPin size={15} color="var(--accent-gold-light)" />
+                      <span>पत्ता / गल्ली</span>
+                    </label>
                     <input
                       type="text"
-                      className="form-control"
+                      className="form-input"
                       value={editForm.address}
                       onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
                     />
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                  <div>
-                    <label className="form-label">जमा स्थिती</label>
-                    <select
-                      className="form-control"
-                      value={editForm.status}
-                      onChange={(e) => {
-                        const newStatus = e.target.value;
-                        setEditForm({
-                          ...editForm,
-                          status: newStatus,
-                          paidAmount: newStatus === 'Paid' ? (editForm.paidAmount || perHeadShare) : 0
-                        });
-                      }}
-                    >
-                      <option value="Paid">✅ पूर्ण जमा (Paid)</option>
-                      <option value="Pending">⏳ बाकी (Pending)</option>
-                    </select>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem' }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
+                      <CheckCircle2 size={15} color="var(--accent-gold-light)" />
+                      <span>जमा स्थिती (Status)</span>
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditForm({
+                            ...editForm,
+                            status: 'Paid',
+                            paidAmount: editForm.paidAmount || perHeadShare
+                          });
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '5px',
+                          padding: '0.62rem 0.5rem',
+                          borderRadius: '9px',
+                          fontSize: '0.82rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          background: editForm.status === 'Paid' ? 'rgba(16, 185, 129, 0.22)' : 'rgba(255, 255, 255, 0.04)',
+                          border: `1.5px solid ${editForm.status === 'Paid' ? '#10b981' : 'var(--glass-border)'}`,
+                          color: editForm.status === 'Paid' ? '#10b981' : 'var(--text-subtle)'
+                        }}
+                      >
+                        <CheckCircle2 size={14} />
+                        <span>पूर्ण जमा</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditForm({
+                            ...editForm,
+                            status: 'Pending',
+                            paidAmount: 0
+                          });
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '5px',
+                          padding: '0.62rem 0.5rem',
+                          borderRadius: '9px',
+                          fontSize: '0.82rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          background: editForm.status === 'Pending' ? 'rgba(245, 158, 11, 0.22)' : 'rgba(255, 255, 255, 0.04)',
+                          border: `1.5px solid ${editForm.status === 'Pending' ? '#f59e0b' : 'var(--glass-border)'}`,
+                          color: editForm.status === 'Pending' ? '#f59e0b' : 'var(--text-subtle)'
+                        }}
+                      >
+                        <Clock size={14} />
+                        <span>बाकी</span>
+                      </button>
+                    </div>
                   </div>
-                  <div>
-                    <label className="form-label">जमा रक्कम (₹)</label>
+
+                  <div className="form-group">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                      <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
+                        <IndianRupee size={15} color="var(--accent-gold-light)" />
+                        <span>जमा रक्कम (₹)</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setEditForm({ ...editForm, paidAmount: perHeadShare, status: 'Paid' })}
+                        style={{
+                          fontSize: '0.72rem',
+                          padding: '0.15rem 0.45rem',
+                          borderRadius: '5px',
+                          background: 'rgba(251, 191, 36, 0.15)',
+                          border: '1px solid rgba(251, 191, 36, 0.35)',
+                          color: 'var(--accent-gold-light)',
+                          cursor: 'pointer',
+                          fontWeight: 700
+                        }}
+                        title="प्रत्येकी वाटा रक्कम भरा"
+                      >
+                        वाटा ₹{perHeadShare}
+                      </button>
+                    </div>
                     <input
                       type="number"
-                      className="form-control"
+                      className="form-input"
                       value={editForm.paidAmount}
                       onChange={(e) => setEditForm({ ...editForm, paidAmount: e.target.value })}
                     />
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                  <div>
-                    <label className="form-label">पेमेंट मोड</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem' }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
+                      <CreditCard size={15} color="var(--accent-gold-light)" />
+                      <span>पेमेंट मोड</span>
+                    </label>
                     <select
-                      className="form-control"
+                      className="form-select"
                       value={editForm.paymentMode}
                       onChange={(e) => setEditForm({ ...editForm, paymentMode: e.target.value })}
                     >
-                      <option value="Cash">रोख (Cash)</option>
-                      <option value="UPI">Google Pay / PhonePe (UPI)</option>
-                      <option value="Cheque">चेक (Cheque)</option>
-                      <option value="Bank Transfer">बँक ट्रान्सफर (NEFT)</option>
+                      <option value="Cash">💵 रोख (Cash)</option>
+                      <option value="UPI">📱 Google Pay / PhonePe (UPI)</option>
+                      <option value="Cheque">🏦 चेक (Cheque)</option>
+                      <option value="Bank Transfer">💳 बँक ट्रान्सफर (NEFT/IMPS)</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="form-label">जमा तारीख</label>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
+                      <Calendar size={15} color="var(--accent-gold-light)" />
+                      <span>जमा तारीख</span>
+                    </label>
                     <input
                       type="date"
-                      className="form-control"
+                      className="form-input"
                       value={editForm.paidDate}
                       onChange={(e) => setEditForm({ ...editForm, paidDate: e.target.value })}
                     />
                   </div>
                 </div>
 
-                <div>
-                  <label className="form-label">शेरा (Remarks)</label>
+                <div className="form-group">
+                  <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
+                    <FileText size={15} color="var(--accent-gold-light)" />
+                    <span>शेरा (Remarks)</span>
+                  </label>
                   <input
                     type="text"
-                    className="form-control"
+                    className="form-input"
                     value={editForm.remarks}
                     onChange={(e) => setEditForm({ ...editForm, remarks: e.target.value })}
                   />
                 </div>
               </div>
 
-              <div className="modal-footer" style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end', gap: '0.65rem' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setIsEditModalOpen(false)}>
+              <div
+                className="modal-footer"
+                style={{
+                  padding: '1rem 1.4rem',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+                  background: 'rgba(0, 0, 0, 0.25)',
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: '0.75rem'
+                }}
+              >
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setIsEditModalOpen(false)}
+                  style={{ minHeight: '40px', padding: '0.5rem 1.15rem' }}
+                >
                   रद्द करा
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  अपडेट करा
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{
+                    minHeight: '40px',
+                    padding: '0.5rem 1.35rem',
+                    background: 'linear-gradient(135deg, #ea580c, #f59e0b)',
+                    borderColor: '#ea580c',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontWeight: 700
+                  }}
+                >
+                  <Check size={16} />
+                  <span>अपडेट करा</span>
                 </button>
               </div>
             </form>
@@ -970,71 +1287,171 @@ export const ManageMahaprasad = () => {
       {/* ========================================================================= */}
       {isSettingsModalOpen && (
         <div className="modal-overlay" onClick={() => setIsSettingsModalOpen(false)}>
-          <div className="modal-content glass-panel" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
-            <div className="modal-header">
-              <h2 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Settings size={18} color="#f59e0b" />
-                <span>महाप्रसाद हिशोब व एकूण खर्च सेटिंग्ज</span>
-              </h2>
-              <button type="button" className="btn-close" onClick={() => setIsSettingsModalOpen(false)}>
+          <div
+            className="modal-content glass-panel"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '520px',
+              borderRadius: '18px',
+              border: '1px solid rgba(245, 158, 11, 0.35)',
+              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8), 0 0 25px rgba(245, 158, 11, 0.15)',
+              overflow: 'hidden'
+            }}
+          >
+            <div
+              className="modal-header"
+              style={{
+                padding: '1.15rem 1.4rem',
+                borderBottom: '1px solid rgba(245, 158, 11, 0.25)',
+                background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.14) 0%, rgba(234, 88, 12, 0.04) 100%)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div
+                  style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#fff',
+                    boxShadow: '0 4px 12px rgba(245, 158, 11, 0.35)',
+                    flexShrink: 0
+                  }}
+                >
+                  <Settings size={20} />
+                </div>
+                <div>
+                  <h2 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: 'var(--text-main)', letterSpacing: '0.01em' }}>
+                    महाप्रसाद हिशोब व एकूण खर्च सेटिंग्ज
+                  </h2>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--accent-gold-light)', fontWeight: 600 }}>
+                    एकूण खर्च व प्रत्येकी वाटा व्यवस्थापन
+                  </span>
+                </div>
+              </div>
+              <button type="button" className="btn-close" onClick={() => setIsSettingsModalOpen(false)} aria-label="Close">
                 <X size={18} />
               </button>
             </div>
 
             <form onSubmit={handleSettingsSubmit}>
-              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                <div>
-                  <label className="form-label">महाप्रसाद कार्यक्रमाचे नाव</label>
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.35rem 1.4rem' }}>
+                <div className="form-group">
+                  <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
+                    <UtensilsCrossed size={15} color="var(--accent-gold-light)" />
+                    <span>महाप्रसाद कार्यक्रमाचे नाव</span>
+                    <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
                   <input
                     type="text"
                     required
-                    className="form-control"
+                    className="form-input"
                     value={settingsForm.title}
                     onChange={(e) => setSettingsForm({ ...settingsForm, title: e.target.value })}
                   />
                 </div>
 
-                <div>
-                  <label className="form-label">एकूण महाप्रसाद खर्च (Total Expense ₹) *</label>
+                <div className="form-group">
+                  <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
+                    <IndianRupee size={15} color="var(--accent-gold-light)" />
+                    <span>एकूण महाप्रसाद खर्च (Total Expense ₹)</span>
+                    <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
                   <input
                     type="number"
                     required
-                    className="form-control"
+                    className="form-input"
                     value={settingsForm.totalExpense}
                     onChange={(e) => setSettingsForm({ ...settingsForm, totalExpense: e.target.value })}
                   />
-                  <div style={{ fontSize: '0.78rem', color: '#10b981', fontWeight: 700, marginTop: '4px' }}>
-                    💡 नवीन प्रत्येकी खर्च: ₹{manakariCount > 0 ? Math.round(Number(settingsForm.totalExpense || 0) / manakariCount).toLocaleString('en-IN') : 0} (एकूण {manakariCount} मानकऱ्यांमध्ये समसमान विभागणी)
+                  <div
+                    style={{
+                      fontSize: '0.8rem',
+                      color: '#10b981',
+                      fontWeight: 700,
+                      marginTop: '6px',
+                      background: 'rgba(16, 185, 129, 0.1)',
+                      border: '1px solid rgba(16, 185, 129, 0.25)',
+                      padding: '0.4rem 0.75rem',
+                      borderRadius: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <span>💡</span>
+                    <span>
+                      नवीन प्रत्येकी खर्च: <strong>₹{manakariCount > 0 ? Math.round(Number(settingsForm.totalExpense || 0) / manakariCount).toLocaleString('en-IN') : 0}</strong> (एकूण {manakariCount} मानकऱ्यांमध्ये समसमान विभागणी)
+                    </span>
                   </div>
                 </div>
 
-                <div>
-                  <label className="form-label">महाप्रसाद तारीख</label>
+                <div className="form-group">
+                  <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
+                    <Calendar size={15} color="var(--accent-gold-light)" />
+                    <span>महाप्रसाद तारीख</span>
+                  </label>
                   <input
                     type="date"
-                    className="form-control"
+                    className="form-input"
                     value={settingsForm.date}
                     onChange={(e) => setSettingsForm({ ...settingsForm, date: e.target.value })}
                   />
                 </div>
 
-                <div>
-                  <label className="form-label">अधिकृत संदेश / नोंद (Notes)</label>
+                <div className="form-group">
+                  <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
+                    <FileText size={15} color="var(--accent-gold-light)" />
+                    <span>अधिकृत संदेश / नोंद (Notes)</span>
+                  </label>
                   <textarea
                     rows={3}
-                    className="form-control"
+                    className="form-textarea"
+                    placeholder="उदा. सर्व भाविक व मानकऱ्यांचे मनःपूर्वक आभार..."
                     value={settingsForm.notes}
                     onChange={(e) => setSettingsForm({ ...settingsForm, notes: e.target.value })}
                   />
                 </div>
               </div>
 
-              <div className="modal-footer" style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end', gap: '0.65rem' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setIsSettingsModalOpen(false)}>
+              <div
+                className="modal-footer"
+                style={{
+                  padding: '1rem 1.4rem',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+                  background: 'rgba(0, 0, 0, 0.25)',
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: '0.75rem'
+                }}
+              >
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setIsSettingsModalOpen(false)}
+                  style={{ minHeight: '40px', padding: '0.5rem 1.15rem' }}
+                >
                   रद्द करा
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  सेव्ह करा
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{
+                    minHeight: '40px',
+                    padding: '0.5rem 1.35rem',
+                    background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                    borderColor: '#f59e0b',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontWeight: 700
+                  }}
+                >
+                  <Check size={16} />
+                  <span>सेव्ह करा</span>
                 </button>
               </div>
             </form>

@@ -274,7 +274,7 @@ export const MahaprasadPublicSection = () => {
             />
             <input
               type="text"
-              className="form-control"
+              className="form-input"
               placeholder="मानकऱ्याचे नाव किंवा परिसर शोधा..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
