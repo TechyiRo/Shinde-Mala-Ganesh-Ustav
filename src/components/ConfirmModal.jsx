@@ -2,13 +2,14 @@ import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { AlertTriangle, X } from 'lucide-react';
 
-export const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel }) => {
+export const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel, onClose }) => {
   const { t } = useLanguage();
+  const handleClose = onCancel || onClose;
 
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onCancel}>
+    <div className="modal-overlay" onClick={handleClose}>
       <div className="modal-content" style={{ maxWidth: '440px', padding: '1.75rem' }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -29,7 +30,7 @@ export const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel }) =>
             </h3>
           </div>
           <button
-            onClick={onCancel}
+            onClick={handleClose}
             style={{
               background: 'none',
               border: 'none',
@@ -47,7 +48,7 @@ export const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel }) =>
         </p>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
-          <button className="btn btn-secondary" onClick={onCancel}>
+          <button className="btn btn-secondary" onClick={handleClose}>
             {t('confirmCancel')}
           </button>
           <button className="btn btn-danger" onClick={onConfirm}>

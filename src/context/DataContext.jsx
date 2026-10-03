@@ -978,20 +978,20 @@ export const DataProvider = ({ children }) => {
     const currentList = currentData.manakariList || [];
     const newCount = currentList.length + 1;
     const expectedShare = Number(currentData.totalExpense || 0) > 0 ? Math.round(Number(currentData.totalExpense) / newCount) : 0;
-    const id = 'MK-' + String(Date.now()).slice(-6);
+    const id = `MK-${String(newCount).padStart(2, '0')}`;
     const item = {
       id,
-      name: newManakari.name || '',
-      phone: newManakari.phone || '',
-      address: newManakari.address || '',
+      name: (newManakari.name || '').trim(),
+      phone: (newManakari.phone || '').trim(),
+      address: (newManakari.address || '').trim(),
       status: newManakari.status || 'Paid',
       paidAmount: Number(newManakari.paidAmount ?? (newManakari.status === 'Pending' ? 0 : expectedShare)),
       paidDate: newManakari.paidDate || new Date().toISOString().split('T')[0],
       paymentMode: newManakari.paymentMode || 'Cash',
       remarks: newManakari.remarks || 'मानकरी वाटा'
     };
-    // Prepend newly added mankari so it appears directly at the very top of the list!
-    const updatedList = [item, ...currentList.filter((m) => m.id !== id)];
+    // Append in sequential chronological order (1, 2, 3...)
+    const updatedList = [...currentList.filter((m) => m.id !== id), item];
     const next = { ...currentData, manakariList: updatedList };
 
     // 1. Instant Synchronous Update (0ms) in State & LocalStorage
@@ -1019,7 +1019,7 @@ export const DataProvider = ({ children }) => {
       })
       .catch((err) => console.warn('Could not sync mahaprasad to MongoDB:', err.message));
 
-    addToast('नवीन मानकरी त्वरित जोडले गेले!', 'success');
+    addToast(`नवीन मानकरी क्र. ${newCount} (${item.name}) यशस्वीरित्या जोडले गेले!`, 'success');
   };
 
   const updateManakari = (id, updatedFields) => {
@@ -1086,14 +1086,19 @@ export const DataProvider = ({ children }) => {
     const currentData = mahaprasadData || initialMahaprasadData;
     const currentList = currentData.manakariList || [];
     const perShare = currentList.length > 0 ? Math.round(Number(currentData.totalExpense || 0) / currentList.length) : 0;
+    let targetName = '';
+    let isNowPaid = false;
+
     const updatedList = currentList.map((m) => {
       if (m.id === id) {
         const newStatus = m.status === 'Paid' ? 'Pending' : 'Paid';
+        isNowPaid = newStatus === 'Paid';
+        targetName = m.name || 'मानकरी';
         return {
           ...m,
           status: newStatus,
-          paidAmount: newStatus === 'Paid' ? perShare : 0,
-          paidDate: newStatus === 'Paid' ? new Date().toISOString().split('T')[0] : ''
+          paidAmount: newStatus === 'Paid' ? (m.paidAmount && m.paidAmount > 0 ? m.paidAmount : perShare) : 0,
+          paidDate: newStatus === 'Paid' ? (m.paidDate || new Date().toISOString().split('T')[0]) : ''
         };
       }
       return m;
@@ -1121,7 +1126,11 @@ export const DataProvider = ({ children }) => {
       })
       .catch((err) => console.warn('Could not sync mahaprasad to MongoDB:', err.message));
 
-    addToast('पेमेंट स्थिती त्वरित अपडेट झाली!', 'success');
+    if (isNowPaid) {
+      addToast(`${targetName}: रक्कम पूर्ण जमा झाली!`, 'success');
+    } else {
+      addToast(`${targetName}: रक्कम बाकी / शिल्लक केली.`, 'info');
+    }
   };
 
   // Settings & Reset

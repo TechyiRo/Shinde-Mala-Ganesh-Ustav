@@ -578,9 +578,20 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.75), var(--glass-inner-glow);
   width: 100%;
   max-width: 680px;
-  max-height: 90vh;
-  overflow-y: auto;
+  max-height: 92vh;
+  max-height: 92dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   animation: modalScaleIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-content > form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 @keyframes fadeIn {
@@ -610,6 +621,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   border-top-left-radius: inherit;
   border-top-right-radius: inherit;
   gap: 0.75rem;
+  flex-shrink: 0;
 }
 
 [data-theme="light"] .modal-header {
@@ -619,8 +631,10 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 
 .modal-body {
   padding: 1.3rem 1.4rem;
-  max-height: calc(85vh - 140px);
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: rgba(234, 88, 12, 0.3) transparent;
 }
@@ -635,11 +649,51 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   background: rgba(0, 0, 0, 0.22);
   border-bottom-left-radius: inherit;
   border-bottom-right-radius: inherit;
+  flex-shrink: 0;
 }
 
 [data-theme="light"] .modal-footer {
   background: rgba(248, 249, 250, 0.95);
   border-top-color: rgba(230, 81, 0, 0.15);
+}
+
+@media (max-width: 640px) {
+  .modal-overlay {
+    padding: 0.5rem;
+    align-items: center;
+  }
+
+  .modal-content {
+    max-height: 94dvh;
+    max-height: 94vh;
+    border-radius: var(--radius-lg);
+  }
+
+  .modal-header {
+    padding: 0.85rem 1rem;
+  }
+
+  .modal-body {
+    padding: 0.9rem 1rem;
+  }
+
+  .modal-footer {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.6rem !important;
+    padding: 0.75rem 0.9rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .modal-footer .btn {
+    width: 100% !important;
+    justify-content: center !important;
+    min-height: 42px !important;
+    font-size: 0.9rem !important;
+    padding: 0.55rem 0.75rem !important;
+    margin: 0 !important;
+  }
 }
 
 /* Close Button (Circular Glass) */

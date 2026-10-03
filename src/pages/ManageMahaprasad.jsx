@@ -525,7 +525,7 @@ export const ManageMahaprasad = () => {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))',
               gap: '0.85rem'
             }}
           >
@@ -543,16 +543,16 @@ export const ManageMahaprasad = () => {
                     position: 'relative',
                     transition: 'transform 0.15s, border-color 0.15s',
                     border: isPaid
-                      ? '1px solid rgba(16, 185, 129, 0.35)'
-                      : '1px solid rgba(239, 68, 68, 0.35)',
+                      ? '1px solid rgba(16, 185, 129, 0.4)'
+                      : '1px solid rgba(239, 68, 68, 0.4)',
                     background: isPaid
-                      ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(0,0,0,0.18))'
-                      : 'linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(0,0,0,0.18))'
+                      ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.07), rgba(0,0,0,0.22))'
+                      : 'linear-gradient(135deg, rgba(239, 68, 68, 0.07), rgba(0,0,0,0.22))'
                   }}
                 >
-                  {/* Card Top: Avatar & Name */}
+                  {/* Card Top: Avatar & Name & Status Toggle Badge */}
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.65rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0, flex: 1 }}>
                       <div
                         style={{
                           width: '38px',
@@ -567,12 +567,13 @@ export const ManageMahaprasad = () => {
                           justifyContent: 'center',
                           fontWeight: 800,
                           fontSize: '0.88rem',
-                          flexShrink: 0
+                          flexShrink: 0,
+                          boxShadow: isPaid ? '0 2px 8px rgba(16, 185, 129, 0.4)' : '0 2px 8px rgba(239, 68, 68, 0.4)'
                         }}
                       >
                         {idx + 1}
                       </div>
-                      <div style={{ minWidth: 0 }}>
+                      <div style={{ minWidth: 0, flex: 1 }}>
                         <div
                           style={{
                             fontWeight: 800,
@@ -583,6 +584,7 @@ export const ManageMahaprasad = () => {
                             overflow: 'hidden',
                             textOverflow: 'ellipsis'
                           }}
+                          title={m.name}
                         >
                           {m.name}
                         </div>
@@ -594,7 +596,10 @@ export const ManageMahaprasad = () => {
                               display: 'flex',
                               alignItems: 'center',
                               gap: '3px',
-                              marginTop: '2px'
+                              marginTop: '2px',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis'
                             }}
                           >
                             <MapPin size={11} color="var(--primary-light)" />
@@ -604,99 +609,158 @@ export const ManageMahaprasad = () => {
                       </div>
                     </div>
 
-                    {/* Paid / Pending Status Badge (Clickable toggle) */}
+                    {/* Paid / Pending Status Badge (Clickable Toggle) */}
                     <button
                       type="button"
                       onClick={() => toggleManakariPaidStatus(m.id)}
-                      title="स्थिती बदलण्यासाठी क्लिक करा"
+                      title="स्थिती बदलण्यासाठी टॅप करा (जमा ⇄ बाकी)"
                       style={{
-                        background: isPaid ? 'rgba(16, 185, 129, 0.18)' : 'rgba(239, 68, 68, 0.18)',
-                        border: isPaid ? '1px solid #10b981' : '1px solid #ef4444',
+                        background: isPaid ? 'rgba(16, 185, 129, 0.22)' : 'rgba(239, 68, 68, 0.22)',
+                        border: isPaid ? '1.5px solid #10b981' : '1.5px solid #ef4444',
                         color: isPaid ? '#10b981' : '#ef4444',
                         borderRadius: '999px',
-                        padding: '0.2rem 0.55rem',
-                        fontSize: '0.72rem',
+                        padding: '0.28rem 0.65rem',
+                        fontSize: '0.75rem',
                         fontWeight: 800,
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '4px',
-                        flexShrink: 0
+                        flexShrink: 0,
+                        transition: 'transform 0.15s, background 0.15s'
                       }}
                     >
-                      {isPaid ? <CheckCircle2 size={12} /> : <Clock size={12} />}
+                      {isPaid ? <CheckCircle2 size={13} /> : <Clock size={13} />}
                       <span>{isPaid ? 'पूर्ण जमा' : 'शिल्लक'}</span>
                     </button>
                   </div>
 
-                  {/* Financial Breakdown (Share vs Paid) */}
+                  {/* Financial Breakdown (Share vs Paid) - Fully Clickable to Toggle Status */}
                   <div
+                    onClick={() => toggleManakariPaidStatus(m.id)}
+                    title="रक्कम व देयक स्थिती बदलण्यासाठी टॅप करा"
                     style={{
                       margin: '0.85rem 0',
-                      padding: '0.65rem 0.75rem',
+                      padding: '0.7rem 0.8rem',
                       borderRadius: 'var(--radius-md)',
-                      backgroundColor: 'rgba(0, 0, 0, 0.25)',
+                      backgroundColor: isPaid ? 'rgba(16, 185, 129, 0.08)' : 'rgba(239, 68, 68, 0.08)',
+                      border: isPaid ? '1px dashed rgba(16, 185, 129, 0.45)' : '1px dashed rgba(239, 68, 68, 0.45)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      fontSize: '0.82rem'
+                      fontSize: '0.82rem',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                      transition: 'all 0.18s ease'
                     }}
                   >
                     <div>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>प्रत्येकी वाटा</div>
+                      <div style={{ fontSize: '0.68rem', color: 'var(--text-subtle)', fontWeight: 600 }}>प्रत्येकी वाटा</div>
                       <div style={{ fontWeight: 800, color: 'var(--accent-gold-light)', fontSize: '0.92rem' }}>
                         {formatCurrency(perHeadShare)}
                       </div>
                     </div>
 
                     <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>पेमेंट मोड</div>
+                      <div style={{ fontSize: '0.68rem', color: 'var(--text-subtle)', fontWeight: 600 }}>पेमेंट मोड</div>
                       <div style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.78rem' }}>
                         {m.paymentMode || 'Cash'}
                       </div>
                     </div>
 
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>जमा रक्कम</div>
-                      <div style={{ fontWeight: 900, color: isPaid ? '#10b981' : '#ef4444', fontSize: '0.95rem' }}>
+                      <div style={{ fontSize: '0.68rem', color: isPaid ? '#10b981' : '#ef4444', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '3px' }}>
+                        <span>{isPaid ? 'जमा रक्कम' : 'शिल्लक बाकी'}</span>
+                        <span style={{ fontSize: '0.65rem', opacity: 0.85 }}>🔄 बदला</span>
+                      </div>
+                      <div style={{ fontWeight: 900, color: isPaid ? '#10b981' : '#ef4444', fontSize: '1rem' }}>
                         {formatCurrency(m.paidAmount || 0)}
                       </div>
                     </div>
                   </div>
 
-                  {/* Bottom Info & Action Buttons */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', paddingTop: '0.4rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                    <div style={{ fontSize: '0.74rem', color: 'var(--text-subtle)' }}>
+                  {/* Bottom Info & Action Buttons (Clearly visible, labeled and touch-friendly) */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '0.5rem',
+                      paddingTop: '0.5rem',
+                      borderTop: '1px solid rgba(255,255,255,0.08)',
+                      flexWrap: 'wrap'
+                    }}
+                  >
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-subtle)' }}>
                       {m.phone ? (
-                        <a href={`tel:${m.phone}`} style={{ color: 'var(--primary-light)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                          <Phone size={11} /> {m.phone}
+                        <a
+                          href={`tel:${m.phone}`}
+                          style={{
+                            color: 'var(--primary-light)',
+                            textDecoration: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            fontWeight: 600
+                          }}
+                        >
+                          <Phone size={12} /> {m.phone}
                         </a>
                       ) : (
                         <span>दिनांक: {m.paidDate || '—'}</span>
                       )}
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    {/* High-visibility prominent labeled action buttons */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
                       <button
                         type="button"
-                        className="btn btn-secondary btn-icon btn-sm"
                         onClick={() => handleOpenEdit(m)}
-                        title="संपादन करा"
-                        style={{ width: '30px', height: '30px', padding: 0 }}
+                        title="माहिती संपादन करा"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                          padding: '0.4rem 0.7rem',
+                          borderRadius: '8px',
+                          fontSize: '0.8rem',
+                          fontWeight: 700,
+                          background: 'rgba(245, 158, 11, 0.16)',
+                          border: '1px solid rgba(245, 158, 11, 0.5)',
+                          color: '#f59e0b',
+                          cursor: 'pointer',
+                          minHeight: '35px',
+                          transition: 'all 0.15s ease'
+                        }}
                       >
-                        <Edit2 size={13} color="var(--primary-light)" />
+                        <Edit2 size={13} />
+                        <span>संपादन</span>
                       </button>
                       <button
                         type="button"
-                        className="btn btn-secondary btn-icon btn-sm"
                         onClick={() => {
                           setDeleteTargetId(m.id);
                           setIsConfirmDeleteOpen(true);
                         }}
-                        title="काढून टाका"
-                        style={{ width: '30px', height: '30px', padding: 0 }}
+                        title="यादीतून काढून टाका"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                          padding: '0.4rem 0.7rem',
+                          borderRadius: '8px',
+                          fontSize: '0.8rem',
+                          fontWeight: 700,
+                          background: 'rgba(239, 68, 68, 0.16)',
+                          border: '1px solid rgba(239, 68, 68, 0.5)',
+                          color: '#ef4444',
+                          cursor: 'pointer',
+                          minHeight: '35px',
+                          transition: 'all 0.15s ease'
+                        }}
                       >
-                        <Trash2 size={13} color="#ef4444" />
+                        <Trash2 size={13} />
+                        <span>काढून टाका</span>
                       </button>
                     </div>
                   </div>
@@ -717,16 +781,13 @@ export const ManageMahaprasad = () => {
             onClick={(e) => e.stopPropagation()}
             style={{
               maxWidth: '520px',
-              borderRadius: '18px',
               border: '1px solid rgba(16, 185, 129, 0.35)',
-              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8), 0 0 25px rgba(16, 185, 129, 0.15)',
-              overflow: 'hidden'
+              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8), 0 0 25px rgba(16, 185, 129, 0.15)'
             }}
           >
             <div
               className="modal-header"
               style={{
-                padding: '1.15rem 1.4rem',
                 borderBottom: '1px solid rgba(16, 185, 129, 0.25)',
                 background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.14) 0%, rgba(245, 158, 11, 0.04) 100%)'
               }}
@@ -762,8 +823,23 @@ export const ManageMahaprasad = () => {
               </button>
             </div>
 
-            <form onSubmit={handleAddSubmit}>
-              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.35rem 1.4rem' }}>
+            <form
+              onSubmit={handleAddSubmit}
+              style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}
+            >
+              <div
+                className="modal-body"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                  flex: 1,
+                  minHeight: 0,
+                  overflowY: 'auto',
+                  WebkitOverflowScrolling: 'touch',
+                  padding: 'clamp(1rem, 3vw, 1.35rem)'
+                }}
+              >
                 <div className="form-group">
                   <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
                     <User size={15} color="var(--accent-gold-light)" />
@@ -956,22 +1032,11 @@ export const ManageMahaprasad = () => {
                 </div>
               </div>
 
-              <div
-                className="modal-footer"
-                style={{
-                  padding: '1rem 1.4rem',
-                  borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-                  background: 'rgba(0, 0, 0, 0.25)',
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  gap: '0.75rem'
-                }}
-              >
+              <div className="modal-footer">
                 <button
                   type="button"
                   className="btn btn-secondary"
                   onClick={() => setIsAddModalOpen(false)}
-                  style={{ minHeight: '40px', padding: '0.5rem 1.15rem' }}
                 >
                   रद्द करा
                 </button>
@@ -979,12 +1044,11 @@ export const ManageMahaprasad = () => {
                   type="submit"
                   className="btn btn-primary"
                   style={{
-                    minHeight: '40px',
-                    padding: '0.5rem 1.35rem',
                     background: 'linear-gradient(135deg, #10b981, #059669)',
                     borderColor: '#10b981',
                     display: 'flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '6px',
                     fontWeight: 700
                   }}
@@ -1008,16 +1072,13 @@ export const ManageMahaprasad = () => {
             onClick={(e) => e.stopPropagation()}
             style={{
               maxWidth: '520px',
-              borderRadius: '18px',
               border: '1px solid rgba(245, 158, 11, 0.35)',
-              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8), 0 0 25px rgba(234, 88, 12, 0.15)',
-              overflow: 'hidden'
+              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8), 0 0 25px rgba(234, 88, 12, 0.15)'
             }}
           >
             <div
               className="modal-header"
               style={{
-                padding: '1.15rem 1.4rem',
                 borderBottom: '1px solid rgba(245, 158, 11, 0.25)',
                 background: 'linear-gradient(135deg, rgba(234, 88, 12, 0.14) 0%, rgba(245, 158, 11, 0.04) 100%)'
               }}
@@ -1053,8 +1114,23 @@ export const ManageMahaprasad = () => {
               </button>
             </div>
 
-            <form onSubmit={handleEditSubmit}>
-              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.35rem 1.4rem' }}>
+            <form
+              onSubmit={handleEditSubmit}
+              style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}
+            >
+              <div
+                className="modal-body"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                  flex: 1,
+                  minHeight: 0,
+                  overflowY: 'auto',
+                  WebkitOverflowScrolling: 'touch',
+                  padding: 'clamp(1rem, 3vw, 1.35rem)'
+                }}
+              >
                 <div className="form-group">
                   <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
                     <User size={15} color="var(--accent-gold-light)" />
@@ -1242,22 +1318,11 @@ export const ManageMahaprasad = () => {
                 </div>
               </div>
 
-              <div
-                className="modal-footer"
-                style={{
-                  padding: '1rem 1.4rem',
-                  borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-                  background: 'rgba(0, 0, 0, 0.25)',
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  gap: '0.75rem'
-                }}
-              >
+              <div className="modal-footer">
                 <button
                   type="button"
                   className="btn btn-secondary"
                   onClick={() => setIsEditModalOpen(false)}
-                  style={{ minHeight: '40px', padding: '0.5rem 1.15rem' }}
                 >
                   रद्द करा
                 </button>
@@ -1265,12 +1330,11 @@ export const ManageMahaprasad = () => {
                   type="submit"
                   className="btn btn-primary"
                   style={{
-                    minHeight: '40px',
-                    padding: '0.5rem 1.35rem',
                     background: 'linear-gradient(135deg, #ea580c, #f59e0b)',
                     borderColor: '#ea580c',
                     display: 'flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '6px',
                     fontWeight: 700
                   }}
@@ -1294,16 +1358,13 @@ export const ManageMahaprasad = () => {
             onClick={(e) => e.stopPropagation()}
             style={{
               maxWidth: '520px',
-              borderRadius: '18px',
               border: '1px solid rgba(245, 158, 11, 0.35)',
-              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8), 0 0 25px rgba(245, 158, 11, 0.15)',
-              overflow: 'hidden'
+              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8), 0 0 25px rgba(245, 158, 11, 0.15)'
             }}
           >
             <div
               className="modal-header"
               style={{
-                padding: '1.15rem 1.4rem',
                 borderBottom: '1px solid rgba(245, 158, 11, 0.25)',
                 background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.14) 0%, rgba(234, 88, 12, 0.04) 100%)'
               }}
@@ -1339,8 +1400,23 @@ export const ManageMahaprasad = () => {
               </button>
             </div>
 
-            <form onSubmit={handleSettingsSubmit}>
-              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.35rem 1.4rem' }}>
+            <form
+              onSubmit={handleSettingsSubmit}
+              style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}
+            >
+              <div
+                className="modal-body"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                  flex: 1,
+                  minHeight: 0,
+                  overflowY: 'auto',
+                  WebkitOverflowScrolling: 'touch',
+                  padding: 'clamp(1rem, 3vw, 1.35rem)'
+                }}
+              >
                 <div className="form-group">
                   <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
                     <UtensilsCrossed size={15} color="var(--accent-gold-light)" />
@@ -1419,22 +1495,11 @@ export const ManageMahaprasad = () => {
                 </div>
               </div>
 
-              <div
-                className="modal-footer"
-                style={{
-                  padding: '1rem 1.4rem',
-                  borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-                  background: 'rgba(0, 0, 0, 0.25)',
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  gap: '0.75rem'
-                }}
-              >
+              <div className="modal-footer">
                 <button
                   type="button"
                   className="btn btn-secondary"
                   onClick={() => setIsSettingsModalOpen(false)}
-                  style={{ minHeight: '40px', padding: '0.5rem 1.15rem' }}
                 >
                   रद्द करा
                 </button>
@@ -1442,12 +1507,11 @@ export const ManageMahaprasad = () => {
                   type="submit"
                   className="btn btn-primary"
                   style={{
-                    minHeight: '40px',
-                    padding: '0.5rem 1.35rem',
                     background: 'linear-gradient(135deg, #f59e0b, #d97706)',
                     borderColor: '#f59e0b',
                     display: 'flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '6px',
                     fontWeight: 700
                   }}
