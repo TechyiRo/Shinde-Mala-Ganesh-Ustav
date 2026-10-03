@@ -1929,7 +1929,7 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
                 <strong>अध्यक्ष:</strong> {mandalSettings.president || 'श्री. तुषार शिंदे'}
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', marginLeft: '0.45rem', verticalAlign: 'middle' }}>
                   <img
-                    src="/signatures/tushar-signature.jpeg"
+                    src="/signatures/tushar-signature.png"
                     alt="अध्यक्ष स्वाक्षरी"
                     style={{ height: '20px', maxWidth: '70px', objectFit: 'contain', filter: 'brightness(1.05)' }}
                     onError={(e) => { e.target.style.display = 'none'; }}
@@ -1943,9 +1943,17 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
                 <strong>खजिनदार:</strong> {mandalSettings.treasurer || 'श्री. तुकाराम शिंदे व श्री. धनंजय शिंदे'}
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', marginLeft: '0.45rem', verticalAlign: 'middle' }}>
                   <img
+                    src="/signatures/tukaram-signature.png"
+                    alt="तुकाराम शिंदे स्वाक्षरी"
+                    title="श्री. तुकाराम शिंदे स्वाक्षरी"
+                    style={{ height: '20px', maxWidth: '50px', objectFit: 'contain', filter: 'brightness(1.05)' }}
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                  <img
                     src="/signatures/mayur-signature.png"
-                    alt="खजिनदार स्वाक्षरी"
-                    style={{ height: '20px', maxWidth: '70px', objectFit: 'contain', filter: 'brightness(1.05)' }}
+                    alt="धनंजय (मयूर) शिंदे स्वाक्षरी"
+                    title="श्री. धनंजय शिंदे स्वाक्षरी"
+                    style={{ height: '20px', maxWidth: '50px', objectFit: 'contain', filter: 'brightness(1.05)' }}
                     onError={(e) => { e.target.style.display = 'none'; }}
                   />
                   <span style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 700 }} title="अधिकृत डिजिटल स्वाक्षरी प्रमाणीत">

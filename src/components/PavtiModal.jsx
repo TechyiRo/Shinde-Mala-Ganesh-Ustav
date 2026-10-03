@@ -688,7 +688,13 @@ export const PavtiModal = ({ isOpen, pavti, onClose, isPublic = false }) => {
             <div style={{ textAlign: 'center' }}>
               <div style={{ height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '2px' }}>
                 <img
-                  src="/signatures/mayur-signature.png"
+                  src={
+                    pavti.receivedBy?.includes('तुकाराम') ? '/signatures/tukaram-signature.png' :
+                    pavti.receivedBy?.includes('तुषार') ? '/signatures/tushar-signature.png' :
+                    pavti.receivedBy?.includes('मानस') ? '/signatures/manas-signature.png' :
+                    pavti.receivedBy?.includes('मयूर') ? '/signatures/mayur-signature.png' :
+                    '/signatures/tukaram-signature.png'
+                  }
                   alt="अधिकृत स्वाक्षरी"
                   style={{
                     maxHeight: '34px',

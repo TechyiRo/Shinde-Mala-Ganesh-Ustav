@@ -16,7 +16,8 @@ import {
   Sparkles
 } from 'lucide-react';
 import { formatCurrency, numberToWordsMr } from '../i18n/numberToWords';
-import html2pdf from 'html2pdf.js';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 
 export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => {
   const { t } = useLanguage();
@@ -152,60 +153,122 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
 
   if (!isOpen) return null;
 
-  // Handle Download PDF via html2pdf.js with mobile protection & explicit windowWidth
+  // Handle Download PDF via isolated per-page capture (Guarantees exact page count & 100% full borders on mobile)
   const handleDownloadPDF = async () => {
     if (!reportRef.current) return;
     setIsGeneratingPdf(true);
 
+    let renderHost = null;
     try {
       if (document.fonts && document.fonts.ready) {
         await document.fonts.ready;
       }
 
-      // Temporarily store current zoom and reset to 1 for un-distorted canvas capture
-      const prevZoom = zoomLevel;
-      setZoomLevel(1);
-      await new Promise((resolve) => setTimeout(resolve, 150));
-
-      const element = reportRef.current;
       const cleanYear = mandalSettings.year || '2026';
       const filename = `Shinde_Mala_Ganesh_Utsav_Ahaval_${cleanYear}.pdf`;
 
-      const opt = {
-        margin: [6, 10, 6, 10], // mm (safe margins: 10mm left & right ensures complete borders)
-        filename: filename,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: {
-          scale: 2,
+      // Select all individual pages from the report
+      const pageElements = reportRef.current.querySelectorAll('.pdf-page');
+      if (!pageElements || pageElements.length === 0) {
+        throw new Error('No PDF pages found to generate');
+      }
+
+      // Create an isolated, fixed-size off-screen render host attached to document.body
+      // This completely shields canvas rendering from mobile viewport clipping, parent scroll, and flex centering!
+      renderHost = document.createElement('div');
+      renderHost.setAttribute('id', 'pdf-export-isolated-host');
+      renderHost.style.position = 'fixed';
+      renderHost.style.left = '0';
+      renderHost.style.top = '0';
+      renderHost.style.width = '670px';
+      renderHost.style.height = '960px';
+      renderHost.style.margin = '0';
+      renderHost.style.padding = '0';
+      renderHost.style.zIndex = '-99999';
+      renderHost.style.backgroundColor = '#ffffff';
+      renderHost.style.overflow = 'visible';
+      renderHost.style.pointerEvents = 'none';
+      document.body.appendChild(renderHost);
+
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+        compress: true
+      });
+
+      for (let i = 0; i < pageElements.length; i++) {
+        const pageEl = pageElements[i];
+
+        // Clear and append clone of this exact page
+        renderHost.innerHTML = '';
+        const clone = pageEl.cloneNode(true);
+        clone.style.margin = '0';
+        clone.style.position = 'relative';
+        clone.style.width = '670px';
+        clone.style.minHeight = '960px';
+        clone.style.maxHeight = '960px';
+        clone.style.boxSizing = 'border-box';
+        clone.style.overflow = 'hidden';
+        clone.style.transform = 'none';
+        renderHost.appendChild(clone);
+
+        // Wait for images in the clone to be ready
+        const imgs = Array.from(clone.querySelectorAll('img'));
+        await Promise.all(
+          imgs.map((img) => {
+            if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
+            return new Promise((res) => {
+              img.onload = res;
+              img.onerror = res;
+            });
+          })
+        );
+
+        // Small tick for layout stabilization
+        await new Promise((resolve) => setTimeout(resolve, 60));
+
+        // High-definition render of the clean isolated page
+        const canvas = await html2canvas(clone, {
+          scale: 2.2,
           useCORS: true,
           logging: false,
           backgroundColor: '#ffffff',
           letterRendering: true,
+          width: 670,
+          height: 960,
+          windowWidth: 1024,
           scrollX: 0,
           scrollY: 0,
-          windowWidth: 800, // Desktop width emulation so mobile browsers never clip right border
-          width: 670        // Exact pixel width of .pdf-page
-        },
-        jsPDF: {
-          unit: 'mm',
-          format: 'a4',
-          orientation: 'portrait',
-          compress: true
-        },
-        pagebreak: {
-          mode: ['css', 'legacy'],
-          after: '.pdf-page-break-after'
+          x: 0,
+          y: 0
+        });
+
+        if (i > 0) {
+          pdf.addPage('a4', 'portrait');
         }
-      };
 
-      await html2pdf().set(opt).from(element).save();
+        const imgData = canvas.toDataURL('image/jpeg', 0.98);
 
-      // Restore zoom
-      setZoomLevel(prevZoom);
+        // Exact symmetrical placement on A4 (210mm x 297mm)
+        // 8mm left margin & 8mm right margin -> printWidth = 194mm
+        const printWidth = 194;
+        const canvasAspect = canvas.height / canvas.width;
+        const printHeight = Math.min(278, printWidth * canvasAspect);
+        const marginX = (210 - printWidth) / 2; // Exactly 8.0 mm
+        const marginY = (297 - printHeight) / 2; // Exactly ~9.5 mm (vertically centered)
+
+        pdf.addImage(imgData, 'JPEG', marginX, marginY, printWidth, printHeight, undefined, 'FAST');
+      }
+
+      pdf.save(filename);
     } catch (err) {
       console.error('Report PDF generation error:', err);
       window.print();
     } finally {
+      if (renderHost && renderHost.parentNode) {
+        renderHost.parentNode.removeChild(renderHost);
+      }
       setIsGeneratingPdf(false);
     }
   };
@@ -273,7 +336,7 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
         <div>
           <div style={{ height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <img
-              src="/signatures/tushar-signature.jpeg"
+              src="/signatures/tushar-signature.png"
               alt="अध्यक्ष स्वाक्षरी"
               style={{ maxHeight: '30px', maxWidth: '100px', objectFit: 'contain' }}
               onError={(e) => { e.target.style.display = 'none'; }}
@@ -288,13 +351,21 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
           </div>
         </div>
 
-        {/* Treasurer (With Mayur Signature) */}
+        {/* Treasurer (With Tukaram & Dhananjay/Mayur Signatures) */}
         <div>
-          <div style={{ height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+            <img
+              src="/signatures/tukaram-signature.png"
+              alt="तुकाराम शिंदे स्वाक्षरी"
+              title="श्री. तुकाराम शिंदे स्वाक्षरी"
+              style={{ maxHeight: '30px', maxWidth: '58px', objectFit: 'contain' }}
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
             <img
               src="/signatures/mayur-signature.png"
-              alt="खजिनदार स्वाक्षरी"
-              style={{ maxHeight: '30px', maxWidth: '100px', objectFit: 'contain' }}
+              alt="धनंजय (मयूर) शिंदे स्वाक्षरी"
+              title="श्री. धनंजय शिंदे स्वाक्षरी"
+              style={{ maxHeight: '30px', maxWidth: '58px', objectFit: 'contain' }}
               onError={(e) => { e.target.style.display = 'none'; }}
             />
           </div>
@@ -1005,8 +1076,8 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                             <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#dc2626' }}>
                               {formatCurrency(
                                 (expenseCategoryStats.find((c) => c.key === 'Electricity')?.amount || 0) +
-                                  (expenseCategoryStats.find((c) => c.key === 'Security')?.amount || 0) +
-                                  (expenseCategoryStats.find((c) => c.key === 'Misc')?.amount || 0)
+                                (expenseCategoryStats.find((c) => c.key === 'Security')?.amount || 0) +
+                                (expenseCategoryStats.find((c) => c.key === 'Misc')?.amount || 0)
                               )}
                             </td>
                           </tr>
