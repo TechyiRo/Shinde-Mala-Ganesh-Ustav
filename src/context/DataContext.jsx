@@ -58,6 +58,11 @@ const sanitizeMandalAddress = (addr) => {
     .trim();
 };
 
+// Unique client session ID to prevent cross-tab broadcast echo loops
+const localClientId = typeof window !== 'undefined'
+  ? `client_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+  : 'server';
+
 // Cross-tab Instant Sync (0-millisecond reflection between tabs/pages)
 const syncChannel = typeof window !== 'undefined' && 'BroadcastChannel' in window
   ? new BroadcastChannel('shindemala_mandal_sync')
@@ -66,7 +71,7 @@ const syncChannel = typeof window !== 'undefined' && 'BroadcastChannel' in windo
 const broadcastLocalChange = (type, data) => {
   if (syncChannel) {
     try {
-      syncChannel.postMessage({ type, data, timestamp: Date.now() });
+      syncChannel.postMessage({ type, data, senderId: localClientId, timestamp: Date.now() });
     } catch (e) {
       console.warn('BroadcastChannel error:', e);
     }
@@ -135,17 +140,15 @@ export const DataProvider = ({ children }) => {
     }
   });
 
-  // 6. Mahaprasad & Manakari Data (Starts clean, only admin added data appears)
+  // 6. Mahaprasad & Manakari Data
   const [mahaprasadData, setMahaprasadData] = useState(() => {
     try {
       const saved = localStorage.getItem('mandal_mahaprasad_data');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed?.manakariList && parsed.manakariList.some((m) => m.id === 'MK-01' || m.id === 'MK-02')) {
-          localStorage.removeItem('mandal_mahaprasad_data');
-          return initialMahaprasadData;
+        if (parsed && typeof parsed === 'object') {
+          return parsed;
         }
-        return parsed;
       }
       return initialMahaprasadData;
     } catch {
@@ -332,8 +335,9 @@ export const DataProvider = ({ children }) => {
                 setEventList((prev) => prev.filter((e) => e.id !== parsed.data.id));
                 break;
               case 'MAHAPRASAD_UPDATED':
-                if (parsed.data) {
+                if (parsed.data && parsed.data.senderId !== localClientId) {
                   setMahaprasadData(parsed.data);
+                  safeSetLocalStorage('mandal_mahaprasad_data', JSON.stringify(parsed.data));
                 }
                 break;
               case 'EVENT_LIKED':
@@ -383,32 +387,28 @@ export const DataProvider = ({ children }) => {
     if (!syncChannel) return;
 
     const handleSyncMessage = (event) => {
-      const { type, data } = event.data || {};
-      if (!type) return;
+      const { type, data, senderId } = event.data || {};
+      if (!type || senderId === localClientId) return;
 
       switch (type) {
         case 'MAHAPRASAD_UPDATED':
           if (data && typeof data === 'object') {
             setMahaprasadData(data);
-            safeSetLocalStorage('mandal_mahaprasad_data', JSON.stringify(data));
           }
           break;
         case 'PAVTI_UPDATED':
           if (Array.isArray(data)) {
             setPavtiList(data);
-            safeSetLocalStorage('mandal_pavti_data', JSON.stringify(data));
           }
           break;
         case 'EXPENSE_UPDATED':
           if (Array.isArray(data)) {
             setExpenseList(data);
-            safeSetLocalStorage('mandal_expense_data', JSON.stringify(data));
           }
           break;
         case 'STATUS_UPDATED':
           if (Array.isArray(data)) {
             setStatusList(data);
-            safeSetLocalStorage('mandal_status_data', JSON.stringify(data));
           }
           break;
         default:
@@ -423,7 +423,7 @@ export const DataProvider = ({ children }) => {
     };
   }, []);
 
-  // 2. Storage event listener (syncs across browser tabs when localStorage is updated)
+  // 2. Storage event listener (syncs across browser tabs when localStorage is updated in another tab)
   useEffect(() => {
     const handleStorage = (e) => {
       if (e.key === 'mandal_mahaprasad_data' && e.newValue) {
@@ -440,25 +440,16 @@ export const DataProvider = ({ children }) => {
     return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
-  // 3. Fast auto-poll & visibility/focus sync (refetches immediately on focus or every 3.5s for multi-device sync)
+  // 3. Tab Focus / Visibility sync (only checks cloud when user switches back to this tab)
   useEffect(() => {
-    let pollTimer = null;
-
     const syncLatestMahaprasad = async () => {
       try {
         const res = await fetch('/api/mahaprasad');
         if (res.ok) {
           const serverData = await res.json();
-          if (serverData && Array.isArray(serverData.manakariList)) {
-            setMahaprasadData((prev) => {
-              const prevJson = JSON.stringify(prev?.manakariList || []);
-              const newJson = JSON.stringify(serverData.manakariList || []);
-              if (prevJson !== newJson || Number(prev?.totalExpense) !== Number(serverData.totalExpense)) {
-                safeSetLocalStorage('mandal_mahaprasad_data', JSON.stringify(serverData));
-                return serverData;
-              }
-              return prev;
-            });
+          if (serverData && Array.isArray(serverData.manakariList) && serverData.manakariList.length > 0) {
+            setMahaprasadData(serverData);
+            safeSetLocalStorage('mandal_mahaprasad_data', JSON.stringify(serverData));
           }
         }
       } catch {
@@ -475,15 +466,7 @@ export const DataProvider = ({ children }) => {
     window.addEventListener('focus', handleVisibilityOrFocus);
     document.addEventListener('visibilitychange', handleVisibilityOrFocus);
 
-    // High-frequency 3.5s background check for instant multi-device sync
-    pollTimer = setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        syncLatestMahaprasad();
-      }
-    }, 3500);
-
     return () => {
-      if (pollTimer) clearInterval(pollTimer);
       window.removeEventListener('focus', handleVisibilityOrFocus);
       document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
     };
@@ -943,7 +926,7 @@ export const DataProvider = ({ children }) => {
   // Mahaprasad Management Functions (Synchronous 0ms UI reflection + Cloud Sync)
   const updateMahaprasadSettings = (updatedFields) => {
     const currentData = mahaprasadData || initialMahaprasadData;
-    const next = { ...currentData, ...updatedFields };
+    const next = { ...currentData, ...updatedFields, senderId: localClientId };
 
     // 1. Instant Synchronous Update (0ms) in State & LocalStorage
     setMahaprasadData(next);
@@ -957,18 +940,7 @@ export const DataProvider = ({ children }) => {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(next)
-    })
-      .then(async (res) => {
-        if (res.ok) {
-          const json = await res.json();
-          if (json.item) {
-            setMahaprasadData(json.item);
-            safeSetLocalStorage('mandal_mahaprasad_data', JSON.stringify(json.item));
-            broadcastLocalChange('MAHAPRASAD_UPDATED', json.item);
-          }
-        }
-      })
-      .catch((err) => console.warn('Could not sync mahaprasad to MongoDB:', err.message));
+    }).catch((err) => console.warn('Could not sync mahaprasad to MongoDB:', err.message));
 
     addToast('महाप्रसाद माहिती यशस्वीरित्या सेव्ह झाली!', 'success');
   };
@@ -992,7 +964,7 @@ export const DataProvider = ({ children }) => {
     };
     // Append in sequential chronological order (1, 2, 3...)
     const updatedList = [...currentList.filter((m) => m.id !== id), item];
-    const next = { ...currentData, manakariList: updatedList };
+    const next = { ...currentData, manakariList: updatedList, senderId: localClientId };
 
     // 1. Instant Synchronous Update (0ms) in State & LocalStorage
     setMahaprasadData(next);
@@ -1006,18 +978,7 @@ export const DataProvider = ({ children }) => {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(next)
-    })
-      .then(async (res) => {
-        if (res.ok) {
-          const json = await res.json();
-          if (json.item) {
-            setMahaprasadData(json.item);
-            safeSetLocalStorage('mandal_mahaprasad_data', JSON.stringify(json.item));
-            broadcastLocalChange('MAHAPRASAD_UPDATED', json.item);
-          }
-        }
-      })
-      .catch((err) => console.warn('Could not sync mahaprasad to MongoDB:', err.message));
+    }).catch((err) => console.warn('Could not sync mahaprasad to MongoDB:', err.message));
 
     addToast(`नवीन मानकरी क्र. ${newCount} (${item.name}) यशस्वीरित्या जोडले गेले!`, 'success');
   };
@@ -1027,7 +988,7 @@ export const DataProvider = ({ children }) => {
     const updatedList = (currentData.manakariList || []).map((m) =>
       m.id === id ? { ...m, ...updatedFields } : m
     );
-    const next = { ...currentData, manakariList: updatedList };
+    const next = { ...currentData, manakariList: updatedList, senderId: localClientId };
 
     setMahaprasadData(next);
     safeSetLocalStorage('mandal_mahaprasad_data', JSON.stringify(next));
@@ -1037,18 +998,7 @@ export const DataProvider = ({ children }) => {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(next)
-    })
-      .then(async (res) => {
-        if (res.ok) {
-          const json = await res.json();
-          if (json.item) {
-            setMahaprasadData(json.item);
-            safeSetLocalStorage('mandal_mahaprasad_data', JSON.stringify(json.item));
-            broadcastLocalChange('MAHAPRASAD_UPDATED', json.item);
-          }
-        }
-      })
-      .catch((err) => console.warn('Could not sync mahaprasad to MongoDB:', err.message));
+    }).catch((err) => console.warn('Could not sync mahaprasad to MongoDB:', err.message));
 
     addToast('मानकरी माहिती त्वरित अपडेट झाली!', 'success');
   };
@@ -1056,7 +1006,7 @@ export const DataProvider = ({ children }) => {
   const deleteManakari = (id) => {
     const currentData = mahaprasadData || initialMahaprasadData;
     const updatedList = (currentData.manakariList || []).filter((m) => m.id !== id);
-    const next = { ...currentData, manakariList: updatedList };
+    const next = { ...currentData, manakariList: updatedList, senderId: localClientId };
 
     setMahaprasadData(next);
     safeSetLocalStorage('mandal_mahaprasad_data', JSON.stringify(next));
@@ -1066,18 +1016,7 @@ export const DataProvider = ({ children }) => {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(next)
-    })
-      .then(async (res) => {
-        if (res.ok) {
-          const json = await res.json();
-          if (json.item) {
-            setMahaprasadData(json.item);
-            safeSetLocalStorage('mandal_mahaprasad_data', JSON.stringify(json.item));
-            broadcastLocalChange('MAHAPRASAD_UPDATED', json.item);
-          }
-        }
-      })
-      .catch((err) => console.warn('Could not sync mahaprasad to MongoDB:', err.message));
+    }).catch((err) => console.warn('Could not sync mahaprasad to MongoDB:', err.message));
 
     addToast('मानकरी यादीतून काढण्यात आले!', 'info');
   };
@@ -1103,7 +1042,7 @@ export const DataProvider = ({ children }) => {
       }
       return m;
     });
-    const next = { ...currentData, manakariList: updatedList };
+    const next = { ...currentData, manakariList: updatedList, senderId: localClientId };
 
     setMahaprasadData(next);
     safeSetLocalStorage('mandal_mahaprasad_data', JSON.stringify(next));
@@ -1113,18 +1052,7 @@ export const DataProvider = ({ children }) => {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(next)
-    })
-      .then(async (res) => {
-        if (res.ok) {
-          const json = await res.json();
-          if (json.item) {
-            setMahaprasadData(json.item);
-            safeSetLocalStorage('mandal_mahaprasad_data', JSON.stringify(json.item));
-            broadcastLocalChange('MAHAPRASAD_UPDATED', json.item);
-          }
-        }
-      })
-      .catch((err) => console.warn('Could not sync mahaprasad to MongoDB:', err.message));
+    }).catch((err) => console.warn('Could not sync mahaprasad to MongoDB:', err.message));
 
     if (isNowPaid) {
       addToast(`${targetName}: रक्कम पूर्ण जमा झाली!`, 'success');
