@@ -108,12 +108,24 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
       .slice(0, 6);
   }, [pavtiList]);
 
-  // Chunking Pavti list into pages (20 pavtis per page so rows never get cut)
+  // Dynamic Pavti Chunking:
+  // If <= 19 pavtis, all fit on the final page together with the Signatures block!
+  // If > 19, chunk into pages so the final page always has at most 18 pavtis + Signatures.
   const pavtiChunks = useMemo(() => {
-    const chunkSize = 20;
+    if (pavtiList.length <= 19) {
+      return [pavtiList];
+    }
     const chunks = [];
-    for (let i = 0; i < pavtiList.length; i += chunkSize) {
-      chunks.push(pavtiList.slice(i, i + chunkSize));
+    let i = 0;
+    while (i < pavtiList.length) {
+      const remaining = pavtiList.length - i;
+      if (remaining <= 19) {
+        chunks.push(pavtiList.slice(i));
+        break;
+      }
+      const take = 22;
+      chunks.push(pavtiList.slice(i, i + take));
+      i += take;
     }
     return chunks.length > 0 ? chunks : [[]];
   }, [pavtiList]);
@@ -121,11 +133,8 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
   // Total pages calculation
   const totalPagesCount = useMemo(() => {
     if (reportScope === 'summary') return 1;
-    let count = 2; // Page 1: Summary, Page 2: Expenses & Signatures
-    if (includeReceipts) {
-      count += pavtiChunks.length;
-    }
-    return count;
+    if (!includeReceipts) return 2;
+    return 2 + pavtiChunks.length;
   }, [reportScope, includeReceipts, pavtiChunks.length]);
 
   // Formatted Generation Date & Time
@@ -156,14 +165,14 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
       // Temporarily store current zoom and reset to 1 for un-distorted canvas capture
       const prevZoom = zoomLevel;
       setZoomLevel(1);
-      await new Promise((resolve) => setTimeout(resolve, 120));
+      await new Promise((resolve) => setTimeout(resolve, 150));
 
       const element = reportRef.current;
       const cleanYear = mandalSettings.year || '2026';
       const filename = `Shinde_Mala_Ganesh_Utsav_Ahaval_${cleanYear}.pdf`;
 
       const opt = {
-        margin: [6, 8, 6, 8], // mm (safe margins: 8mm on left & right ensures complete borders)
+        margin: [6, 10, 6, 10], // mm (safe margins: 10mm left & right ensures complete borders)
         filename: filename,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: {
@@ -175,7 +184,7 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
           scrollX: 0,
           scrollY: 0,
           windowWidth: 800, // Desktop width emulation so mobile browsers never clip right border
-          width: 690        // Exact pixel width of .pdf-page
+          width: 670        // Exact pixel width of .pdf-page
         },
         jsPDF: {
           unit: 'mm',
@@ -224,6 +233,119 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
     const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
   };
+
+  // Reusable Signatures Block Component
+  const renderSignaturesBlock = () => (
+    <div
+      style={{
+        border: '1.5px solid #fdba74',
+        backgroundColor: '#fffaf5',
+        borderRadius: '6px',
+        padding: '8px 12px',
+        boxSizing: 'border-box',
+        width: '100%',
+        marginTop: '8px'
+      }}
+    >
+      <div
+        style={{
+          fontSize: '9.5px',
+          color: '#7c2d12',
+          textAlign: 'center',
+          lineHeight: 1.4,
+          marginBottom: '10px',
+          fontStyle: 'italic',
+          fontWeight: 600
+        }}
+      >
+        "आम्ही याद्वारे प्रमाणित करतो की वरील वार्षिक अहवालातील सर्व पावती जमा व उत्सव खर्चाचा हिशोब हा मूळ पावती पुस्तके व अधिकृत बिलांनुसार अचूक व परिपूर्ण आहे. सदर हिशोब सर्व भाविक, देणगीदार व ग्रामस्थांच्या अवलोकनार्थ प्रसिद्ध करण्यात येत आहे."
+      </div>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '8px',
+          textAlign: 'center'
+        }}
+      >
+        {/* President (With Tushar Signature) */}
+        <div>
+          <div style={{ height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <img
+              src="/signatures/tushar-signature.jpeg"
+              alt="अध्यक्ष स्वाक्षरी"
+              style={{ maxHeight: '30px', maxWidth: '100px', objectFit: 'contain' }}
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
+          </div>
+          <div style={{ height: '1px', borderBottom: '1px dashed #c2410c', margin: '1px auto 3px', width: '80%' }} />
+          <div style={{ fontSize: '10.5px', fontWeight: 800, color: '#451a03' }}>
+            {mandalSettings.president || 'श्री. तुषार शिंदे'}
+          </div>
+          <div style={{ fontSize: '9px', color: '#ea580c', fontWeight: 700 }}>
+            अध्यक्ष (President)
+          </div>
+        </div>
+
+        {/* Treasurer (With Mayur Signature) */}
+        <div>
+          <div style={{ height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <img
+              src="/signatures/mayur-signature.png"
+              alt="खजिनदार स्वाक्षरी"
+              style={{ maxHeight: '30px', maxWidth: '100px', objectFit: 'contain' }}
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
+          </div>
+          <div style={{ height: '1px', borderBottom: '1px dashed #c2410c', margin: '1px auto 3px', width: '80%' }} />
+          <div style={{ fontSize: '10.5px', fontWeight: 800, color: '#451a03' }}>
+            {mandalSettings.treasurer || 'श्री. तुकाराम शिंदे व श्री. धनंजय शिंदे'}
+          </div>
+          <div style={{ fontSize: '9px', color: '#ea580c', fontWeight: 700 }}>
+            खजिनदार (Treasurer)
+          </div>
+        </div>
+
+        {/* Secretary (With Manas Signature) */}
+        <div>
+          <div style={{ height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <img
+              src="/signatures/manas-signature.png"
+              alt="सचिव स्वाक्षरी"
+              style={{ maxHeight: '30px', maxWidth: '100px', objectFit: 'contain' }}
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
+          </div>
+          <div style={{ height: '1px', borderBottom: '1px dashed #c2410c', margin: '1px auto 3px', width: '80%' }} />
+          <div style={{ fontSize: '10.5px', fontWeight: 800, color: '#451a03' }}>
+            {mandalSettings.secretary || 'श्री. मानस शिंदे'}
+          </div>
+          <div style={{ fontSize: '9px', color: '#ea580c', fontWeight: 700 }}>
+            सचिव (Secretary)
+          </div>
+        </div>
+      </div>
+
+      {/* Official Seal Line */}
+      <div
+        style={{
+          borderTop: '1px solid #fed7aa',
+          marginTop: '8px',
+          paddingTop: '4px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          fontSize: '8.5px',
+          color: '#9a3412',
+          fontWeight: 600
+        }}
+      >
+        <span>मंडळ अधिकृत शिक्का व स्वाक्षरी प्रमाणित</span>
+        <span>शिंदे मळा गणेश उत्सव मंडळ, हिंगणी दुमाला, दौंड</span>
+      </div>
+    </div>
+  );
 
   return (
     <div
@@ -502,14 +624,14 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
           >
             {/* ========================================================================= */}
             {/* THE FORMAL ANNUAL AUDIT REPORT DOCUMENT (Captured by html2pdf.js)         */}
-            {/* Width: 690px with generous margins ensures NO RIGHT CUT on any mobile     */}
+            {/* Width: 670px, Height: 960px ensures NO extra page spillover & NO right cut */}
             {/* ========================================================================= */}
             <div
               id="annual-report-pdf-doc"
               ref={reportRef}
               className="annual-report-pdf-doc"
               style={{
-                width: '690px',
+                width: '670px',
                 backgroundColor: '#ffffff',
                 color: '#1a1006',
                 fontFamily: "'Noto Sans Devanagari', 'Mukta', 'Anek Devanagari', 'Baloo 2', sans-serif",
@@ -524,8 +646,9 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
               <div
                 className="pdf-page pdf-page-break-after"
                 style={{
-                  width: '690px',
-                  minHeight: '970px',
+                  width: '670px',
+                  minHeight: '960px',
+                  maxHeight: '960px',
                   boxSizing: 'border-box',
                   backgroundColor: '#ffffff',
                   padding: '12px 14px',
@@ -534,7 +657,8 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                   justifyContent: 'space-between',
                   pageBreakAfter: reportScope === 'summary' ? 'auto' : 'always',
                   breakAfter: reportScope === 'summary' ? 'auto' : 'page',
-                  position: 'relative'
+                  position: 'relative',
+                  overflow: 'hidden'
                 }}
               >
                 {/* Decorative Marathi Outer Frame */}
@@ -549,495 +673,445 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                     backgroundColor: '#ffffff',
                     position: 'relative',
                     display: 'flex',
-                    flexDirection: 'column'
+                    flexDirection: 'column',
+                    justifyContent: 'space-between'
                   }}
                 >
-                  {/* Auspicious Vedic Top Tag */}
-                  <div
-                    style={{
-                      textAlign: 'center',
-                      fontSize: '11px',
-                      fontWeight: 800,
-                      color: '#c2410c',
-                      letterSpacing: '0.06em',
-                      marginBottom: '3px'
-                    }}
-                  >
-                    {mandalSettings.tagline || '॥ श्री गणेशाय नमः ॥ गणपती बाप्पा मोरया ॥'}
-                  </div>
-
-                  {/* Mandal Header Block */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      borderBottom: '2px solid #ea580c',
-                      paddingBottom: '8px',
-                      marginBottom: '10px',
-                      gap: '10px'
-                    }}
-                  >
-                    {/* Left: Emblem Logo */}
-                    <div style={{ flexShrink: 0 }}>
-                      <img
-                        src="/logo.png"
-                        onError={(e) => {
-                          e.target.src = '/ganesh-icon.svg';
-                        }}
-                        alt="Ganesh Logo"
-                        style={{
-                          width: '62px',
-                          height: '62px',
-                          borderRadius: '50%',
-                          border: '2px solid #d97706',
-                          objectFit: 'cover'
-                        }}
-                      />
-                    </div>
-
-                    {/* Center: Mandal Name & Address */}
-                    <div style={{ textAlign: 'center', flex: 1 }}>
-                      <h1
-                        style={{
-                          fontSize: '20px',
-                          fontWeight: 900,
-                          color: '#9a3412',
-                          margin: '0 0 2px',
-                          lineHeight: 1.2
-                        }}
-                      >
-                        {mandalSettings.mandalName || 'शिंदे मळा गणेश उत्सव मंडळ'}
-                      </h1>
-                      <div style={{ fontSize: '10.5px', fontWeight: 700, color: '#451a03', marginBottom: '2px' }}>
-                        📍 {mandalSettings.address || 'शिंदे मळा, हिंगणी दुमाला, ता. दौंड, जि. पुणे - ४१२२१०'}
-                      </div>
-                      <div style={{ fontSize: '9.5px', color: '#78350f', fontWeight: 600 }}>
-                        {mandalSettings.regNo || 'नोंदणी क्र. महा/१२४५/२०१२'} • संपर्क: {mandalSettings.contact || '9922466579'}
-                      </div>
-                    </div>
-
-                    {/* Right: Year Badge & Date */}
-                    <div style={{ textAlign: 'right', flexShrink: 0, minWidth: '100px' }}>
-                      <div
-                        style={{
-                          display: 'inline-block',
-                          backgroundColor: '#ea580c',
-                          color: '#ffffff',
-                          padding: '3px 8px',
-                          borderRadius: '5px',
-                          fontWeight: 900,
-                          fontSize: '12px'
-                        }}
-                      >
-                        उत्सव {mandalSettings.year || '२०२६'}
-                      </div>
-                      <div style={{ fontSize: '8.5px', color: '#78350f', marginTop: '3px', fontWeight: 600 }}>
-                        दिनांक: {generatedDateTime}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Report Title Ribbon */}
-                  <div
-                    style={{
-                      backgroundColor: '#fff7ed',
-                      border: '1px solid #fdba74',
-                      borderRadius: '5px',
-                      padding: '6px 12px',
-                      textAlign: 'center',
-                      marginBottom: '12px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between'
-                    }}
-                  >
-                    <div style={{ textAlign: 'left' }}>
-                      <div style={{ fontSize: '13px', fontWeight: 900, color: '#9a3412' }}>
-                        📋 वार्षिक जमा-खर्च हिशोब अहवाल व आर्थिक ताळेबंद
-                      </div>
-                      <div style={{ fontSize: '9.5px', color: '#c2410c', fontWeight: 600 }}>
-                        (ANNUAL FINANCIAL AUDIT & BALANCE SHEET REPORT)
-                      </div>
-                    </div>
+                  {/* Top Block: Auspicious Tag, Header, Ribbon, Stat Cards, Taaleband, Donors */}
+                  <div>
+                    {/* Auspicious Vedic Top Tag */}
                     <div
                       style={{
-                        backgroundColor: '#16a34a',
-                        color: '#ffffff',
-                        fontSize: '9.5px',
+                        textAlign: 'center',
+                        fontSize: '11px',
                         fontWeight: 800,
-                        padding: '3px 8px',
-                        borderRadius: '4px',
+                        color: '#c2410c',
+                        letterSpacing: '0.06em',
+                        marginBottom: '4px'
+                      }}
+                    >
+                      {mandalSettings.tagline || '॥ श्री गणेशाय नमः ॥ गणपती बाप्पा मोरया ॥'}
+                    </div>
+
+                    {/* Mandal Header Block */}
+                    <div
+                      style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '3px'
+                        justifyContent: 'space-between',
+                        borderBottom: '2px solid #ea580c',
+                        paddingBottom: '8px',
+                        marginBottom: '10px',
+                        gap: '10px'
                       }}
                     >
-                      <CheckCircle2 size={11} />
-                      <span>अधिकृत व प्रमाणित हिशोब</span>
-                    </div>
-                  </div>
+                      {/* Left: Emblem Logo */}
+                      <div style={{ flexShrink: 0 }}>
+                        <img
+                          src="/logo.png"
+                          onError={(e) => {
+                            e.target.src = '/ganesh-icon.svg';
+                          }}
+                          alt="Ganesh Logo"
+                          style={{
+                            width: '58px',
+                            height: '58px',
+                            borderRadius: '50%',
+                            border: '2px solid #d97706',
+                            objectFit: 'cover'
+                          }}
+                        />
+                      </div>
 
-                  {/* 3 Executive Stat Cards */}
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(3, 1fr)',
-                      gap: '8px',
-                      marginBottom: '12px'
-                    }}
-                  >
-                    {/* Total Receipts */}
+                      {/* Center: Mandal Name & Address */}
+                      <div style={{ textAlign: 'center', flex: 1 }}>
+                        <h1
+                          style={{
+                            fontSize: '19px',
+                            fontWeight: 900,
+                            color: '#9a3412',
+                            margin: '0 0 2px',
+                            lineHeight: 1.2
+                          }}
+                        >
+                          {mandalSettings.mandalName || 'शिंदे मळा गणेश उत्सव मंडळ'}
+                        </h1>
+                        <div style={{ fontSize: '10px', fontWeight: 700, color: '#451a03', marginBottom: '2px' }}>
+                          📍 {mandalSettings.address || 'शिंदे मळा, हिंगणी दुमाला, ता. दौंड, जि. पुणे - ४१२२१०'}
+                        </div>
+                        <div style={{ fontSize: '9px', color: '#78350f', fontWeight: 600 }}>
+                          {mandalSettings.regNo || 'नोंदणी क्र. महा/१२४५/२०१२'} • संपर्क: {mandalSettings.contact || '9922466579'}
+                        </div>
+                      </div>
+
+                      {/* Right: Year Badge & Date */}
+                      <div style={{ textAlign: 'right', flexShrink: 0, minWidth: '95px' }}>
+                        <div
+                          style={{
+                            display: 'inline-block',
+                            backgroundColor: '#ea580c',
+                            color: '#ffffff',
+                            padding: '3px 8px',
+                            borderRadius: '5px',
+                            fontWeight: 900,
+                            fontSize: '11.5px'
+                          }}
+                        >
+                          उत्सव {mandalSettings.year || '२०२६'}
+                        </div>
+                        <div style={{ fontSize: '8.5px', color: '#78350f', marginTop: '3px', fontWeight: 600 }}>
+                          दिनांक: {generatedDateTime}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Report Title Ribbon */}
                     <div
                       style={{
-                        backgroundColor: '#f0fdf4',
-                        border: '1px solid #86efac',
+                        backgroundColor: '#fff7ed',
+                        border: '1px solid #fdba74',
                         borderRadius: '5px',
-                        padding: '8px 10px',
-                        textAlign: 'center'
+                        padding: '6px 10px',
+                        textAlign: 'center',
+                        marginBottom: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
                       }}
                     >
-                      <div style={{ fontSize: '10px', fontWeight: 700, color: '#166534', marginBottom: '2px' }}>
-                        एकूण पावती जमा (Total Receipts)
-                      </div>
-                      <div style={{ fontSize: '18px', fontWeight: 900, color: '#15803d', lineHeight: 1.2 }}>
-                        {formatCurrency(totalCollection)}
-                      </div>
-                      <div style={{ fontSize: '9px', color: '#166534', marginTop: '2px', fontWeight: 600 }}>
-                        एकूण {pavtiCount} अधिकृत पावत्या
-                      </div>
-                    </div>
-
-                    {/* Total Expenses */}
-                    <div
-                      style={{
-                        backgroundColor: '#fef2f2',
-                        border: '1px solid #fca5a5',
-                        borderRadius: '5px',
-                        padding: '8px 10px',
-                        textAlign: 'center'
-                      }}
-                    >
-                      <div style={{ fontSize: '10px', fontWeight: 700, color: '#991b1b', marginBottom: '2px' }}>
-                        एकूण उत्सव खर्च (Total Expenses)
-                      </div>
-                      <div style={{ fontSize: '18px', fontWeight: 900, color: '#dc2626', lineHeight: 1.2 }}>
-                        {formatCurrency(totalExpense)}
-                      </div>
-                      <div style={{ fontSize: '9px', color: '#991b1b', marginTop: '2px', fontWeight: 600 }}>
-                        एकूण {expenseList.length} खर्च नोंदी
-                      </div>
-                    </div>
-
-                    {/* Net Balance */}
-                    <div
-                      style={{
-                        backgroundColor: balance >= 0 ? '#fffbeb' : '#fef2f2',
-                        border: balance >= 0 ? '1px solid #fde68a' : '1px solid #fca5a5',
-                        borderRadius: '5px',
-                        padding: '8px 10px',
-                        textAlign: 'center'
-                      }}
-                    >
-                      <div style={{ fontSize: '10px', fontWeight: 700, color: balance >= 0 ? '#92400e' : '#991b1b', marginBottom: '2px' }}>
-                        {balance >= 0 ? 'निव्वळ शिल्लक निधी (Surplus)' : 'तूट रक्कम (Deficit)'}
+                      <div style={{ textAlign: 'left' }}>
+                        <div style={{ fontSize: '12.5px', fontWeight: 900, color: '#9a3412' }}>
+                          📋 वार्षिक जमा-खर्च हिशोब अहवाल व आर्थिक ताळेबंद
+                        </div>
+                        <div style={{ fontSize: '9px', color: '#c2410c', fontWeight: 600 }}>
+                          (ANNUAL FINANCIAL AUDIT & BALANCE SHEET REPORT)
+                        </div>
                       </div>
                       <div
                         style={{
-                          fontSize: '18px',
-                          fontWeight: 900,
-                          color: balance >= 0 ? '#b45309' : '#dc2626',
-                          lineHeight: 1.2
+                          backgroundColor: '#16a34a',
+                          color: '#ffffff',
+                          fontSize: '9px',
+                          fontWeight: 800,
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '3px'
                         }}
                       >
-                        {formatCurrency(Math.abs(balance))}
-                      </div>
-                      <div style={{ fontSize: '9px', color: balance >= 0 ? '#92400e' : '#991b1b', marginTop: '2px', fontWeight: 600 }}>
-                        अक्षरी: {numberToWordsMr(Math.abs(balance))}
+                        <CheckCircle2 size={11} />
+                        <span>अधिकृत व प्रमाणित हिशोब</span>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Summary Balance Sheet Table */}
-                  <div
-                    style={{
-                      border: '1px solid #fed7aa',
-                      borderRadius: '5px',
-                      overflow: 'hidden',
-                      marginBottom: '12px'
-                    }}
-                  >
+                    {/* 3 Executive Stat Cards */}
                     <div
                       style={{
-                        backgroundColor: '#ea580c',
-                        color: '#ffffff',
-                        padding: '5px 10px',
-                        fontSize: '11px',
-                        fontWeight: 800,
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(3, 1fr)',
+                        gap: '8px',
+                        marginBottom: '10px'
                       }}
                     >
-                      <span>📊 आर्थिक ताळेबंद गोषवारा (Balance Sheet Summary)</span>
-                      <span style={{ fontSize: '9.5px', opacity: 0.95 }}>उत्सव वर्ष २०२६</span>
+                      {/* Total Receipts */}
+                      <div
+                        style={{
+                          backgroundColor: '#f0fdf4',
+                          border: '1px solid #86efac',
+                          borderRadius: '5px',
+                          padding: '7px 10px',
+                          textAlign: 'center'
+                        }}
+                      >
+                        <div style={{ fontSize: '9.5px', fontWeight: 700, color: '#166534', marginBottom: '2px' }}>
+                          एकूण पावती जमा (Total Receipts)
+                        </div>
+                        <div style={{ fontSize: '17px', fontWeight: 900, color: '#15803d', lineHeight: 1.2 }}>
+                          {formatCurrency(totalCollection)}
+                        </div>
+                        <div style={{ fontSize: '8.5px', color: '#166534', marginTop: '2px', fontWeight: 600 }}>
+                          एकूण {pavtiCount} अधिकृत पावत्या
+                        </div>
+                      </div>
+
+                      {/* Total Expenses */}
+                      <div
+                        style={{
+                          backgroundColor: '#fef2f2',
+                          border: '1px solid #fca5a5',
+                          borderRadius: '5px',
+                          padding: '7px 10px',
+                          textAlign: 'center'
+                        }}
+                      >
+                        <div style={{ fontSize: '9.5px', fontWeight: 700, color: '#991b1b', marginBottom: '2px' }}>
+                          एकूण उत्सव खर्च (Total Expenses)
+                        </div>
+                        <div style={{ fontSize: '17px', fontWeight: 900, color: '#dc2626', lineHeight: 1.2 }}>
+                          {formatCurrency(totalExpense)}
+                        </div>
+                        <div style={{ fontSize: '8.5px', color: '#991b1b', marginTop: '2px', fontWeight: 600 }}>
+                          एकूण {expenseList.length} खर्च नोंदी
+                        </div>
+                      </div>
+
+                      {/* Net Balance */}
+                      <div
+                        style={{
+                          backgroundColor: balance >= 0 ? '#fffbeb' : '#fef2f2',
+                          border: balance >= 0 ? '1px solid #fde68a' : '1px solid #fca5a5',
+                          borderRadius: '5px',
+                          padding: '7px 10px',
+                          textAlign: 'center'
+                        }}
+                      >
+                        <div style={{ fontSize: '9.5px', fontWeight: 700, color: balance >= 0 ? '#92400e' : '#991b1b', marginBottom: '2px' }}>
+                          {balance >= 0 ? 'निव्वळ शिल्लक निधी (Surplus)' : 'तूट रक्कम (Deficit)'}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: '17px',
+                            fontWeight: 900,
+                            color: balance >= 0 ? '#b45309' : '#dc2626',
+                            lineHeight: 1.2
+                          }}
+                        >
+                          {formatCurrency(Math.abs(balance))}
+                        </div>
+                        <div style={{ fontSize: '8.5px', color: balance >= 0 ? '#92400e' : '#991b1b', marginTop: '2px', fontWeight: 600 }}>
+                          अक्षरी: {numberToWordsMr(Math.abs(balance))}
+                        </div>
+                      </div>
                     </div>
 
-                    <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: '10px', boxSizing: 'border-box' }}>
-                      <thead>
-                        <tr style={{ backgroundColor: '#fff7ed', borderBottom: '1px solid #fed7aa', color: '#7c2d12', fontWeight: 800 }}>
-                          <th style={{ padding: '5px 8px', textAlign: 'left', width: '36%' }}>जमा तपशील (Receipts)</th>
-                          <th style={{ padding: '5px 8px', textAlign: 'right', width: '14%' }}>रक्कम (₹)</th>
-                          <th style={{ padding: '5px 8px', textAlign: 'left', width: '36%', borderLeft: '1px solid #fed7aa' }}>
-                            खर्च तपशील (Expenditure)
-                          </th>
-                          <th style={{ padding: '5px 8px', textAlign: 'right', width: '14%' }}>रक्कम (₹)</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td style={{ padding: '4px 8px', borderBottom: '1px solid #ffedd5' }}>
-                            <strong>१. घरगुती वार्षिक वर्गणी</strong>
-                          </td>
-                          <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#15803d' }}>
-                            {formatCurrency(donationTypeStats.find((d) => d.key === 'Vargani')?.amount || 0)}
-                          </td>
-                          <td style={{ padding: '4px 8px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa' }}>
-                            <strong>१. श्री गणेश मूर्ती व पूजा साहित्य</strong>
-                          </td>
-                          <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#dc2626' }}>
-                            {formatCurrency(expenseCategoryStats.find((c) => c.key === 'Murti')?.amount || 0)}
-                          </td>
-                        </tr>
-                        <tr style={{ backgroundColor: '#fffcf9' }}>
-                          <td style={{ padding: '4px 8px', borderBottom: '1px solid #ffedd5' }}>
-                            <strong>२. ऐच्छिक देणगी (Denagi)</strong>
-                          </td>
-                          <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#15803d' }}>
-                            {formatCurrency(donationTypeStats.find((d) => d.key === 'Denagi')?.amount || 0)}
-                          </td>
-                          <td style={{ padding: '4px 8px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa' }}>
-                            <strong>२. मंडप, स्टेज व छत व्यवस्था</strong>
-                          </td>
-                          <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#dc2626' }}>
-                            {formatCurrency(expenseCategoryStats.find((c) => c.key === 'Mandap')?.amount || 0)}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td style={{ padding: '4px 8px', borderBottom: '1px solid #ffedd5' }}>
-                            <strong>३. नवस पावती देणगी (Navas)</strong>
-                          </td>
-                          <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#15803d' }}>
-                            {formatCurrency(donationTypeStats.find((d) => d.key === 'Navas')?.amount || 0)}
-                          </td>
-                          <td style={{ padding: '4px 8px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa' }}>
-                            <strong>३. डेकोरेशन व विद्युत रोषणाई</strong>
-                          </td>
-                          <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#dc2626' }}>
-                            {formatCurrency(expenseCategoryStats.find((c) => c.key === 'Decoration')?.amount || 0)}
-                          </td>
-                        </tr>
-                        <tr style={{ backgroundColor: '#fffcf9' }}>
-                          <td style={{ padding: '4px 8px', borderBottom: '1px solid #ffedd5' }}>
-                            <strong>४. इतर जमा व सहाय्य</strong>
-                          </td>
-                          <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#15803d' }}>
-                            {formatCurrency(donationTypeStats.find((d) => d.key === 'Other')?.amount || 0)}
-                          </td>
-                          <td style={{ padding: '4px 8px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa' }}>
-                            <strong>४. ध्वनी (Sound System) व लाईट</strong>
-                          </td>
-                          <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#dc2626' }}>
-                            {formatCurrency(expenseCategoryStats.find((c) => c.key === 'SoundLight')?.amount || 0)}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td style={{ padding: '4px 8px', borderBottom: '1px solid #ffedd5', color: '#78350f' }}>
-                            <span>• रोख जमा: {formatCurrency(paymentModeStats.find((m) => m.key === 'Cash')?.amount || 0)}</span>
-                          </td>
-                          <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontSize: '9px' }}>
-                            ({paymentModeStats.find((m) => m.key === 'Cash')?.count || 0} पावत्या)
-                          </td>
-                          <td style={{ padding: '4px 8px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa' }}>
-                            <strong>५. महाप्रसाद व अन्नदान भोजन</strong>
-                          </td>
-                          <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#dc2626' }}>
-                            {formatCurrency(expenseCategoryStats.find((c) => c.key === 'Prasad')?.amount || 0)}
-                          </td>
-                        </tr>
-                        <tr style={{ backgroundColor: '#fffcf9' }}>
-                          <td style={{ padding: '4px 8px', borderBottom: '1px solid #ffedd5', color: '#78350f' }}>
-                            <span>• ऑनलाइन UPI: {formatCurrency(paymentModeStats.find((m) => m.key === 'UPI')?.amount || 0)}</span>
-                          </td>
-                          <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontSize: '9px' }}>
-                            ({paymentModeStats.find((m) => m.key === 'UPI')?.count || 0} पावत्या)
-                          </td>
-                          <td style={{ padding: '4px 8px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa' }}>
-                            <strong>६. वीज, जनरेटर, सुरक्षा व इतर</strong>
-                          </td>
-                          <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#dc2626' }}>
-                            {formatCurrency(
-                              (expenseCategoryStats.find((c) => c.key === 'Electricity')?.amount || 0) +
-                                (expenseCategoryStats.find((c) => c.key === 'Security')?.amount || 0) +
-                                (expenseCategoryStats.find((c) => c.key === 'Misc')?.amount || 0)
-                            )}
-                          </td>
-                        </tr>
-                        {/* Totals Row */}
-                        <tr style={{ backgroundColor: '#ffedd5', fontWeight: 900, borderTop: '1.5px solid #ea580c' }}>
-                          <td style={{ padding: '6px 8px', color: '#9a3412', fontSize: '10.5px' }}>
-                            एकूण जमा रक्कम (Total A)
-                          </td>
-                          <td style={{ padding: '6px 8px', textAlign: 'right', color: '#15803d', fontSize: '11px' }}>
-                            {formatCurrency(totalCollection)}
-                          </td>
-                          <td style={{ padding: '6px 8px', color: '#9a3412', fontSize: '10.5px', borderLeft: '1px solid #fed7aa' }}>
-                            एकूण खर्च रक्कम (Total B)
-                          </td>
-                          <td style={{ padding: '6px 8px', textAlign: 'right', color: '#dc2626', fontSize: '11px' }}>
-                            {formatCurrency(totalExpense)}
-                          </td>
-                        </tr>
-                        <tr style={{ backgroundColor: '#fff7ed', fontWeight: 900 }}>
-                          <td colSpan={2} style={{ padding: '5px 8px', color: '#451a03', fontSize: '10px' }}>
-                            अंतिम आर्थिक ताळेबंद स्थिती:
-                          </td>
-                          <td colSpan={2} style={{ padding: '5px 8px', textAlign: 'right', color: balance >= 0 ? '#b45309' : '#dc2626', fontSize: '11px' }}>
-                            {balance >= 0 ? `शिल्लक निधी: + ${formatCurrency(balance)}` : `तूट: - ${formatCurrency(Math.abs(balance))}`}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Top Donors Honors List (Top 6) */}
-                  <div
-                    style={{
-                      border: '1px solid #fde68a',
-                      borderRadius: '5px',
-                      overflow: 'hidden',
-                      marginBottom: '8px'
-                    }}
-                  >
+                    {/* Summary Balance Sheet Table */}
                     <div
                       style={{
-                        backgroundColor: '#d97706',
-                        color: '#ffffff',
-                        padding: '4px 10px',
-                        fontSize: '11px',
-                        fontWeight: 800,
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
+                        border: '1px solid #fed7aa',
+                        borderRadius: '5px',
+                        overflow: 'hidden',
+                        marginBottom: '10px'
                       }}
                     >
-                      <span>🏆 सर्वोच्च देणगीदार सन्मान यादी (Top Donors)</span>
-                      <span style={{ fontSize: '9px' }}>देणगी व वर्गणी</span>
-                    </div>
+                      <div
+                        style={{
+                          backgroundColor: '#ea580c',
+                          color: '#ffffff',
+                          padding: '5px 10px',
+                          fontSize: '10.5px',
+                          fontWeight: 800,
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center'
+                        }}
+                      >
+                        <span>📊 आर्थिक ताळेबंद गोषवारा (Balance Sheet Summary)</span>
+                        <span style={{ fontSize: '9px', opacity: 0.95 }}>उत्सव वर्ष २०२६</span>
+                      </div>
 
-                    <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: '9.5px', boxSizing: 'border-box' }}>
-                      <thead>
-                        <tr style={{ backgroundColor: '#fffbeb', borderBottom: '1px solid #fde68a', color: '#92400e', fontWeight: 800 }}>
-                          <th style={{ padding: '4px 6px', textAlign: 'center', width: '8%' }}>क्र.</th>
-                          <th style={{ padding: '4px 6px', textAlign: 'left', width: '18%' }}>पावती क्र.</th>
-                          <th style={{ padding: '4px 6px', textAlign: 'left', width: '36%' }}>देणगीदाराचे नाव</th>
-                          <th style={{ padding: '4px 6px', textAlign: 'left', width: '22%' }}>पत्ता / परिसर</th>
-                          <th style={{ padding: '4px 6px', textAlign: 'right', width: '16%' }}>रक्कम (₹)</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {topDonorsList.map((d, idx) => (
-                          <tr
-                            key={d.id || idx}
-                            style={{
-                              backgroundColor: idx % 2 === 0 ? '#ffffff' : '#fffdf5',
-                              borderBottom: '1px solid #fef3c7'
-                            }}
-                          >
-                            <td style={{ padding: '3.5px 6px', textAlign: 'center', fontWeight: 800, color: '#b45309' }}>
-                              {idx + 1}
+                      <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: '9.5px', boxSizing: 'border-box' }}>
+                        <thead>
+                          <tr style={{ backgroundColor: '#fff7ed', borderBottom: '1px solid #fed7aa', color: '#7c2d12', fontWeight: 800 }}>
+                            <th style={{ padding: '4px 6px', textAlign: 'left', width: '36%' }}>जमा तपशील (Receipts)</th>
+                            <th style={{ padding: '4px 8px', textAlign: 'right', width: '14%' }}>रक्कम (₹)</th>
+                            <th style={{ padding: '4px 6px', textAlign: 'left', width: '36%', borderLeft: '1px solid #fed7aa' }}>
+                              खर्च तपशील (Expenditure)
+                            </th>
+                            <th style={{ padding: '4px 8px', textAlign: 'right', width: '14%' }}>रक्कम (₹)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5' }}>
+                              <strong>१. घरगुती वार्षिक वर्गणी</strong>
                             </td>
-                            <td style={{ padding: '3.5px 6px', fontWeight: 700, color: '#92400e' }}>{d.pavtiNo}</td>
-                            <td style={{ padding: '3.5px 6px', fontWeight: 700 }}>{d.donorName}</td>
-                            <td style={{ padding: '3.5px 6px', color: '#78350f' }}>{d.address || 'स्थानिक परिसर'}</td>
-                            <td style={{ padding: '3.5px 6px', textAlign: 'right', fontWeight: 900, color: '#15803d', whiteSpace: 'nowrap' }}>
-                              {formatCurrency(d.amount)}
+                            <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#15803d' }}>
+                              {formatCurrency(donationTypeStats.find((d) => d.key === 'Vargani')?.amount || 0)}
+                            </td>
+                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa' }}>
+                              <strong>१. श्री गणेश मूर्ती व पूजा साहित्य</strong>
+                            </td>
+                            <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#dc2626' }}>
+                              {formatCurrency(expenseCategoryStats.find((c) => c.key === 'Murti')?.amount || 0)}
                             </td>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                          <tr style={{ backgroundColor: '#fffcf9' }}>
+                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5' }}>
+                              <strong>२. ऐच्छिक देणगी (Denagi)</strong>
+                            </td>
+                            <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#15803d' }}>
+                              {formatCurrency(donationTypeStats.find((d) => d.key === 'Denagi')?.amount || 0)}
+                            </td>
+                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa' }}>
+                              <strong>२. मंडप, स्टेज व छत व्यवस्था</strong>
+                            </td>
+                            <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#dc2626' }}>
+                              {formatCurrency(expenseCategoryStats.find((c) => c.key === 'Mandap')?.amount || 0)}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5' }}>
+                              <strong>३. नवस पावती देणगी (Navas)</strong>
+                            </td>
+                            <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#15803d' }}>
+                              {formatCurrency(donationTypeStats.find((d) => d.key === 'Navas')?.amount || 0)}
+                            </td>
+                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa' }}>
+                              <strong>३. डेकोरेशन व विद्युत रोषणाई</strong>
+                            </td>
+                            <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#dc2626' }}>
+                              {formatCurrency(expenseCategoryStats.find((c) => c.key === 'Decoration')?.amount || 0)}
+                            </td>
+                          </tr>
+                          <tr style={{ backgroundColor: '#fffcf9' }}>
+                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5' }}>
+                              <strong>४. इतर जमा व सहाय्य</strong>
+                            </td>
+                            <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#15803d' }}>
+                              {formatCurrency(donationTypeStats.find((d) => d.key === 'Other')?.amount || 0)}
+                            </td>
+                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa' }}>
+                              <strong>४. ध्वनी (Sound System) व लाईट</strong>
+                            </td>
+                            <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#dc2626' }}>
+                              {formatCurrency(expenseCategoryStats.find((c) => c.key === 'SoundLight')?.amount || 0)}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', color: '#78350f' }}>
+                              <span>• रोख जमा: {formatCurrency(paymentModeStats.find((m) => m.key === 'Cash')?.amount || 0)}</span>
+                            </td>
+                            <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontSize: '8.5px' }}>
+                              ({paymentModeStats.find((m) => m.key === 'Cash')?.count || 0} पावत्या)
+                            </td>
+                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa' }}>
+                              <strong>५. महाप्रसाद व अन्नदान भोजन</strong>
+                            </td>
+                            <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#dc2626' }}>
+                              {formatCurrency(expenseCategoryStats.find((c) => c.key === 'Prasad')?.amount || 0)}
+                            </td>
+                          </tr>
+                          <tr style={{ backgroundColor: '#fffcf9' }}>
+                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', color: '#78350f' }}>
+                              <span>• ऑनलाइन UPI: {formatCurrency(paymentModeStats.find((m) => m.key === 'UPI')?.amount || 0)}</span>
+                            </td>
+                            <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontSize: '8.5px' }}>
+                              ({paymentModeStats.find((m) => m.key === 'UPI')?.count || 0} पावत्या)
+                            </td>
+                            <td style={{ padding: '4px 6px', borderBottom: '1px solid #ffedd5', borderLeft: '1px solid #fed7aa' }}>
+                              <strong>६. वीज, जनरेटर, सुरक्षा व इतर</strong>
+                            </td>
+                            <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #ffedd5', fontWeight: 700, color: '#dc2626' }}>
+                              {formatCurrency(
+                                (expenseCategoryStats.find((c) => c.key === 'Electricity')?.amount || 0) +
+                                  (expenseCategoryStats.find((c) => c.key === 'Security')?.amount || 0) +
+                                  (expenseCategoryStats.find((c) => c.key === 'Misc')?.amount || 0)
+                              )}
+                            </td>
+                          </tr>
+                          {/* Totals Row */}
+                          <tr style={{ backgroundColor: '#ffedd5', fontWeight: 900, borderTop: '1.5px solid #ea580c' }}>
+                            <td style={{ padding: '5px 6px', color: '#9a3412', fontSize: '10px' }}>
+                              एकूण जमा रक्कम (Total A)
+                            </td>
+                            <td style={{ padding: '5px 8px', textAlign: 'right', color: '#15803d', fontSize: '10.5px' }}>
+                              {formatCurrency(totalCollection)}
+                            </td>
+                            <td style={{ padding: '5px 6px', color: '#9a3412', fontSize: '10px', borderLeft: '1px solid #fed7aa' }}>
+                              एकूण खर्च रक्कम (Total B)
+                            </td>
+                            <td style={{ padding: '5px 8px', textAlign: 'right', color: '#dc2626', fontSize: '10.5px' }}>
+                              {formatCurrency(totalExpense)}
+                            </td>
+                          </tr>
+                          <tr style={{ backgroundColor: '#fff7ed', fontWeight: 900 }}>
+                            <td colSpan={2} style={{ padding: '4px 6px', color: '#451a03', fontSize: '9.5px' }}>
+                              अंतिम आर्थिक ताळेबंद स्थिती:
+                            </td>
+                            <td colSpan={2} style={{ padding: '4px 8px', textAlign: 'right', color: balance >= 0 ? '#b45309' : '#dc2626', fontSize: '10.5px' }}>
+                              {balance >= 0 ? `शिल्लक निधी: + ${formatCurrency(balance)}` : `तूट: - ${formatCurrency(Math.abs(balance))}`}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
 
-                  {/* Summary Scope Single Page Signatures */}
-                  {reportScope === 'summary' && (
+                    {/* Top Donors Honors List (Top 6) */}
                     <div
                       style={{
-                        border: '1px solid #fdba74',
-                        backgroundColor: '#fffaf5',
+                        border: '1px solid #fde68a',
                         borderRadius: '5px',
-                        padding: '8px 12px',
-                        marginTop: 'auto'
+                        overflow: 'hidden',
+                        marginBottom: '6px'
                       }}
                     >
                       <div
                         style={{
-                          fontSize: '9px',
-                          color: '#7c2d12',
-                          textAlign: 'center',
-                          marginBottom: '10px',
-                          fontStyle: 'italic',
-                          fontWeight: 600
+                          backgroundColor: '#d97706',
+                          color: '#ffffff',
+                          padding: '4px 8px',
+                          fontSize: '10.5px',
+                          fontWeight: 800,
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center'
                         }}
                       >
-                        "सदर हिशोब मूळ पावती पुस्तके व अधिकृत बिलांनुसार अचूक तपासला असून प्रमाणित करण्यात येत आहे."
+                        <span>🏆 सर्वोच्च देणगीदार सन्मान यादी (Top Donors)</span>
+                        <span style={{ fontSize: '8.5px' }}>देणगी व वर्गणी</span>
                       </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', textAlign: 'center' }}>
-                        <div>
-                          <div style={{ height: '22px', borderBottom: '1px dashed #c2410c', margin: '0 auto', width: '80%' }} />
-                          <div style={{ fontSize: '10px', fontWeight: 800, color: '#451a03', marginTop: '3px' }}>
-                            {mandalSettings.president || 'श्री. तुषार शिंदे'}
-                          </div>
-                          <div style={{ fontSize: '8.5px', color: '#ea580c', fontWeight: 700 }}>अध्यक्ष</div>
-                        </div>
-                        <div>
-                          <div style={{ height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <img
-                              src="/signatures/mayur-signature.png"
-                              alt="खजिनदार स्वाक्षरी"
-                              style={{ maxHeight: '24px', maxWidth: '90px', objectFit: 'contain' }}
-                              onError={(e) => { e.target.style.display = 'none'; }}
-                            />
-                          </div>
-                          <div style={{ height: '1px', borderBottom: '1px dashed #c2410c', margin: '2px auto 3px', width: '80%' }} />
-                          <div style={{ fontSize: '10px', fontWeight: 800, color: '#451a03' }}>
-                            {mandalSettings.treasurer || 'श्री. तुकाराम शिंदे व श्री. धनंजय शिंदे'}
-                          </div>
-                          <div style={{ fontSize: '8.5px', color: '#ea580c', fontWeight: 700 }}>खजिनदार</div>
-                        </div>
-                        <div>
-                          <div style={{ height: '22px', borderBottom: '1px dashed #c2410c', margin: '0 auto', width: '80%' }} />
-                          <div style={{ fontSize: '10px', fontWeight: 800, color: '#451a03', marginTop: '3px' }}>
-                            {mandalSettings.secretary || 'श्री. मानस शिंदे'}
-                          </div>
-                          <div style={{ fontSize: '8.5px', color: '#ea580c', fontWeight: 700 }}>सचिव</div>
-                        </div>
-                      </div>
+
+                      <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: '9px', boxSizing: 'border-box' }}>
+                        <thead>
+                          <tr style={{ backgroundColor: '#fffbeb', borderBottom: '1px solid #fde68a', color: '#92400e', fontWeight: 800 }}>
+                            <th style={{ padding: '3.5px 5px', textAlign: 'center', width: '8%' }}>क्र.</th>
+                            <th style={{ padding: '3.5px 5px', textAlign: 'left', width: '18%' }}>पावती क्र.</th>
+                            <th style={{ padding: '3.5px 5px', textAlign: 'left', width: '36%' }}>देणगीदाराचे नाव</th>
+                            <th style={{ padding: '3.5px 5px', textAlign: 'left', width: '22%' }}>पत्ता / परिसर</th>
+                            <th style={{ padding: '3.5px 8px', textAlign: 'right', width: '16%' }}>रक्कम (₹)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {topDonorsList.map((d, idx) => (
+                            <tr
+                              key={d.id || idx}
+                              style={{
+                                backgroundColor: idx % 2 === 0 ? '#ffffff' : '#fffdf5',
+                                borderBottom: '1px solid #fef3c7'
+                              }}
+                            >
+                              <td style={{ padding: '3px 5px', textAlign: 'center', fontWeight: 800, color: '#b45309' }}>
+                                {idx + 1}
+                              </td>
+                              <td style={{ padding: '3px 5px', fontWeight: 700, color: '#92400e' }}>{d.pavtiNo}</td>
+                              <td style={{ padding: '3px 5px', fontWeight: 700 }}>{d.donorName}</td>
+                              <td style={{ padding: '3px 5px', color: '#78350f' }}>{d.address || 'स्थानिक परिसर'}</td>
+                              <td style={{ padding: '3px 8px', textAlign: 'right', fontWeight: 900, color: '#15803d', whiteSpace: 'nowrap' }}>
+                                {formatCurrency(d.amount)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
-                  )}
+                  </div>
+
+                  {/* Summary Scope Single Page Signatures (Only if Single Page Summary Mode) */}
+                  {reportScope === 'summary' && renderSignaturesBlock()}
 
                   {/* Page 1 Bottom Footer */}
                   <div
                     style={{
                       borderTop: '1px solid #fed7aa',
-                      marginTop: 'auto',
-                      paddingTop: '6px',
+                      paddingTop: '5px',
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
                       fontSize: '8.5px',
                       color: '#9a3412',
-                      fontWeight: 600
+                      fontWeight: 600,
+                      marginTop: '4px'
                     }}
                   >
                     <span>शिंदे मळा गणेश उत्सव मंडळ • अधिकृत ताळेबंद</span>
@@ -1048,14 +1122,17 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
               </div>
 
               {/* ========================================================================= */}
-              {/* PAGE 2: ITEMIZED EXPENSES & OFFICIAL SIGNATURES (तपशीलवार खर्च व स्वाक्षऱ्या) */}
+              {/* PAGE 2: ITEMIZED EXPENSES TABLE (तपशीलवार खर्च व्हाउचर्स यादी)            */}
+              {/* Note: If includeReceipts is false, Signatures are here as the LAST page.  */}
+              {/* If includeReceipts is true, Signatures appear on the LAST page (Page 3+).*/}
               {/* ========================================================================= */}
               {reportScope !== 'summary' && (
                 <div
                   className="pdf-page pdf-page-break-after"
                   style={{
-                    width: '690px',
-                    minHeight: '970px',
+                    width: '670px',
+                    minHeight: '960px',
+                    maxHeight: '960px',
                     boxSizing: 'border-box',
                     backgroundColor: '#ffffff',
                     padding: '12px 14px',
@@ -1064,7 +1141,8 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                     justifyContent: 'space-between',
                     pageBreakAfter: includeReceipts ? 'always' : 'auto',
                     breakAfter: includeReceipts ? 'page' : 'auto',
-                    position: 'relative'
+                    position: 'relative',
+                    overflow: 'hidden'
                   }}
                 >
                   <div
@@ -1078,229 +1156,182 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                       backgroundColor: '#ffffff',
                       position: 'relative',
                       display: 'flex',
-                      flexDirection: 'column'
+                      flexDirection: 'column',
+                      justifyContent: 'space-between'
                     }}
                   >
-                    {/* Page 2 Mini Header */}
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        borderBottom: '2px solid #ea580c',
-                        paddingBottom: '6px',
-                        marginBottom: '10px'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <img
-                          src="/logo.png"
-                          onError={(e) => {
-                            e.target.src = '/ganesh-icon.svg';
-                          }}
-                          alt="Logo"
-                          style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
-                        />
-                        <div>
-                          <div style={{ fontSize: '14px', fontWeight: 900, color: '#9a3412' }}>
-                            {mandalSettings.mandalName || 'शिंदे मळा गणेश उत्सव मंडळ'}
-                          </div>
-                          <div style={{ fontSize: '9px', color: '#c2410c', fontWeight: 600 }}>
-                            भाग २: तपशीलवार उत्सव खर्च व्हाउचर्स व मंडळ प्रमाणिकरण
+                    {/* Top Content: Mini Header + Expenses Table */}
+                    <div>
+                      {/* Page 2 Mini Header */}
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          borderBottom: '2px solid #ea580c',
+                          paddingBottom: '6px',
+                          marginBottom: '10px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <img
+                            src="/logo.png"
+                            onError={(e) => {
+                              e.target.src = '/ganesh-icon.svg';
+                            }}
+                            alt="Logo"
+                            style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
+                          />
+                          <div>
+                            <div style={{ fontSize: '13.5px', fontWeight: 900, color: '#9a3412' }}>
+                              {mandalSettings.mandalName || 'शिंदे मळा गणेश उत्सव मंडळ'}
+                            </div>
+                            <div style={{ fontSize: '9px', color: '#c2410c', fontWeight: 600 }}>
+                              भाग २: तपशीलवार उत्सव खर्च व्हाउचर्स (Itemized Expense Vouchers)
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div style={{ textAlign: 'right', fontSize: '9px', color: '#78350f', fontWeight: 700 }}>
-                        उत्सव वर्ष २०२६ • एकूण खर्च: <strong style={{ color: '#dc2626' }}>{formatCurrency(totalExpense)}</strong>
-                      </div>
-                    </div>
-
-                    {/* Itemized Expenses Table */}
-                    <div
-                      style={{
-                        border: '1px solid #fed7aa',
-                        borderRadius: '5px',
-                        overflow: 'hidden',
-                        marginBottom: '14px'
-                      }}
-                    >
-                      <div
-                        style={{
-                          backgroundColor: '#c2410c',
-                          color: '#ffffff',
-                          padding: '5px 10px',
-                          fontSize: '11px',
-                          fontWeight: 800,
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center'
-                        }}
-                      >
-                        <span>💸 तपशीलवार उत्सव खर्च यादी (Itemized Expense Vouchers)</span>
-                        <span style={{ fontSize: '9.5px' }}>एकूण {expenseList.length} खर्च नोंदी</span>
+                        <div style={{ textAlign: 'right', fontSize: '9px', color: '#78350f', fontWeight: 700 }}>
+                          उत्सव वर्ष २०२६ • एकूण खर्च: <strong style={{ color: '#dc2626' }}>{formatCurrency(totalExpense)}</strong>
+                        </div>
                       </div>
 
-                      <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: '9.5px', boxSizing: 'border-box' }}>
-                        <thead>
-                          <tr style={{ backgroundColor: '#fff7ed', borderBottom: '1px solid #fed7aa', color: '#7c2d12', fontWeight: 800 }}>
-                            <th style={{ padding: '4px 6px', textAlign: 'center', width: '6%' }}>अ.क्र.</th>
-                            <th style={{ padding: '4px 6px', textAlign: 'left', width: '14%' }}>दिनांक</th>
-                            <th style={{ padding: '4px 6px', textAlign: 'left', width: '20%' }}>विभाग / प्रकार</th>
-                            <th style={{ padding: '4px 6px', textAlign: 'left', width: '30%' }}>खर्चाचे विवरण व तपशील</th>
-                            <th style={{ padding: '4px 6px', textAlign: 'left', width: '16%' }}>दुकानदार / व्यक्ती</th>
-                            <th style={{ padding: '4px 6px', textAlign: 'right', width: '14%' }}>रक्कम (₹)</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {expenseList.length === 0 ? (
-                            <tr>
-                              <td colSpan={6} style={{ textAlign: 'center', padding: '12px', color: '#78350f' }}>
-                                कोणतीही खर्च नोंद आढळली नाही.
-                              </td>
-                            </tr>
-                          ) : (
-                            expenseList.map((e, idx) => (
-                              <tr
-                                key={e.id || idx}
-                                style={{
-                                  backgroundColor: idx % 2 === 0 ? '#ffffff' : '#fffcf9',
-                                  borderBottom: '1px solid #ffedd5'
-                                }}
-                              >
-                                <td style={{ padding: '4px 6px', textAlign: 'center', color: '#78350f' }}>{idx + 1}</td>
-                                <td style={{ padding: '4px 6px', whiteSpace: 'nowrap' }}>{e.date}</td>
-                                <td style={{ padding: '4px 6px', fontWeight: 600 }}>{t(`cat${e.category}`) || e.category}</td>
-                                <td style={{ padding: '4px 6px', wordBreak: 'break-word' }}>{e.description}</td>
-                                <td style={{ padding: '4px 6px', color: '#451a03', wordBreak: 'break-word' }}>{e.paidTo || '—'}</td>
-                                <td style={{ padding: '4px 6px', textAlign: 'right', fontWeight: 800, color: '#dc2626', whiteSpace: 'nowrap' }}>
-                                  {formatCurrency(e.amount)}
-                                </td>
-                              </tr>
-                            ))
-                          )}
-                          <tr style={{ backgroundColor: '#fef2f2', fontWeight: 900, borderTop: '1.5px solid #dc2626' }}>
-                            <td colSpan={5} style={{ padding: '5px 8px', textAlign: 'right', color: '#991b1b', fontSize: '10.5px' }}>
-                              एकूण उत्सव खर्च बेरीज (Total Expenditure):
-                            </td>
-                            <td style={{ padding: '5px 8px', textAlign: 'right', color: '#dc2626', fontSize: '11px', whiteSpace: 'nowrap' }}>
-                              {formatCurrency(totalExpense)}
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-
-                    {/* Official Audit Declaration & Signatures Block */}
-                    <div
-                      style={{
-                        border: '1.5px solid #fdba74',
-                        backgroundColor: '#fffaf5',
-                        borderRadius: '6px',
-                        padding: '10px 14px',
-                        marginTop: 'auto',
-                        boxSizing: 'border-box'
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: '9.5px',
-                          color: '#7c2d12',
-                          textAlign: 'center',
-                          lineHeight: 1.5,
-                          marginBottom: '14px',
-                          fontStyle: 'italic',
-                          fontWeight: 600
-                        }}
-                      >
-                        "आम्ही याद्वारे प्रमाणित करतो की वरील वार्षिक अहवालातील सर्व पावती जमा व उत्सव खर्चाचा हिशोब हा मूळ पावती पुस्तके व अधिकृत बिलांनुसार अचूक व परिपूर्ण आहे. सदर हिशोब सर्व भाविक, देणगीदार व ग्रामस्थांच्या अवलोकनार्थ प्रसिद्ध करण्यात येत आहे."
-                      </div>
-
+                      {/* Category Breakdown Highlights Row */}
                       <div
                         style={{
                           display: 'grid',
-                          gridTemplateColumns: 'repeat(3, 1fr)',
-                          gap: '10px',
-                          textAlign: 'center',
-                          paddingTop: '4px'
+                          gridTemplateColumns: 'repeat(4, 1fr)',
+                          gap: '6px',
+                          marginBottom: '10px'
                         }}
                       >
-                        {/* President */}
-                        <div>
-                          <div style={{ height: '30px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-                            <span style={{ borderBottom: '1px dashed #c2410c', width: '80%', display: 'inline-block' }} />
+                        {expenseCategoryStats.slice(0, 4).map((c) => (
+                          <div
+                            key={c.key}
+                            style={{
+                              backgroundColor: '#fff7ed',
+                              border: '1px solid #fed7aa',
+                              borderRadius: '4px',
+                              padding: '5px 7px',
+                              textAlign: 'center'
+                            }}
+                          >
+                            <div style={{ fontSize: '8.5px', color: '#7c2d12', fontWeight: 700 }}>{c.label}</div>
+                            <div style={{ fontSize: '11px', fontWeight: 800, color: '#dc2626', marginTop: '1px' }}>
+                              {formatCurrency(c.amount)}
+                            </div>
+                            <div style={{ fontSize: '7.5px', color: '#9a3412' }}>{c.percent}% वाटा ({c.count} व्हाउचर्स)</div>
                           </div>
-                          <div style={{ fontSize: '10.5px', fontWeight: 800, color: '#451a03', marginTop: '3px' }}>
-                            {mandalSettings.president || 'श्री. तुषार शिंदे'}
-                          </div>
-                          <div style={{ fontSize: '9px', color: '#ea580c', fontWeight: 700 }}>
-                            अध्यक्ष (President)
-                          </div>
-                        </div>
-
-                        {/* Treasurer */}
-                        <div>
-                          <div style={{ height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <img
-                              src="/signatures/mayur-signature.png"
-                              alt="खजिनदार स्वाक्षरी"
-                              style={{ maxHeight: '32px', maxWidth: '105px', objectFit: 'contain' }}
-                              onError={(e) => { e.target.style.display = 'none'; }}
-                            />
-                          </div>
-                          <div style={{ height: '1px', borderBottom: '1px dashed #c2410c', margin: '2px auto 3px', width: '80%' }} />
-                          <div style={{ fontSize: '10.5px', fontWeight: 800, color: '#451a03' }}>
-                            {mandalSettings.treasurer || 'श्री. तुकाराम शिंदे व श्री. धनंजय शिंदे'}
-                          </div>
-                          <div style={{ fontSize: '9px', color: '#ea580c', fontWeight: 700 }}>
-                            खजिनदार (Treasurer)
-                          </div>
-                        </div>
-
-                        {/* Secretary */}
-                        <div>
-                          <div style={{ height: '30px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-                            <span style={{ borderBottom: '1px dashed #c2410c', width: '80%', display: 'inline-block' }} />
-                          </div>
-                          <div style={{ fontSize: '10.5px', fontWeight: 800, color: '#451a03', marginTop: '3px' }}>
-                            {mandalSettings.secretary || 'श्री. मानस शिंदे'}
-                          </div>
-                          <div style={{ fontSize: '9px', color: '#ea580c', fontWeight: 700 }}>
-                            सचिव (Secretary)
-                          </div>
-                        </div>
+                        ))}
                       </div>
 
-                      {/* Official Seal Line */}
+                      {/* Itemized Expenses Table */}
                       <div
                         style={{
-                          borderTop: '1px solid #fed7aa',
-                          marginTop: '10px',
-                          paddingTop: '5px',
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          fontSize: '8.5px',
-                          color: '#9a3412',
-                          fontWeight: 600
+                          border: '1px solid #fed7aa',
+                          borderRadius: '5px',
+                          overflow: 'hidden',
+                          marginBottom: '10px'
                         }}
                       >
-                        <span>मंडळ अधिकृत शिक्का व स्वाक्षरी प्रमाणित</span>
-                        <span>शिंदे मळा गणेश उत्सव मंडळ, हिंगणी दुमाला, दौंड</span>
+                        <div
+                          style={{
+                            backgroundColor: '#c2410c',
+                            color: '#ffffff',
+                            padding: '5px 10px',
+                            fontSize: '10.5px',
+                            fontWeight: 800,
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                          }}
+                        >
+                          <span>💸 तपशीलवार उत्सव खर्च यादी</span>
+                          <span style={{ fontSize: '9px' }}>एकूण {expenseList.length} खर्च नोंदी</span>
+                        </div>
+
+                        <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: '9px', boxSizing: 'border-box' }}>
+                          <thead>
+                            <tr style={{ backgroundColor: '#fff7ed', borderBottom: '1px solid #fed7aa', color: '#7c2d12', fontWeight: 800 }}>
+                              <th style={{ padding: '4px 5px', textAlign: 'center', width: '6%' }}>अ.क्र.</th>
+                              <th style={{ padding: '4px 5px', textAlign: 'left', width: '14%' }}>दिनांक</th>
+                              <th style={{ padding: '4px 5px', textAlign: 'left', width: '18%' }}>विभाग / प्रकार</th>
+                              <th style={{ padding: '4px 5px', textAlign: 'left', width: '32%' }}>खर्चाचे विवरण व तपशील</th>
+                              <th style={{ padding: '4px 5px', textAlign: 'left', width: '16%' }}>दुकानदार / व्यक्ती</th>
+                              <th style={{ padding: '4px 8px', textAlign: 'right', width: '14%' }}>रक्कम (₹)</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {expenseList.length === 0 ? (
+                              <tr>
+                                <td colSpan={6} style={{ textAlign: 'center', padding: '12px', color: '#78350f' }}>
+                                  कोणतीही खर्च नोंद आढळली नाही.
+                                </td>
+                              </tr>
+                            ) : (
+                              expenseList.map((e, idx) => (
+                                <tr
+                                  key={e.id || idx}
+                                  style={{
+                                    backgroundColor: idx % 2 === 0 ? '#ffffff' : '#fffcf9',
+                                    borderBottom: '1px solid #ffedd5'
+                                  }}
+                                >
+                                  <td style={{ padding: '4px 5px', textAlign: 'center', color: '#78350f' }}>{idx + 1}</td>
+                                  <td style={{ padding: '4px 5px', whiteSpace: 'nowrap' }}>{e.date}</td>
+                                  <td style={{ padding: '4px 5px', fontWeight: 600 }}>{t(`cat${e.category}`) || e.category}</td>
+                                  <td style={{ padding: '4px 5px', wordBreak: 'break-word' }}>{e.description}</td>
+                                  <td style={{ padding: '4px 5px', color: '#451a03', wordBreak: 'break-word' }}>{e.paidTo || '—'}</td>
+                                  <td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 800, color: '#dc2626', whiteSpace: 'nowrap' }}>
+                                    {formatCurrency(e.amount)}
+                                  </td>
+                                </tr>
+                              ))
+                            )}
+                            <tr style={{ backgroundColor: '#fef2f2', fontWeight: 900, borderTop: '1.5px solid #dc2626' }}>
+                              <td colSpan={5} style={{ padding: '5px 6px', textAlign: 'right', color: '#991b1b', fontSize: '10px' }}>
+                                एकूण उत्सव खर्च बेरीज (Total Expenditure):
+                              </td>
+                              <td style={{ padding: '5px 8px', textAlign: 'right', color: '#dc2626', fontSize: '10.5px', whiteSpace: 'nowrap' }}>
+                                {formatCurrency(totalExpense)}
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Official Verification Note */}
+                      <div
+                        style={{
+                          backgroundColor: '#fef3c7',
+                          border: '1px solid #fde68a',
+                          borderRadius: '5px',
+                          padding: '6px 10px',
+                          fontSize: '8.5px',
+                          color: '#92400e',
+                          fontWeight: 600,
+                          lineHeight: 1.4
+                        }}
+                      >
+                        📌 <strong>खर्च नोंदणी नियम व पडताळणी:</strong> मंडळाचे सर्व खर्च अधिकृत व्हाउचर्स, मूळ बिले, पावती व बँक/UPI ट्रान्सफर पावत्यांनुसार तपासले असून सर्व व्हाउचर्स मंडळाच्या कार्यालयात सुरक्षीत जतन केले आहेत.
                       </div>
                     </div>
+
+                    {/* If Receipts are NOT included, Page 2 is the LAST page, so render Signatures Block here */}
+                    {!includeReceipts && renderSignaturesBlock()}
 
                     {/* Page 2 Bottom Footer */}
                     <div
                       style={{
                         borderTop: '1px solid #fed7aa',
-                        marginTop: '8px',
                         paddingTop: '5px',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
                         fontSize: '8.5px',
                         color: '#9a3412',
-                        fontWeight: 600
+                        fontWeight: 600,
+                        marginTop: '4px'
                       }}
                     >
                       <span>शिंदे मळा गणेश उत्सव मंडळ • खर्च अहवाल</span>
@@ -1312,8 +1343,8 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
               )}
 
               {/* ========================================================================= */}
-              {/* PAGE 3+ : DETAILED PAVTI RECEIPTS LEDGER (संपूर्ण देणगी पावत्या यादी)      */}
-              {/* Cleanly paginated in chunks of 20 so tables never get cut awkwardly        */}
+              {/* PAGE 3+ : DETAILED PAVTI LEDGER & FINAL SIGNATURES BLOCK                  */}
+              {/* The Signatures Section is ALWAYS placed on the LAST page!                */}
               {/* ========================================================================= */}
               {reportScope !== 'summary' && includeReceipts && (
                 pavtiChunks.map((chunk, chunkIdx) => {
@@ -1326,8 +1357,9 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                       key={`pavti-page-${chunkIdx}`}
                       className={`pdf-page ${isLastChunk ? '' : 'pdf-page-break-after'}`}
                       style={{
-                        width: '690px',
-                        minHeight: '970px',
+                        width: '670px',
+                        minHeight: '960px',
+                        maxHeight: '960px',
                         boxSizing: 'border-box',
                         backgroundColor: '#ffffff',
                         padding: '12px 14px',
@@ -1336,7 +1368,8 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                         justifyContent: 'space-between',
                         pageBreakAfter: isLastChunk ? 'auto' : 'always',
                         breakAfter: isLastChunk ? 'auto' : 'page',
-                        position: 'relative'
+                        position: 'relative',
+                        overflow: 'hidden'
                       }}
                     >
                       <div
@@ -1350,126 +1383,135 @@ export const AnnualReportModal = ({ isOpen, onClose, defaultScope = 'all' }) => 
                           backgroundColor: '#ffffff',
                           position: 'relative',
                           display: 'flex',
-                          flexDirection: 'column'
+                          flexDirection: 'column',
+                          justifyContent: 'space-between'
                         }}
                       >
-                        {/* Page 3 Mini Header */}
-                        <div
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            borderBottom: '2px solid #ea580c',
-                            paddingBottom: '6px',
-                            marginBottom: '10px'
-                          }}
-                        >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <img
-                              src="/logo.png"
-                              onError={(e) => {
-                                e.target.src = '/ganesh-icon.svg';
-                              }}
-                              alt="Logo"
-                              style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }}
-                            />
-                            <div>
-                              <div style={{ fontSize: '13px', fontWeight: 900, color: '#9a3412' }}>
-                                {mandalSettings.mandalName || 'शिंदे मळा गणेश उत्सव मंडळ'}
-                              </div>
-                              <div style={{ fontSize: '9px', color: '#c2410c', fontWeight: 600 }}>
-                                भाग ३: संपूर्ण देणगी पावत्या यादी (Receipts Ledger)
-                              </div>
-                            </div>
-                          </div>
-                          <div style={{ textAlign: 'right', fontSize: '9px', color: '#78350f', fontWeight: 700 }}>
-                            एकूण पावत्या: {pavtiList.length} • एकूण जमा: <strong style={{ color: '#15803d' }}>{formatCurrency(totalCollection)}</strong>
-                          </div>
-                        </div>
-
-                        {/* Pavti Table Chunk */}
-                        <div
-                          style={{
-                            border: '1px solid #fed7aa',
-                            borderRadius: '5px',
-                            overflow: 'hidden',
-                            marginBottom: '8px'
-                          }}
-                        >
+                        {/* Top Content: Mini Header + Pavti Table */}
+                        <div>
+                          {/* Page 3 Mini Header */}
                           <div
                             style={{
-                              backgroundColor: '#ea580c',
-                              color: '#ffffff',
-                              padding: '5px 10px',
-                              fontSize: '11px',
-                              fontWeight: 800,
                               display: 'flex',
+                              alignItems: 'center',
                               justifyContent: 'space-between',
-                              alignItems: 'center'
+                              borderBottom: '2px solid #ea580c',
+                              paddingBottom: '6px',
+                              marginBottom: '8px'
                             }}
                           >
-                            <span>📜 देणगी पावत्या तपशील (नोंद क्र. {startIndex + 1} ते {startIndex + chunk.length})</span>
-                            <span style={{ fontSize: '9.5px' }}>उत्सव २०२६</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <img
+                                src="/logo.png"
+                                onError={(e) => {
+                                  e.target.src = '/ganesh-icon.svg';
+                                }}
+                                alt="Logo"
+                                style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }}
+                              />
+                              <div>
+                                <div style={{ fontSize: '13px', fontWeight: 900, color: '#9a3412' }}>
+                                  {mandalSettings.mandalName || 'शिंदे मळा गणेश उत्सव मंडळ'}
+                                </div>
+                                <div style={{ fontSize: '9px', color: '#c2410c', fontWeight: 600 }}>
+                                  भाग ३: संपूर्ण देणगी पावत्या यादी (Receipts Ledger) {isLastChunk && '& अधिकृत प्रमाणिकरण'}
+                                </div>
+                              </div>
+                            </div>
+                            <div style={{ textAlign: 'right', fontSize: '9px', color: '#78350f', fontWeight: 700 }}>
+                              एकूण पावत्या: {pavtiList.length} • एकूण जमा: <strong style={{ color: '#15803d' }}>{formatCurrency(totalCollection)}</strong>
+                            </div>
                           </div>
 
-                          <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: '9px', boxSizing: 'border-box' }}>
-                            <thead>
-                              <tr style={{ backgroundColor: '#fff7ed', borderBottom: '1px solid #fed7aa', color: '#7c2d12', fontWeight: 800 }}>
-                                <th style={{ padding: '4px 5px', textAlign: 'center', width: '7%' }}>क्र.</th>
-                                <th style={{ padding: '4px 5px', textAlign: 'left', width: '17%' }}>पावती क्र.</th>
-                                <th style={{ padding: '4px 5px', textAlign: 'left', width: '13%' }}>दिनांक</th>
-                                <th style={{ padding: '4px 5px', textAlign: 'left', width: '29%' }}>देणगीदाराचे नाव</th>
-                                <th style={{ padding: '4px 5px', textAlign: 'left', width: '14%' }}>प्रकार</th>
-                                <th style={{ padding: '4px 5px', textAlign: 'center', width: '8%' }}>मोड</th>
-                                <th style={{ padding: '4px 5px', textAlign: 'right', width: '12%' }}>रक्कम (₹)</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {chunk.map((p, idx) => (
-                                <tr
-                                  key={p.id || idx}
-                                  style={{
-                                    backgroundColor: idx % 2 === 0 ? '#ffffff' : '#fffcf9',
-                                    borderBottom: '1px solid #ffedd5'
-                                  }}
-                                >
-                                  <td style={{ padding: '3px 5px', textAlign: 'center', color: '#78350f' }}>{startIndex + idx + 1}</td>
-                                  <td style={{ padding: '3px 5px', fontWeight: 700, color: '#9a3412', whiteSpace: 'nowrap' }}>{p.pavtiNo}</td>
-                                  <td style={{ padding: '3px 5px', whiteSpace: 'nowrap' }}>{p.date}</td>
-                                  <td style={{ padding: '3px 5px', fontWeight: 600, wordBreak: 'break-word' }}>{p.donorName}</td>
-                                  <td style={{ padding: '3px 5px', whiteSpace: 'nowrap' }}>{t(`type${p.donationType}`) || p.donationType}</td>
-                                  <td style={{ padding: '3px 5px', textAlign: 'center', whiteSpace: 'nowrap' }}>{p.paymentMode}</td>
-                                  <td style={{ padding: '3px 5px', textAlign: 'right', fontWeight: 800, color: '#15803d', whiteSpace: 'nowrap' }}>
-                                    {formatCurrency(p.amount)}
-                                  </td>
+                          {/* Pavti Table Chunk */}
+                          <div
+                            style={{
+                              border: '1px solid #fed7aa',
+                              borderRadius: '5px',
+                              overflow: 'hidden',
+                              marginBottom: '6px'
+                            }}
+                          >
+                            <div
+                              style={{
+                                backgroundColor: '#ea580c',
+                                color: '#ffffff',
+                                padding: '4px 8px',
+                                fontSize: '10px',
+                                fontWeight: 800,
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                              }}
+                            >
+                              <span>📜 देणगी पावत्या तपशील (नोंद क्र. {startIndex + 1} ते {startIndex + chunk.length})</span>
+                              <span style={{ fontSize: '8.5px' }}>उत्सव २०२६</span>
+                            </div>
+
+                            <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: '8.5px', boxSizing: 'border-box' }}>
+                              <thead>
+                                <tr style={{ backgroundColor: '#fff7ed', borderBottom: '1px solid #fed7aa', color: '#7c2d12', fontWeight: 800 }}>
+                                  <th style={{ padding: '3px 4px', textAlign: 'center', width: '6%' }}>क्र.</th>
+                                  <th style={{ padding: '3px 5px', textAlign: 'left', width: '18%' }}>पावती क्र.</th>
+                                  <th style={{ padding: '3px 5px', textAlign: 'left', width: '13%' }}>दिनांक</th>
+                                  <th style={{ padding: '3px 5px', textAlign: 'left', width: '29%' }}>देणगीदाराचे नाव</th>
+                                  <th style={{ padding: '3px 5px', textAlign: 'left', width: '14%' }}>प्रकार</th>
+                                  <th style={{ padding: '3px 4px', textAlign: 'center', width: '8%' }}>मोड</th>
+                                  <th style={{ padding: '3px 8px', textAlign: 'right', width: '12%' }}>रक्कम (₹)</th>
                                 </tr>
-                              ))}
-                              {isLastChunk && (
-                                <tr style={{ backgroundColor: '#f0fdf4', fontWeight: 900, borderTop: '1.5px solid #16a34a' }}>
-                                  <td colSpan={6} style={{ padding: '5px 8px', textAlign: 'right', color: '#166534', fontSize: '10px' }}>
-                                    एकूण जमा पावती रक्कम बेरीज (Total Collection):
-                                  </td>
-                                  <td style={{ padding: '5px 8px', textAlign: 'right', color: '#15803d', fontSize: '10.5px', whiteSpace: 'nowrap' }}>
-                                    {formatCurrency(totalCollection)}
-                                  </td>
-                                </tr>
-                              )}
-                            </tbody>
-                          </table>
+                              </thead>
+                              <tbody>
+                                {chunk.map((p, idx) => (
+                                  <tr
+                                    key={p.id || idx}
+                                    style={{
+                                      backgroundColor: idx % 2 === 0 ? '#ffffff' : '#fffcf9',
+                                      borderBottom: '1px solid #ffedd5'
+                                    }}
+                                  >
+                                    <td style={{ padding: '2.5px 4px', textAlign: 'center', color: '#78350f' }}>{startIndex + idx + 1}</td>
+                                    <td style={{ padding: '2.5px 5px', fontWeight: 700, color: '#9a3412', whiteSpace: 'nowrap' }}>{p.pavtiNo}</td>
+                                    <td style={{ padding: '2.5px 5px', whiteSpace: 'nowrap' }}>{p.date}</td>
+                                    <td style={{ padding: '2.5px 5px', fontWeight: 600, wordBreak: 'break-word' }}>{p.donorName}</td>
+                                    <td style={{ padding: '2.5px 5px', whiteSpace: 'nowrap' }}>{t(`type${p.donationType}`) || p.donationType}</td>
+                                    <td style={{ padding: '2.5px 4px', textAlign: 'center', whiteSpace: 'nowrap' }}>{p.paymentMode}</td>
+                                    <td style={{ padding: '2.5px 8px', textAlign: 'right', fontWeight: 800, color: '#15803d', whiteSpace: 'nowrap' }}>
+                                      {formatCurrency(p.amount)}
+                                    </td>
+                                  </tr>
+                                ))}
+                                {isLastChunk && (
+                                  <tr style={{ backgroundColor: '#f0fdf4', fontWeight: 900, borderTop: '1.5px solid #16a34a' }}>
+                                    <td colSpan={6} style={{ padding: '4px 6px', textAlign: 'right', color: '#166534', fontSize: '9.5px' }}>
+                                      एकूण जमा पावती रक्कम बेरीज (Total Collection):
+                                    </td>
+                                    <td style={{ padding: '4px 8px', textAlign: 'right', color: '#15803d', fontSize: '10px', whiteSpace: 'nowrap' }}>
+                                      {formatCurrency(totalCollection)}
+                                    </td>
+                                  </tr>
+                                )}
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
+
+                        {/* ========================================================================= */}
+                        {/* SIGNATURES SECTION: ALWAYS ON THE VERY LAST PAGE OF THE REPORT!            */}
+                        {/* ========================================================================= */}
+                        {isLastChunk && renderSignaturesBlock()}
 
                         {/* Page Bottom Footer */}
                         <div
                           style={{
                             borderTop: '1px solid #fed7aa',
-                            marginTop: 'auto',
-                            paddingTop: '5px',
+                            paddingTop: '4px',
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
                             fontSize: '8.5px',
                             color: '#9a3412',
-                            fontWeight: 600
+                            fontWeight: 600,
+                            marginTop: '4px'
                           }}
                         >
                           <span>शिंदे मळा गणेश उत्सव मंडळ • पावती वही</span>

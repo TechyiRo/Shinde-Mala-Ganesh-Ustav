@@ -1925,7 +1925,20 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
               कार्यकारी पदाधिकारी २०२६
             </h4>
             <ul style={{ listStyle: 'none', padding: 0, fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.8 }}>
-              <li><strong>अध्यक्ष:</strong> {mandalSettings.president || 'श्री. तुषार शिंदे'}</li>
+              <li>
+                <strong>अध्यक्ष:</strong> {mandalSettings.president || 'श्री. तुषार शिंदे'}
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', marginLeft: '0.45rem', verticalAlign: 'middle' }}>
+                  <img
+                    src="/signatures/tushar-signature.jpeg"
+                    alt="अध्यक्ष स्वाक्षरी"
+                    style={{ height: '20px', maxWidth: '70px', objectFit: 'contain', filter: 'brightness(1.05)' }}
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                  <span style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 700 }} title="अधिकृत डिजिटल स्वाक्षरी प्रमाणीत">
+                    (स्वाक्षरी ✓)
+                  </span>
+                </span>
+              </li>
               <li>
                 <strong>खजिनदार:</strong> {mandalSettings.treasurer || 'श्री. तुकाराम शिंदे व श्री. धनंजय शिंदे'}
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', marginLeft: '0.45rem', verticalAlign: 'middle' }}>
@@ -1940,7 +1953,20 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
                   </span>
                 </span>
               </li>
-              <li><strong>कार्यवाह:</strong> {mandalSettings.secretary || 'श्री. मानस शिंदे'}</li>
+              <li>
+                <strong>कार्यवाह:</strong> {mandalSettings.secretary || 'श्री. मानस शिंदे'}
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', marginLeft: '0.45rem', verticalAlign: 'middle' }}>
+                  <img
+                    src="/signatures/manas-signature.png"
+                    alt="सचिव स्वाक्षरी"
+                    style={{ height: '20px', maxWidth: '70px', objectFit: 'contain', filter: 'brightness(1.05)' }}
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                  <span style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 700 }} title="अधिकृत डिजिटल स्वाक्षरी प्रमाणीत">
+                    (स्वाक्षरी ✓)
+                  </span>
+                </span>
+              </li>
             </ul>
           </div>
 
