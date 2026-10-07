@@ -166,9 +166,9 @@ export const translations = {
     downloadPdf: 'PDF सेव्ह करा',
     shareWhatsApp: 'व्हॉट्सॲपवर पाठवा',
     close: 'बंद करा',
-    whatsappMessageIntro: '॥ गणपती बाप्पा मोरया ॥\n\nसस्नेह नमस्कार',
+    whatsappMessageIntro: '🚩 ॥ श्री गणेशाय नमः ॥ 🚩\n🌸 ॥ गणपती बाप्पा मोरया ॥ 🌸\n\nसस्नेह नमस्कार',
     whatsappMessageBody: 'शिंदे मळा गणेश उत्सव मंडळाकडून आपल्या देणगीची पावती यशस्वीरित्या तयार झाली आहे.',
-    whatsappMessageThanks: 'आपल्या सहकार्याबद्दल मनःपूर्वक धन्यवाद! गणपती बाप्पा आपल्या कुटुंबावर सदैव कृपा करो.',
+    whatsappMessageThanks: 'आपल्या मोलाच्या सहकार्याबद्दल मनःपूर्वक धन्यवाद! गणपती बाप्पा आपल्या कुटुंबावर सदैव कृपा करो.\n\n🌐 मंडळाच्या अधिकृत वेबसाईटला अवश्य भेट द्या:\n👉 https://shindemala.vercel.app/',
 
     // Manage Pavti
     managePavtiTitle: 'पावत्यांचे व्यवस्थापन (Manage Pavti)',
@@ -430,9 +430,9 @@ export const translations = {
     downloadPdf: 'Download PDF',
     shareWhatsApp: 'Share on WhatsApp',
     close: 'Close',
-    whatsappMessageIntro: '|| Ganpati Bappa Morya ||\n\nDear Devotee',
+    whatsappMessageIntro: '🚩 || Shree Ganeshay Namah || 🚩\n🌸 || Ganpati Bappa Morya || 🌸\n\nDear Devotee',
     whatsappMessageBody: 'Your donation receipt for Shinde Mala Ganesh Utsav Mandal has been generated successfully.',
-    whatsappMessageThanks: 'Thank you heartfelt for your generous contribution. May Lord Ganesha bless you with happiness and prosperity!',
+    whatsappMessageThanks: 'Thank you heartfelt for your generous contribution. May Lord Ganesha bless you with happiness and prosperity!\n\n🌐 Visit our official website:\n👉 https://shindemala.vercel.app/',
 
     // Manage Pavti
     managePavtiTitle: 'Manage Donation Receipts',

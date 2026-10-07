@@ -257,6 +257,72 @@ export const ManageMahaprasad = () => {
     }
   };
 
+  // WhatsApp Share for Individual Manakari
+  const handleShareManakariWhatsApp = (m, idx) => {
+    const rawMobile = (m.phone || '').replace(/\D/g, '');
+    const cleanMobile = rawMobile.length === 10 ? `91${rawMobile}` : rawMobile;
+    const isPaid = m.status === 'Paid';
+
+    const text =
+`🚩 *॥ श्री गणेशाय नमः ॥* 🚩
+🌸 *॥ अन्नदान हेच श्रेष्ठ दान ॥* 🌸
+
+सस्नेह नमस्कार, *${m.name}* जी 🙏
+*शिंदे मळा गणेश उत्सव मंडळ २०२६*
+श्री गणेश महाप्रसाद अन्नदान सोहळा — मानकरी नोंदणी तपशील:
+
+━━━━━━━━━━━━━━━━━━━━
+🌺 *मानकरी क्र.:* ${idx + 1}
+👤 *मानकऱ्याचे नाव:* *${m.name}*
+📍 *पत्ता / परिसर:* ${m.address || 'शिंदे मळा, हिंगणी दुमाला'}
+⭐ *प्रत्येकी आलेला खर्च:* *${formatCurrency(perHeadShare)}*
+💰 *जमा रक्कम:* *${formatCurrency(m.paidAmount || 0)}*
+📊 *सहभाग स्थिती:* *${isPaid ? '✅ पूर्ण जमा' : '⏳ शिल्लक बाकी'}*
+💳 *पेमेंट पद्धत:* ${m.paymentMode || 'Cash'}
+📅 *दिनांक:* ${m.paidDate || '२०२६'}
+━━━━━━━━━━━━━━━━━━━━
+
+🙏 आपल्या पवित्र अन्नदान सहभागाबद्दल मनःपूर्वक आभार! गणपती बाप्पा आपल्या संपूर्ण परिवारावर सदैव कृपा ठेवोत! 🌸✨
+
+━━━━━━━━━━━━━━━━━━━━
+🌐 *महाप्रसाद यादी व हिशोब थेट वेबसाईटवर पाहण्यासाठी भेट द्या:*
+👉 *https://shindemala.vercel.app/*
+━━━━━━━━━━━━━━━━━━━━
+_🚩 शिंदे मळा गणेश उत्सव मंडळ, हिंगणी दुमाला 🚩_`;
+
+    const url = `https://wa.me/${cleanMobile}?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+  };
+
+  // WhatsApp Share for Entire Mahaprasad Report
+  const handleShareWholeMahaprasadWhatsApp = () => {
+    const text =
+`🚩 *॥ श्री गणेशाय नमः ॥* 🚩
+🌸 *॥ अन्नदान हेच श्रेष्ठ दान ॥* 🌸
+
+🚩 *शिंदे मळा गणेश उत्सव मंडळ २०२६*
+🍽️ *श्री गणेश महाप्रसाद मानकरी व खर्च विभागणी अहवाल*
+
+━━━━━━━━━━━━━━━━━━━━
+🍲 *एकूण महाप्रसाद खर्च:* *${formatCurrency(mahaprasadTotalExpense)}*
+👥 *सहभागी मानकरी संख्या:* *${manakariCount} मानकरी*
+⭐ *प्रत्येकी आलेला खर्च (वाटा):* *${formatCurrency(perHeadShare)}*
+💰 *एकूण जमा रक्कम:* *${formatCurrency(totalMahaprasadCollected)}*
+📊 *जमा स्थिती:* *${totalMahaprasadPending === 0 ? '✅ १००% पूर्ण जमा' : `⏳ शिल्लक: ${formatCurrency(totalMahaprasadPending)}`}*
+━━━━━━━━━━━━━━━━━━━━
+
+सर्व सहभागी मानकऱ्यांचे व अन्नदात्यांचे मनःपूर्वक आभार! बाप्पाच्या कृपेने महाप्रसादाचा लाभ हजारो भाविकांनी घेतला.
+
+━━━━━━━━━━━━━━━━━━━━
+🌐 *सर्व मानकऱ्यांची संपूर्ण यादी व हिशोब पाहण्यासाठी वेबसाईटला भेट द्या:*
+👉 *https://shindemala.vercel.app/*
+━━━━━━━━━━━━━━━━━━━━
+_🚩 शिंदे मळा गणेश उत्सव मंडळ, हिंगणी दुमाला 🚩_`;
+
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+  };
+
   return (
     <div className="manage-mahaprasad-page" style={{ paddingBottom: '3rem' }}>
       {/* Top Header Card */}
@@ -317,6 +383,17 @@ export const ManageMahaprasad = () => {
 
         {/* Header Action Buttons */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            className="btn btn-whatsapp btn-sm"
+            onClick={handleShareWholeMahaprasadWhatsApp}
+            title="महाप्रसाद अहवाल व्हॉट्सॲपवर पाठवा"
+            style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
+          >
+            <Share2 size={15} />
+            <span>हिशोब शेअर करा</span>
+          </button>
+
           <button
             type="button"
             className="btn btn-secondary btn-sm"
@@ -784,6 +861,29 @@ export const ManageMahaprasad = () => {
 
                     {/* High-visibility prominent labeled action buttons */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+                      <button
+                        type="button"
+                        onClick={() => handleShareManakariWhatsApp(m, idx)}
+                        title="मानकऱ्याला व्हॉट्सॲपवर पाठवा"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                          padding: '0.4rem 0.7rem',
+                          borderRadius: '8px',
+                          fontSize: '0.8rem',
+                          fontWeight: 700,
+                          background: 'rgba(37, 211, 102, 0.16)',
+                          border: '1px solid rgba(37, 211, 102, 0.5)',
+                          color: '#25d366',
+                          cursor: 'pointer',
+                          minHeight: '35px',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        <Share2 size={13} />
+                        <span>WhatsApp</span>
+                      </button>
                       <button
                         type="button"
                         onClick={() => handleOpenEdit(m)}

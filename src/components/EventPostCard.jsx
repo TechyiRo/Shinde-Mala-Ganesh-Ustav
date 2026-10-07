@@ -57,7 +57,26 @@ export const EventPostCard = ({ event }) => {
   // WhatsApp Share
   const handleWhatsAppShare = () => {
     const title = lang === 'mr' ? event.title : event.titleEn || event.title;
-    const text = `॥ गणपती बाप्पा मोरया ॥\n\n*शिंदे मळा गणेश उत्सव २०२६ — थेट उत्सव क्षणचित्रे*\n\n🌟 *${title}*\n📅 तारीख: ${event.date} (${event.startTime || ''})\n📍 ठिकाण: ${event.location || 'शिंदे मळा मंडप'}\n\n${event.caption || ''}\n\nसर्व भाविकांनी दर्शनाचा व कार्यक्रमाचा लाभ घ्यावा!\n\n_शिंदे मळा गणेश उत्सव मंडळ, हिंगणी दुमाला_`;
+    const text =
+`🚩 *॥ श्री गणेशाय नमः ॥* 🚩
+🌸 *॥ गणपती बाप्पा मोरया ॥* 🌸
+
+*शिंदे मळा गणेश उत्सव मंडळ २०२६ — थेट उत्सव क्षणचित्रे* 📸✨
+
+━━━━━━━━━━━━━━━━━━━━
+🌟 *कार्यक्रमाचे नाव:* *${title}*
+📅 *दिनांक व वेळ:* ${event.date} ${event.startTime ? `(${event.startTime})` : ''}
+📍 *स्थान:* ${event.location || 'शिंदे मळा मंडप, हिंगणी दुमाला'}
+${event.caption ? `\n📝 *विशेष माहिती:*\n${event.caption}\n` : ''}━━━━━━━━━━━━━━━━━━━━
+
+🙏 सर्व गणेशभक्तांनी दर्शनाचा व कार्यक्रमाचा सहकुटुंब लाभ घ्यावा!
+
+━━━━━━━━━━━━━━━━━━━━
+🌐 *थेट उत्सव दर्शन, फोटो व लाईव्ह अपडेट्स पाहण्यासाठी मंडळाच्या वेबसाईटला भेट द्या:*
+👉 *https://shindemala.vercel.app/*
+━━━━━━━━━━━━━━━━━━━━
+_🚩 शिंदे मळा गणेश उत्सव मंडळ, हिंगणी दुमाला 🚩_`;
+
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   };

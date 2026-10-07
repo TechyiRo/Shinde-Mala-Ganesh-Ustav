@@ -70,9 +70,63 @@ export const PavtiModal = ({ isOpen, pavti, onClose, isPublic = false }) => {
     const formattedAmt = formatCurrency(pavti.amount);
 
     const mandalTitle = mandalSettings.mandalName || 'शिंदे मळा गणेश उत्सव मंडळ';
-    const textMarathi = `॥ गणपती बाप्पा मोरया ॥\n\nसस्नेह नमस्कार,\n*${mandalTitle}* कडून आपल्या देणगीची पावती तपशील:\n\n📜 *पावती क्र.:* ${pavti.pavtiNo}\n📅 *तारीख:* ${pavti.date}\n👤 *देणगीदार:* ${pavti.donorName}\n💰 *रक्कम:* ${formattedAmt}\n📝 *अक्षरी:* ${wordsMr}\n💳 *पेमेंट मोड:* ${pavti.paymentMode} ${pavti.refNo ? `(${pavti.refNo})` : ''}\n🙏 *देणगी प्रकार:* ${pavti.donationType}\n✍️ *स्वीकारकर्ता:* ${pavti.receivedBy || mandalSettings.treasurer || 'व्यवस्थापक'}\n\nआपल्या मोलाच्या योगदानाबद्दल मनःपूर्वक धन्यवाद! श्री गणरायाच्या कृपेने आपल्या सर्व मनोकामना पूर्ण होवोत!\n\n_शिंदे मळा गणेश उत्सव मंडळ, शिंदे मळा_`;
+    const textMarathi =
+`🚩 *॥ श्री गणेशाय नमः ॥* 🚩
+🌸 *॥ गणपती बाप्पा मोरया ॥* 🌸
 
-    const textEnglish = `|| Ganpati Bappa Morya ||\n\nDear Devotee,\n*${mandalSettings.mandalNameEn || mandalTitle}* has received your generous contribution:\n\n📜 *Receipt No.:* ${pavti.pavtiNo}\n📅 *Date:* ${pavti.date}\n👤 *Donor:* ${pavti.donorName}\n💰 *Amount:* ${formattedAmt}\n📝 *In Words:* ${wordsEn}\n💳 *Mode:* ${pavti.paymentMode} ${pavti.refNo ? `(${pavti.refNo})` : ''}\n🙏 *Type:* ${pavti.donationType}\n✍️ *Received By:* ${pavti.receivedBy || mandalSettings.treasurer || 'Manager'}\n\nThank you heartfelt for your support! May Lord Ganesha bless you and your family!\n\n_Shinde Mala Ganesh Utsav Mandal_`;
+सस्नेह नमस्कार, *${pavti.donorName}* जी 🙏
+*${mandalTitle}* कडून आपल्या देणगीची अधिकृत पावती तपशील खालीलप्रमाणे:
+
+━━━━━━━━━━━━━━━━━━━━
+📜 *पावती क्रमांक:* *${pavti.pavtiNo}*
+📅 *दिनांक:* ${pavti.date}
+👤 *देणगीदार:* *${pavti.donorName}*
+💰 *देणगी रक्कम:* *${formattedAmt}*
+📝 *अक्षरी रक्कम:* ${wordsMr}
+💳 *पेमेंट पद्धत:* ${pavti.paymentMode}${pavti.refNo ? ` (Ref: ${pavti.refNo})` : ''}
+🙏 *देणगी प्रकार:* ${pavti.donationType || 'वर्गणी'}
+✍️ *पावती देणारे:* ${pavti.receivedBy || mandalSettings.treasurer || 'व्यवस्थापक'}
+━━━━━━━━━━━━━━━━━━━━
+
+🌺 *आपल्या मोलाच्या सहकार्याबद्दल मनःपूर्वक धन्यवाद!*
+श्री गणरायाच्या कृपेने आपल्या कुटुंबात सुख, समृद्धी, उत्तम आरोग्य व भरभराट लाभो, हीच बाप्पाच्या चरणी प्रार्थना! 🙏✨
+
+━━━━━━━━━━━━━━━━━━━━
+🌐 *मंडळाच्या अधिकृत वेबसाईटला अवश्य भेट द्या:*
+👉 *https://shindemala.vercel.app/*
+
+_(थेट उत्सव दर्शन, दैनंदिन फोटो, जमा-खर्च हिशोब व महाप्रसाद यादी पाहण्यासाठी वरील लिंकवर क्लिक करा)_
+━━━━━━━━━━━━━━━━━━━━
+_🚩 शिंदे मळा गणेश उत्सव मंडळ, शिंदे मळा (हिंगणी दुमाला) 🚩_`;
+
+    const textEnglish =
+`🚩 *|| Shree Ganeshay Namah ||* 🚩
+🌸 *|| Ganpati Bappa Morya ||* 🌸
+
+Dear *${pavti.donorName}* Devotee 🙏
+Thank you for your generous contribution to *${mandalSettings.mandalNameEn || mandalTitle}*. Here is your official donation receipt:
+
+━━━━━━━━━━━━━━━━━━━━
+📜 *Receipt No.:* *${pavti.pavtiNo}*
+📅 *Date:* ${pavti.date}
+👤 *Donor Name:* *${pavti.donorName}*
+💰 *Amount Received:* *${formattedAmt}*
+📝 *Amount in Words:* ${wordsEn}
+💳 *Payment Mode:* ${pavti.paymentMode}${pavti.refNo ? ` (Ref: ${pavti.refNo})` : ''}
+🙏 *Donation Type:* ${pavti.donationType || 'Donation'}
+✍️ *Received By:* ${pavti.receivedBy || mandalSettings.treasurer || 'Manager'}
+━━━━━━━━━━━━━━━━━━━━
+
+🌺 *Thank you heartfelt for your devoted support!*
+May Lord Ganesha shower supreme health, wealth, peace, and prosperity upon you and your entire family! 🙏✨
+
+━━━━━━━━━━━━━━━━━━━━
+🌐 *Visit Our Official Mandal Website:*
+👉 *https://shindemala.vercel.app/*
+
+_(Click the link above to view Live Darshan, Event Gallery, Financial Balance Sheet & Mahaprasad List)_
+━━━━━━━━━━━━━━━━━━━━
+_🚩 Shinde Mala Ganesh Utsav Mandal, Hingani Dumala 🚩_`;
 
     const message = lang === 'mr' ? textMarathi : textEnglish;
     const url = `https://wa.me/${cleanMobile}?text=${encodeURIComponent(message)}`;

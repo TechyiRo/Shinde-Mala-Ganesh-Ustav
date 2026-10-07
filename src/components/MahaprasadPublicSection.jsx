@@ -52,6 +52,35 @@ export const MahaprasadPublicSection = () => {
     });
   }, [manakariList, searchTerm, activeFilter]);
 
+  // WhatsApp Share for Mahaprasad Report
+  const handleShareWhatsApp = () => {
+    const text =
+`🚩 *॥ श्री गणेशाय नमः ॥* 🚩
+🌸 *॥ अन्नदान हेच श्रेष्ठ दान ॥* 🌸
+
+🚩 *शिंदे मळा गणेश उत्सव मंडळ २०२६*
+🍽️ *श्री गणेश महाप्रसाद मानकरी व खर्च विभागणी अहवाल*
+
+━━━━━━━━━━━━━━━━━━━━
+🍲 *एकूण महाप्रसाद खर्च:* *${formatCurrency(mahaprasadTotalExpense)}*
+👥 *सहभागी मानकरी संख्या:* *${manakariCount} मानकरी*
+⭐ *प्रत्येकी आलेला खर्च (वाटा):* *${formatCurrency(perHeadShare)}*
+💰 *एकूण जमा रक्कम:* *${formatCurrency(totalMahaprasadCollected)}*
+📊 *जमा स्थिती:* *${totalMahaprasadPending === 0 ? '✅ १००% पूर्ण संकलित' : `⏳ शिल्लक: ${formatCurrency(totalMahaprasadPending)}`}*
+━━━━━━━━━━━━━━━━━━━━
+
+सर्व अन्नदात्यांचे व मानकऱ्यांचे मनःपूर्वक आभार! बाप्पाच्या कृपेने हजारो भाविकांना महाप्रसादाचा लाभ झाला.
+
+━━━━━━━━━━━━━━━━━━━━
+🌐 *सर्व सहभागी मानकऱ्यांची संपूर्ण यादी व हिशोब पाहण्यासाठी वेबसाईटला भेट द्या:*
+👉 *https://shindemala.vercel.app/*
+━━━━━━━━━━━━━━━━━━━━
+_🚩 शिंदे मळा गणेश उत्सव मंडळ, हिंगणी दुमाला 🚩_`;
+
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+  };
+
   return (
     <section
       id="mahaprasad-section"
@@ -136,6 +165,28 @@ export const MahaprasadPublicSection = () => {
           >
             महाप्रसादाच्या एकूण खर्चाची सर्व सहभागी मानकऱ्यांमध्ये समसमान विभागणी करण्यात आली असून प्रत्येक मानकऱ्याचा वाटा व जमा स्थिती खालीलप्रमाणे पारदर्शकपणे दर्शविली आहे.
           </p>
+
+          <div style={{ marginTop: '0.85rem' }}>
+            <button
+              type="button"
+              className="btn btn-whatsapp btn-sm"
+              onClick={handleShareWhatsApp}
+              title="महाप्रसाद अहवाल व्हॉट्सॲपवर शेअर करा"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '0.42rem 1rem',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                borderRadius: '999px',
+                boxShadow: '0 4px 14px rgba(37, 211, 102, 0.25)'
+              }}
+            >
+              <Share2 size={15} />
+              <span>महाप्रसाद अहवाल व्हॉट्सॲपवर शेअर करा</span>
+            </button>
+          </div>
         </div>
 
         {/* 4 Highlight Stat Cards (Pure Mobile-Friendly Responsive Grid) */}

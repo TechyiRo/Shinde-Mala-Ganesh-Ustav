@@ -145,19 +145,32 @@ export const EventStoriesViewer = ({
   };
 
   const handleShare = async () => {
+    const shareText =
+`🚩 *॥ श्री गणेशाय नमः ॥* 🚩
+🌸 *॥ गणपती बाप्पा मोरया ॥* 🌸
+
+*शिंदे मळा गणेश उत्सव २०२६ — २४-तास थेट स्टोरी* 🌟📸
+${currentStory.title ? `\n✨ *${currentStory.title}*` : ''}
+${currentStory.caption ? `${currentStory.caption}\n` : ''}
+━━━━━━━━━━━━━━━━━━━━
+🌐 *थेट दर्शन व स्टोरी पाहण्यासाठी मंडळाच्या वेबसाईटला भेट द्या:*
+👉 *https://shindemala.vercel.app/*
+━━━━━━━━━━━━━━━━━━━━
+_🚩 शिंदे मळा गणेश उत्सव मंडळ, हिंगणी दुमाला 🚩_`;
+
     if (navigator.share) {
       try {
         await navigator.share({
-          title: currentStory.title || 'गणेश उत्सव स्टोरी',
-          text: currentStory.caption || 'शिंदे मळा गणेश उत्सव मंडळ २४-तास स्टोरी',
-          url: window.location.href
+          title: currentStory.title || 'शिंदे मळा गणेश उत्सव २४-तास स्टोरी',
+          text: shareText,
+          url: 'https://shindemala.vercel.app/'
         });
       } catch {
         // Share cancelled or unavailable
       }
     } else {
-      navigator.clipboard?.writeText(window.location.href);
-      addToast('स्टोरी लिंक कॉपी झाली!', 'success');
+      navigator.clipboard?.writeText(shareText);
+      addToast('स्टोरी संदेश व वेबसाईट लिंक कॉपी झाली!', 'success');
     }
   };
 
