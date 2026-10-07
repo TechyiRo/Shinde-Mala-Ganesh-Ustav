@@ -19,21 +19,23 @@ import {
 } from 'lucide-react';
 
 export const ManageCompetitionsModal = ({ competition, onClose }) => {
-  const { updateCompetition, addToast, compressImage } = useData();
+  const { createCompetition, updateCompetition, addToast, compressImage } = useData();
   const { t } = useLanguage();
 
-  const [activeTab, setActiveTab] = useState('winners'); // 'winners' | 'organizers' | 'details'
+  const isCreatingNew = !competition?.id || Boolean(competition?.isNew);
+
+  const [activeTab, setActiveTab] = useState(isCreatingNew ? 'details' : 'winners'); // 'winners' | 'organizers' | 'details'
 
   // Local Form State
   const [formData, setFormData] = useState({
-    title: competition.title || 'होम मिनिस्टर — खेळ पैठणीचा व महासन्मान सोहळा',
-    subtitle: competition.subtitle || 'माहेरवाशिणींचा महासन्मान • मानाची पैठणी • रंगतदार खेळ व मनोरंजक स्पर्धा',
-    date: competition.date || '2026-09-20',
-    time: competition.time || 'सायंकाळी ०६:०० ते रात्री १०:००',
-    venue: competition.venue || 'मुख्य सांस्कृतिक रंगमंच, शिंदे मळा गणेश मंडप',
-    description: competition.description || '',
-    organizers: Array.isArray(competition.organizers) ? [...competition.organizers] : [],
-    winners: Array.isArray(competition.winners) ? [...competition.winners] : []
+    title: isCreatingNew ? '' : (competition?.title || ''),
+    subtitle: isCreatingNew ? '' : (competition?.subtitle || ''),
+    date: competition?.date || new Date().toISOString().split('T')[0],
+    time: competition?.time || 'सायंकाळी ०६:०० ते रात्री १०:००',
+    venue: competition?.venue || 'मुख्य सांस्कृतिक रंगमंच, शिंदे मळा गणेश मंडप',
+    description: isCreatingNew ? '' : (competition?.description || ''),
+    organizers: Array.isArray(competition?.organizers) ? [...competition.organizers] : [],
+    winners: Array.isArray(competition?.winners) ? [...competition.winners] : []
   });
 
   const [isUploading, setIsUploading] = useState(false);
@@ -137,7 +139,19 @@ export const ManageCompetitionsModal = ({ competition, onClose }) => {
 
   // ================= SAVE SUBMIT =================
   const handleSave = () => {
-    updateCompetition(competition.id, formData);
+    if (!formData.title?.trim()) {
+      addToast('कृपया खेळाचे/स्पर्धेचे नाव टाका!', 'error');
+      setActiveTab('details');
+      return;
+    }
+    if (isCreatingNew) {
+      createCompetition({
+        id: `COMP-${Date.now()}`,
+        ...formData
+      });
+    } else {
+      updateCompetition(competition.id, formData);
+    }
     onClose();
   };
 
@@ -187,10 +201,10 @@ export const ManageCompetitionsModal = ({ competition, onClose }) => {
             </div>
             <div>
               <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                होम मिनिस्टर व सांस्कृतिक कार्यक्रम व्यवस्थापन
+                {isCreatingNew ? 'नवीन खेळ / स्पर्धा जोडा' : (formData.title || 'खेळ / स्पर्धा संपादन')}
               </h3>
               <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: 'var(--text-subtle)' }}>
-                आयोजक, विजेते, मानाची पैठणी व फोटो व्यवस्थापन (Admin Panel)
+                {isCreatingNew ? 'येथे नवीन खेळ, आयोजक, निकाल व विजेते फोटो जोडा' : 'आयोजक, विजेते, मानाची पैठणी व फोटो व्यवस्थापन (Admin)'}
               </p>
             </div>
           </div>
@@ -690,7 +704,7 @@ export const ManageCompetitionsModal = ({ competition, onClose }) => {
             style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
           >
             <Check size={16} />
-            <span>बदल सेव्ह करा (Save Changes)</span>
+            <span>{isCreatingNew ? 'नवीन खेळ सेव्ह करा (Save Game)' : 'बदल सेव्ह करा (Save Changes)'}</span>
           </button>
         </div>
       </div>

@@ -38,7 +38,7 @@ const EVENT_CATEGORIES = [
 
 export const ManageEvents = () => {
   const { lang, t } = useLanguage();
-  const { eventList, createEvent, updateEvent, deleteEvent, togglePinEvent, addToast, compressImage, competitionsList } = useData();
+  const { eventList, createEvent, updateEvent, deleteEvent, togglePinEvent, addToast, compressImage, competitionsList, deleteCompetition } = useData();
   const { isAdmin } = useAuth();
 
   // Top Section Mode: 'statuses' (24-Hour Stories) | 'events' (Festival Schedule & Feed) | 'competitions' (Home Minister & Competitions)
@@ -790,9 +790,34 @@ export const ManageEvents = () => {
                 <span>होम मिनिस्टर व स्पर्धा निकाल व्यवस्थापन (Home Minister & Winners)</span>
               </h2>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-subtle)', margin: 0 }}>
-                येथून 'होम मिनिस्टर — खेळ पैठणीचा' चे आयोजक, विजेते, मानाची पैठणी आणि त्यांचे फोटो सेट करा. हे पब्लिकला थेट लाईव्ह फीडवर दिसेल.
+                येथून 'होम मिनिस्टर — खेळ पैठणीचा' व इतर खेळांचे आयोजक, विजेते, मानाची पैठणी आणि त्यांचे फोटो सेट करा.
               </p>
             </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedCompForEdit({ isNew: true });
+                setIsCompModalOpen(true);
+              }}
+              className="btn"
+              style={{
+                background: 'linear-gradient(135deg, #10b981, #059669)',
+                color: '#ffffff',
+                fontWeight: 800,
+                border: '1px solid #34d399',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '0.6rem 1.1rem',
+                borderRadius: 'var(--radius-md)',
+                boxShadow: '0 4px 15px rgba(16, 185, 129, 0.35)',
+                cursor: 'pointer'
+              }}
+            >
+              <PlusCircle size={17} />
+              <span>+ नवीन खेळ / स्पर्धा जोडा</span>
+            </button>
           </div>
 
           {/* Competitions List */}
@@ -800,6 +825,18 @@ export const ManageEvents = () => {
             <div className="glass-panel" style={{ padding: '3rem 1.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
               <Trophy size={48} color="#f59e0b" style={{ margin: '0 auto 1rem', opacity: 0.7 }} />
               <h3>कोणतीही स्पर्धा माहिती उपलब्ध नाही</h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedCompForEdit({ isNew: true });
+                  setIsCompModalOpen(true);
+                }}
+                className="btn btn-primary"
+                style={{ marginTop: '1rem', background: 'linear-gradient(135deg, #d97706, #b91c1c)' }}
+              >
+                <PlusCircle size={16} />
+                <span>+ पहिला खेळ / स्पर्धा जोडा</span>
+              </button>
             </div>
           ) : (
             competitionsList.map((comp) => (
@@ -830,23 +867,47 @@ export const ManageEvents = () => {
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedCompForEdit(comp);
-                      setIsCompModalOpen(true);
-                    }}
-                    className="btn btn-primary"
-                    style={{
-                      background: 'linear-gradient(135deg, #d97706, #b91c1c)',
-                      border: '1px solid #fbbf24',
-                      fontWeight: 800,
-                      boxShadow: '0 4px 15px rgba(217, 119, 6, 0.35)'
-                    }}
-                  >
-                    <Edit2 size={16} />
-                    <span>आयोजक व विजेते सेट करा (Edit)</span>
-                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedCompForEdit(comp);
+                        setIsCompModalOpen(true);
+                      }}
+                      className="btn btn-primary"
+                      style={{
+                        background: 'linear-gradient(135deg, #d97706, #b91c1c)',
+                        border: '1px solid #fbbf24',
+                        fontWeight: 800,
+                        boxShadow: '0 4px 15px rgba(217, 119, 6, 0.35)'
+                      }}
+                    >
+                      <Edit2 size={16} />
+                      <span>माहिती व निकाल भरा (Edit)</span>
+                    </button>
+
+                    {competitionsList.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm(`तुम्हाला नक्की "${comp.title}" हा खेळ हटवायचा आहे का?`)) {
+                            deleteCompetition(comp.id);
+                          }
+                        }}
+                        className="btn btn-sm"
+                        style={{
+                          background: 'rgba(239, 68, 68, 0.15)',
+                          color: '#f87171',
+                          border: '1px solid rgba(239, 68, 68, 0.3)',
+                          fontWeight: 700
+                        }}
+                        title="हा खेळ हटवा"
+                      >
+                        <Trash2 size={15} />
+                        <span>हटवा</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Grid: Organizers and Winners Overview */}
@@ -862,11 +923,17 @@ export const ManageEvents = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                       {(comp.organizers || []).map((org) => (
                         <div key={org.id} style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', padding: '0.45rem 0.6rem', borderRadius: 'var(--radius-sm)', background: 'rgba(255, 255, 255, 0.04)' }}>
-                          <img
-                            src={org.photoUrl || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80'}
-                            alt={org.name}
-                            style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #fbbf24' }}
-                          />
+                          {(org.photo || org.photoUrl) ? (
+                            <img
+                              src={org.photo || org.photoUrl}
+                              alt={org.name}
+                              style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #fbbf24' }}
+                            />
+                          ) : (
+                            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#261219', color: '#fbbf24', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.85rem', border: '1.5px solid #fbbf24' }}>
+                              {org.name ? org.name.charAt(0) : 'आ'}
+                            </div>
+                          )}
                           <div>
                             <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>{org.name}</div>
                             <div style={{ fontSize: '0.74rem', color: '#fbbf24' }}>{org.role || 'आयोजक'}</div>
@@ -887,11 +954,17 @@ export const ManageEvents = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                       {(comp.winners || []).map((w) => (
                         <div key={w.id} style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', padding: '0.45rem 0.6rem', borderRadius: 'var(--radius-sm)', background: 'rgba(255, 255, 255, 0.04)' }}>
-                          <img
-                            src={w.photoUrl || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80'}
-                            alt={w.name}
-                            style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: w.rank === 1 ? '1.5px solid #fbbf24' : '1.5px solid #94a3b8' }}
-                          />
+                          {(w.photo || w.photoUrl) ? (
+                            <img
+                              src={w.photo || w.photoUrl}
+                              alt={w.name}
+                              style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: w.rank === 1 ? '1.5px solid #fbbf24' : '1.5px solid #94a3b8' }}
+                            />
+                          ) : (
+                            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#1f1322', color: w.rank === 1 ? '#fbbf24' : '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.85rem', border: w.rank === 1 ? '1.5px solid #fbbf24' : '1.5px solid #94a3b8' }}>
+                              {w.name ? w.name.charAt(0) : 'वि'}
+                            </div>
+                          )}
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                               <span style={{ fontSize: '0.74rem', fontWeight: 800, color: w.rank === 1 ? '#fbbf24' : '#93c5fd' }}>

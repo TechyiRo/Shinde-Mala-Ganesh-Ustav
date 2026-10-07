@@ -186,13 +186,22 @@ export const DataProvider = ({ children }) => {
     }
   });
 
-  // 7. Cultural Competitions & Winners (Home Minister - Khel Paithanicha)
+  // 7. Cultural Competitions & Winners (Home Minister - Khel Paithanicha & Games)
   const [competitionsList, setCompetitionsList] = useState(() => {
     try {
       const saved = localStorage.getItem('mandal_competitions_data');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((comp) => {
+            const hasMockWinner = comp.winners?.some((w) => w.name?.includes('पूजा सचिन शिंदे'));
+            const hasMockOrg = comp.organizers?.some((o) => o.name?.includes('तुषार शिंदे'));
+            if (hasMockWinner || hasMockOrg) {
+              return { ...comp, organizers: [], winners: [] };
+            }
+            return comp;
+          });
+        }
       }
       return initialCompetitionsList;
     } catch {
@@ -302,7 +311,15 @@ export const DataProvider = ({ children }) => {
               setMahaprasadData(normalized);
             }
             if (Array.isArray(data.competitionsList) && data.competitionsList.length > 0) {
-              setCompetitionsList(data.competitionsList);
+              const cleaned = data.competitionsList.map((comp) => {
+                const hasMockWinner = comp.winners?.some((w) => w.name?.includes('पूजा सचिन शिंदे'));
+                const hasMockOrg = comp.organizers?.some((o) => o.name?.includes('तुषार शिंदे'));
+                if (hasMockWinner || hasMockOrg) {
+                  return { ...comp, organizers: [], winners: [] };
+                }
+                return comp;
+              });
+              setCompetitionsList(cleaned);
             }
             setIsMongoConnected(true);
             console.log('✅ MongoDB Atlas data successfully synchronized!');
