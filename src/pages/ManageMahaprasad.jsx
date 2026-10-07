@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
@@ -27,7 +27,8 @@ import {
   Calendar,
   User,
   CreditCard,
-  FileText
+  FileText,
+  GripVertical
 } from 'lucide-react';
 import { formatCurrency } from '../i18n/numberToWords';
 
@@ -46,6 +47,7 @@ export const ManageMahaprasad = () => {
     updateMahaprasadSettings,
     addManakari,
     updateManakari,
+    reorderManakari,
     deleteManakari,
     toggleManakariPaidStatus,
     addToast
@@ -113,6 +115,52 @@ export const ManageMahaprasad = () => {
       return matchesSearch && matchesStatus;
     });
   }, [manakariList, searchTerm, filterStatus]);
+
+  // Drag & drop reorder (numbers stay fixed, entries move)
+  const [dragId, setDragId] = useState(null);
+  const [overId, setOverId] = useState(null);
+  const overIdRef = useRef(null);
+  const canDrag = isAdmin && !searchTerm && filterStatus === 'all';
+
+  const handleDragStart = (e, id) => {
+    if (!canDrag) return;
+    e.preventDefault();
+    setDragId(id);
+    setOverId(id);
+    overIdRef.current = id;
+
+    const onMove = (ev) => {
+      const el = document.elementFromPoint(ev.clientX, ev.clientY);
+      const card = el && el.closest('[data-manakari-id]');
+      if (card) {
+        const targetId = card.getAttribute('data-manakari-id');
+        if (targetId !== overIdRef.current) {
+          overIdRef.current = targetId;
+          setOverId(targetId);
+        }
+      }
+      // Auto-scroll near screen edges
+      if (ev.clientY < 70) window.scrollBy(0, -14);
+      else if (ev.clientY > window.innerHeight - 70) window.scrollBy(0, 14);
+    };
+
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
+      const target = overIdRef.current;
+      if (target && target !== id) {
+        reorderManakari(id, target);
+      }
+      overIdRef.current = null;
+      setDragId(null);
+      setOverId(null);
+    };
+
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
+  };
 
   // Open Edit Modal
   const handleOpenEdit = (m) => {
@@ -536,12 +584,16 @@ export const ManageMahaprasad = () => {
               return (
                 <div
                   key={m.id || idx}
+                  data-manakari-id={m.id}
                   className="glass-panel"
                   style={{
                     padding: '1rem',
                     borderRadius: 'var(--radius-lg)',
                     position: 'relative',
-                    transition: 'transform 0.15s, border-color 0.15s',
+                    transition: 'transform 0.15s, border-color 0.15s, opacity 0.15s',
+                    opacity: dragId === m.id ? 0.45 : 1,
+                    outline: dragId && overId === m.id && dragId !== m.id ? '2px dashed #f59e0b' : 'none',
+                    outlineOffset: '2px',
                     border: isPaid
                       ? '1px solid rgba(16, 185, 129, 0.4)'
                       : '1px solid rgba(239, 68, 68, 0.4)',
@@ -553,6 +605,25 @@ export const ManageMahaprasad = () => {
                   {/* Card Top: Avatar & Name & Status Toggle Badge */}
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.65rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0, flex: 1 }}>
+                      {canDrag && (
+                        <div
+                          onPointerDown={(e) => handleDragStart(e, m.id)}
+                          title="क्रम बदलण्यासाठी धरून ओढा (Drag to reorder)"
+                          style={{
+                            touchAction: 'none',
+                            cursor: dragId ? 'grabbing' : 'grab',
+                            color: 'var(--text-subtle)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '6px 2px',
+                            marginRight: '-0.35rem',
+                            flexShrink: 0,
+                            userSelect: 'none'
+                          }}
+                        >
+                          <GripVertical size={18} />
+                        </div>
+                      )}
                       <div
                         style={{
                           width: '38px',

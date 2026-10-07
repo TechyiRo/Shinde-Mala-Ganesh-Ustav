@@ -524,6 +524,7 @@ app.put('/api/settings', async (req, res) => {
 // ================= MAHAPRASAD CRUD =================
 app.get('/api/mahaprasad', async (req, res) => {
   try {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
     const db = getDB();
     const doc = await db.collection('mahaprasad').findOne({ _id: 'mahaprasad_2026' });
     if (doc && doc._id) delete doc._id;
@@ -536,17 +537,20 @@ app.get('/api/mahaprasad', async (req, res) => {
 app.put('/api/mahaprasad', async (req, res) => {
   try {
     const db = getDB();
-    const data = req.body;
+    const data = { ...req.body };
     delete data._id;
-    const doc = { _id: 'mahaprasad_2026', ...data, updatedAt: new Date().toISOString() };
+    // Server-assigned version timestamp (used by clients to ignore stale data)
+    const updatedAt = new Date().toISOString();
+    const saved = { ...data, updatedAt };
+    const doc = { _id: 'mahaprasad_2026', ...saved };
     await db.collection('mahaprasad').replaceOne(
       { _id: 'mahaprasad_2026' },
       doc,
       { upsert: true }
     );
 
-    broadcastEvent('MAHAPRASAD_UPDATED', data);
-    res.json({ success: true, item: data });
+    broadcastEvent('MAHAPRASAD_UPDATED', saved);
+    res.json({ success: true, item: saved, updatedAt });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
