@@ -1,5 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useRef } from 'react';
-import { initialMandalSettings, initialPavtiList, initialExpenseList, initialEventList, initialMahaprasadData } from '../data/initialData';
+import {
+  initialMandalSettings,
+  initialPavtiList,
+  initialExpenseList,
+  initialEventList,
+  initialMahaprasadData,
+  initialCompetitionsList
+} from '../data/initialData';
 
 const DataContext = createContext();
 
@@ -179,6 +186,20 @@ export const DataProvider = ({ children }) => {
     }
   });
 
+  // 7. Cultural Competitions & Winners (Home Minister - Khel Paithanicha)
+  const [competitionsList, setCompetitionsList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('mandal_competitions_data');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+      return initialCompetitionsList;
+    } catch {
+      return initialCompetitionsList;
+    }
+  });
+
   // Latest mahaprasad data (avoids stale closures on rapid edits) + write tracking
   const mahaprasadRef = useRef(mahaprasadData);
   const pendingMahaprasadWrites = useRef(0);
@@ -279,6 +300,9 @@ export const DataProvider = ({ children }) => {
               const normalized = normalizeMahaprasad(data.mahaprasadData);
               mahaprasadRef.current = normalized;
               setMahaprasadData(normalized);
+            }
+            if (Array.isArray(data.competitionsList) && data.competitionsList.length > 0) {
+              setCompetitionsList(data.competitionsList);
             }
             setIsMongoConnected(true);
             console.log('✅ MongoDB Atlas data successfully synchronized!');
@@ -399,6 +423,17 @@ export const DataProvider = ({ children }) => {
                   prev.map((e) => (e.id === parsed.data.id ? { ...e, likes: parsed.data.likes } : e))
                 );
                 break;
+              case 'COMPETITION_CREATED':
+                setCompetitionsList((prev) => [parsed.data, ...prev.filter((c) => c.id !== parsed.data.id)]);
+                break;
+              case 'COMPETITION_UPDATED':
+                setCompetitionsList((prev) =>
+                  prev.map((c) => (c.id === parsed.data.id ? { ...c, ...parsed.data } : c))
+                );
+                break;
+              case 'COMPETITION_DELETED':
+                setCompetitionsList((prev) => prev.filter((c) => c.id !== parsed.data.id));
+                break;
               case 'SETTINGS_UPDATED':
                 setMandalSettings((prev) => ({ ...prev, ...parsed.data }));
                 break;
@@ -463,6 +498,11 @@ export const DataProvider = ({ children }) => {
         case 'STATUS_UPDATED':
           if (Array.isArray(data)) {
             setStatusList(data);
+          }
+          break;
+        case 'COMPETITION_UPDATED':
+          if (Array.isArray(data)) {
+            setCompetitionsList(data);
           }
           break;
         default:
@@ -631,6 +671,10 @@ export const DataProvider = ({ children }) => {
   useEffect(() => {
     safeSetLocalStorage('mandal_mahaprasad_data', JSON.stringify(mahaprasadData));
   }, [mahaprasadData]);
+
+  useEffect(() => {
+    safeSetLocalStorage('mandal_competitions_data', JSON.stringify(competitionsList));
+  }, [competitionsList]);
 
   useEffect(() => {
     safeSetLocalStorage('mandal_theme', theme);
@@ -987,6 +1031,61 @@ export const DataProvider = ({ children }) => {
     }
   };
 
+  // ================= CULTURAL COMPETITIONS & HOME MINISTER CRUD =================
+  const createCompetition = async (compData) => {
+    const id = compData.id || `COMP-${Date.now()}`;
+    const newComp = {
+      ...compData,
+      id,
+      updatedAt: new Date().toISOString()
+    };
+    const nextList = [newComp, ...competitionsList.filter((c) => c.id !== id)];
+    setCompetitionsList(nextList);
+    broadcastLocalChange('COMPETITION_UPDATED', nextList);
+
+    try {
+      await fetch('/api/competitions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newComp)
+      });
+      addToast('स्पर्धा / कार्यक्रम यशस्वीरित्या तयार झाला!', 'success');
+    } catch (err) {
+      console.warn('Could not save competition to MongoDB:', err.message);
+    }
+  };
+
+  const updateCompetition = async (id, updateData) => {
+    const updated = { ...updateData, id, updatedAt: new Date().toISOString() };
+    const nextList = (competitionsList || []).map((c) => (c.id === id ? { ...c, ...updated } : c));
+    setCompetitionsList(nextList);
+    broadcastLocalChange('COMPETITION_UPDATED', nextList);
+
+    try {
+      await fetch(`/api/competitions/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
+      });
+      addToast('कार्यक्रमाची माहिती व विजेत्यांची यादी सेव्ह झाली!', 'success');
+    } catch (err) {
+      console.warn('Could not update competition in MongoDB:', err.message);
+    }
+  };
+
+  const deleteCompetition = async (id) => {
+    const nextList = (competitionsList || []).filter((c) => c.id !== id);
+    setCompetitionsList(nextList);
+    broadcastLocalChange('COMPETITION_UPDATED', nextList);
+
+    try {
+      await fetch(`/api/competitions/${id}`, { method: 'DELETE' });
+      addToast('कार्यक्रम हटवण्यात आला.', 'info');
+    } catch (err) {
+      console.warn('Could not delete competition from MongoDB:', err.message);
+    }
+  };
+
   // Mahaprasad Management Functions (Synchronous 0ms UI reflection + ordered Cloud Sync)
   const getCurrentMahaprasad = () => mahaprasadRef.current || mahaprasadData || initialMahaprasadData;
 
@@ -1236,6 +1335,10 @@ export const DataProvider = ({ children }) => {
         reorderManakari,
         deleteManakari,
         toggleManakariPaidStatus,
+        competitionsList,
+        createCompetition,
+        updateCompetition,
+        deleteCompetition,
         resetToSampleData,
         clearAllData,
         totalCollection,

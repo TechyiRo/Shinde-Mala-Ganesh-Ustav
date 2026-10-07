@@ -12,6 +12,7 @@ import { DeveloperBadge } from '../components/DeveloperBadge';
 import { PavtiModal } from '../components/PavtiModal';
 import { AnnualReportModal } from '../components/AnnualReportModal';
 import { MahaprasadPublicSection } from '../components/MahaprasadPublicSection';
+import { HomeMinisterSection } from '../components/HomeMinisterSection';
 import { useMusic } from '../context/MusicContext';
 import confetti from 'canvas-confetti';
 import {
@@ -380,6 +381,22 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
           >
             <UtensilsCrossed size={14} color="#f59e0b" />
             <span>महाप्रसाद</span>
+          </button>
+          <button
+            onClick={() => scrollToSection('home-minister-showcase')}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--accent-gold-light)',
+              fontSize: '0.88rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+          >
+            <span>👑 होम मिनिस्टर</span>
           </button>
           <button
             onClick={() => scrollToSection('public-events-section')}
@@ -1287,6 +1304,11 @@ export const PublicHome = ({ onOpenAdminPortal, onOpenLogin }) => {
               </p>
             </div>
           </div>
+
+          {/* ================================================================= */}
+          {/* SPECIAL CULTURAL PROGRAM: HOME MINISTER / KHEL PAITHANICHA & WINNERS */}
+          {/* ================================================================= */}
+          <HomeMinisterSection />
 
           {/* Stories Category Cards Container (Requirements 1, 2, 4) */}
           {/* Displays only ONE card per Category. Clicking opens that category's statuses sequentially one-by-one. */}

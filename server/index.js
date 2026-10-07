@@ -127,13 +127,14 @@ app.get('/api/data', async (req, res) => {
     const db = getDB();
     const nowIso = new Date().toISOString();
 
-    const [settingsDoc, pavtiList, expenseList, eventList, statusList, mahaprasadDoc] = await Promise.all([
+    const [settingsDoc, pavtiList, expenseList, eventList, statusList, mahaprasadDoc, competitionsList] = await Promise.all([
       db.collection('settings').findOne({ _id: 'mandal_settings' }),
       db.collection('pavtis').find({}).sort({ pavtiNo: -1 }).toArray(),
       db.collection('expenses').find({}).sort({ date: -1 }).toArray(),
       db.collection('events').find({}).sort({ isPinned: -1, dayNumber: -1, date: -1 }).toArray(),
       db.collection('statuses').find({}).sort({ isPinned: -1, createdAt: -1 }).toArray(),
-      db.collection('mahaprasad').findOne({ _id: 'mahaprasad_2026' })
+      db.collection('mahaprasad').findOne({ _id: 'mahaprasad_2026' }),
+      db.collection('competitions').find({}).toArray()
     ]);
 
     // Format docs to ensure clean string ids
@@ -159,7 +160,8 @@ app.get('/api/data', async (req, res) => {
       expenseList: sanitize(expenseList),
       eventList: sanitize(eventList),
       statusList: sanitize(statusList),
-      mahaprasadData: mahaprasad || null
+      mahaprasadData: mahaprasad || null,
+      competitionsList: sanitize(competitionsList)
     });
   } catch (err) {
     console.error('Error in /api/data:', err);
@@ -551,6 +553,61 @@ app.put('/api/mahaprasad', async (req, res) => {
 
     broadcastEvent('MAHAPRASAD_UPDATED', saved);
     res.json({ success: true, item: saved, updatedAt });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ================= COMPETITIONS & KARYAKRAM CRUD =================
+app.get('/api/competitions', async (req, res) => {
+  try {
+    const db = getDB();
+    const list = await db.collection('competitions').find({}).toArray();
+    res.json(list.map(i => ({ ...i, id: String(i._id) })));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/competitions', async (req, res) => {
+  try {
+    const db = getDB();
+    const item = req.body;
+    const id = String(item.id || 'COMP-' + Date.now());
+    const doc = { ...item, _id: id, id, updatedAt: new Date().toISOString() };
+    await db.collection('competitions').replaceOne({ _id: id }, doc, { upsert: true });
+
+    broadcastEvent('COMPETITION_CREATED', doc);
+    res.status(201).json({ success: true, item: doc });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/competitions/:id', async (req, res) => {
+  try {
+    const db = getDB();
+    const id = String(req.params.id);
+    const updateData = req.body;
+    delete updateData._id;
+    const doc = { ...updateData, _id: id, id, updatedAt: new Date().toISOString() };
+    await db.collection('competitions').replaceOne({ _id: id }, doc, { upsert: true });
+
+    broadcastEvent('COMPETITION_UPDATED', doc);
+    res.json({ success: true, item: doc });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/competitions/:id', async (req, res) => {
+  try {
+    const db = getDB();
+    const id = String(req.params.id);
+    await db.collection('competitions').deleteOne({ _id: id });
+
+    broadcastEvent('COMPETITION_DELETED', { id });
+    res.json({ success: true, id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

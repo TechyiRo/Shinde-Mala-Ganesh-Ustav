@@ -19,8 +19,13 @@ import {
   X,
   Eye,
   CheckCircle2,
-  FileText
+  FileText,
+  Trophy,
+  Award,
+  Crown,
+  Users
 } from 'lucide-react';
+import { ManageCompetitionsModal } from '../components/ManageCompetitionsModal';
 
 const EVENT_CATEGORIES = [
   { key: 'Aarti', labelMr: 'आरती', labelEn: 'Aarti' },
@@ -33,11 +38,15 @@ const EVENT_CATEGORIES = [
 
 export const ManageEvents = () => {
   const { lang, t } = useLanguage();
-  const { eventList, createEvent, updateEvent, deleteEvent, togglePinEvent, addToast, compressImage } = useData();
+  const { eventList, createEvent, updateEvent, deleteEvent, togglePinEvent, addToast, compressImage, competitionsList } = useData();
   const { isAdmin } = useAuth();
 
-  // Top Section Mode: 'statuses' (24-Hour Stories) | 'events' (Festival Schedule & Feed)
+  // Top Section Mode: 'statuses' (24-Hour Stories) | 'events' (Festival Schedule & Feed) | 'competitions' (Home Minister & Competitions)
   const [activeSection, setActiveSection] = useState('statuses');
+
+  // Competition state
+  const [isCompModalOpen, setIsCompModalOpen] = useState(false);
+  const [selectedCompForEdit, setSelectedCompForEdit] = useState(null);
 
   // Filters & State
   const [statusFilter, setStatusFilter] = useState('All');
@@ -245,6 +254,30 @@ export const ManageEvents = () => {
         >
           <Calendar size={17} />
           <span>उत्सव कार्यक्रम व फीड (Festival Feed & Events)</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveSection('competitions')}
+          className="btn"
+          style={{
+            flex: '1 1 200px',
+            padding: '0.6rem 1rem',
+            borderRadius: 'var(--radius-md)',
+            fontWeight: 800,
+            fontSize: '0.92rem',
+            background: activeSection === 'competitions' ? 'linear-gradient(135deg, #b91c1c, #d97706)' : 'rgba(255, 255, 255, 0.05)',
+            color: activeSection === 'competitions' ? '#fff' : 'var(--text-muted)',
+            border: activeSection === 'competitions' ? '1.5px solid #fbbf24' : '1px solid rgba(255, 255, 255, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            boxShadow: activeSection === 'competitions' ? '0 4px 15px rgba(217, 119, 6, 0.4)' : 'none'
+          }}
+        >
+          <Trophy size={17} color={activeSection === 'competitions' ? '#fff' : '#fbbf24'} />
+          <span>👑 होम मिनिस्टर व निकाल (Home Minister & Winners)</span>
         </button>
       </div>
 
@@ -732,6 +765,162 @@ export const ManageEvents = () => {
         onCancel={() => setIsConfirmDeleteOpen(false)}
       />
         </>
+      )}
+
+      {/* Competitions Management (Home Minister, Paithani, etc.) */}
+      {activeSection === 'competitions' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {/* Header Bar */}
+          <div
+            className="glass-panel no-print"
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: 'clamp(0.85rem, 3vw, 1.35rem)',
+              gap: '1rem',
+              background: 'linear-gradient(135deg, rgba(185, 28, 28, 0.25) 0%, rgba(217, 119, 6, 0.15) 100%)',
+              border: '1.5px solid rgba(251, 191, 36, 0.4)'
+            }}
+          >
+            <div>
+              <h2 style={{ fontSize: 'clamp(1.1rem, 3vw, 1.35rem)', fontWeight: 800, color: '#fbbf24', margin: '0 0 0.35rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Crown size={22} color="#fbbf24" />
+                <span>होम मिनिस्टर व स्पर्धा निकाल व्यवस्थापन (Home Minister & Winners)</span>
+              </h2>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-subtle)', margin: 0 }}>
+                येथून 'होम मिनिस्टर — खेळ पैठणीचा' चे आयोजक, विजेते, मानाची पैठणी आणि त्यांचे फोटो सेट करा. हे पब्लिकला थेट लाईव्ह फीडवर दिसेल.
+              </p>
+            </div>
+          </div>
+
+          {/* Competitions List */}
+          {(!competitionsList || competitionsList.length === 0) ? (
+            <div className="glass-panel" style={{ padding: '3rem 1.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+              <Trophy size={48} color="#f59e0b" style={{ margin: '0 auto 1rem', opacity: 0.7 }} />
+              <h3>कोणतीही स्पर्धा माहिती उपलब्ध नाही</h3>
+            </div>
+          ) : (
+            competitionsList.map((comp) => (
+              <div
+                key={comp.id}
+                className="glass-panel"
+                style={{
+                  padding: 'clamp(1.2rem, 3vw, 1.8rem)',
+                  borderRadius: 'var(--radius-lg)',
+                  border: '1.5px solid rgba(245, 158, 11, 0.35)',
+                  background: 'linear-gradient(145deg, rgba(153, 27, 27, 0.12) 0%, rgba(20, 10, 20, 0.6) 100%)'
+                }}
+              >
+                {/* Competition Card Top */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', marginBottom: '1.25rem', borderBottom: '1px solid rgba(245, 158, 11, 0.2)', paddingBottom: '1rem' }}>
+                  <div>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(245, 158, 11, 0.18)', border: '1px solid rgba(245, 158, 11, 0.4)', borderRadius: '999px', padding: '0.2rem 0.7rem', color: '#fbbf24', fontSize: '0.78rem', fontWeight: 800, marginBottom: '0.5rem' }}>
+                      <Crown size={14} />
+                      <span>{comp.subtitle || 'खेळ पैठणीचा व महासन्मान'}</span>
+                    </div>
+                    <h3 style={{ fontSize: 'clamp(1.15rem, 3vw, 1.4rem)', fontWeight: 800, color: 'var(--text-main)', margin: '0 0 0.35rem' }}>
+                      {comp.title}
+                    </h3>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', fontSize: '0.82rem', color: 'var(--text-subtle)' }}>
+                      <span>📅 {comp.date}</span>
+                      <span>⏰ {comp.time}</span>
+                      <span>📍 {comp.venue}</span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedCompForEdit(comp);
+                      setIsCompModalOpen(true);
+                    }}
+                    className="btn btn-primary"
+                    style={{
+                      background: 'linear-gradient(135deg, #d97706, #b91c1c)',
+                      border: '1px solid #fbbf24',
+                      fontWeight: 800,
+                      boxShadow: '0 4px 15px rgba(217, 119, 6, 0.35)'
+                    }}
+                  >
+                    <Edit2 size={16} />
+                    <span>आयोजक व विजेते सेट करा (Edit)</span>
+                  </button>
+                </div>
+
+                {/* Grid: Organizers and Winners Overview */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
+                  {/* Organizers box */}
+                  <div style={{ background: 'rgba(0, 0, 0, 0.25)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: 'var(--radius-md)', padding: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: 700, color: '#fbbf24', fontSize: '0.9rem' }}>
+                        <Users size={16} />
+                        <span>आयोजक मंडळी ({comp.organizers?.length || 0})</span>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                      {(comp.organizers || []).map((org) => (
+                        <div key={org.id} style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', padding: '0.45rem 0.6rem', borderRadius: 'var(--radius-sm)', background: 'rgba(255, 255, 255, 0.04)' }}>
+                          <img
+                            src={org.photoUrl || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80'}
+                            alt={org.name}
+                            style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #fbbf24' }}
+                          />
+                          <div>
+                            <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>{org.name}</div>
+                            <div style={{ fontSize: '0.74rem', color: '#fbbf24' }}>{org.role || 'आयोजक'}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Winners box */}
+                  <div style={{ background: 'rgba(0, 0, 0, 0.25)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: 'var(--radius-md)', padding: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: 700, color: '#34d399', fontSize: '0.9rem' }}>
+                        <Trophy size={16} />
+                        <span>विजेते निकाल ({comp.winners?.length || 0})</span>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                      {(comp.winners || []).map((w) => (
+                        <div key={w.id} style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', padding: '0.45rem 0.6rem', borderRadius: 'var(--radius-sm)', background: 'rgba(255, 255, 255, 0.04)' }}>
+                          <img
+                            src={w.photoUrl || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80'}
+                            alt={w.name}
+                            style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: w.rank === 1 ? '1.5px solid #fbbf24' : '1.5px solid #94a3b8' }}
+                          />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                              <span style={{ fontSize: '0.74rem', fontWeight: 800, color: w.rank === 1 ? '#fbbf24' : '#93c5fd' }}>
+                                {w.rankLabel || `${w.rank}रा क्रमांक`}
+                              </span>
+                            </div>
+                            <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{w.name}</div>
+                            {w.prize && <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>🎁 {w.prize}</div>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+
+          {/* Manage Competition Modal */}
+          {isCompModalOpen && (
+            <ManageCompetitionsModal
+              competition={selectedCompForEdit || (competitionsList && competitionsList[0])}
+              onClose={() => {
+                setIsCompModalOpen(false);
+                setSelectedCompForEdit(null);
+              }}
+            />
+          )}
+        </div>
       )}
     </div>
   );

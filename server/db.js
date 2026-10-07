@@ -50,9 +50,10 @@ export async function wipeAllData() {
     db.collection('pavtis').deleteMany({}),
     db.collection('expenses').deleteMany({}),
     db.collection('events').deleteMany({}),
-    db.collection('statuses').deleteMany({})
+    db.collection('statuses').deleteMany({}),
+    db.collection('competitions').deleteMany({})
   ]);
-  console.log('🧹 Cleaned all pavtis, expenses, events, and statuses from MongoDB Atlas');
+  console.log('🧹 Cleaned all pavtis, expenses, events, statuses, and competitions from MongoDB Atlas');
 }
 
 async function seedInitialData(db) {
